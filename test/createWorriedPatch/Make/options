@@ -1,0 +1,8 @@
+EXE_INC = \
+    -DFULLDEBUG -g -O0 \
+    -I$(FOAM_SRC)/finiteVolume/lnInclude \
+    -I$(FOAM_SRC)/dynamicMesh/dynamicMesh/lnInclude
+
+EXE_LIBS = \
+    -lfiniteVolume \
+    -ldynamicMesh
