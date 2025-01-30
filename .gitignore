@@ -1,0 +1,11 @@
+# .dep files
+*.dep
+
+# .o files
+*.o
+
+# directories with 'linux' in their names.
+# directories with 'test' or 'Test' in their names.
+*linux*
+*test*
+*Test*
