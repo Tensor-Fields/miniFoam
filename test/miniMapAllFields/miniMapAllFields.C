@@ -180,7 +180,10 @@ void mapFields
 
     /// Among other errors, ++ operator is not defined for const iterator
     //const IOobjectList& fields = objects.lookupClass(fieldType);
-    IOobjectList& fields = objects.lookupClass(fieldType);
+
+    /// Invalid initialization of non-const
+    //IOobjectList& fields = objects.lookupClass(fieldType);
+    IOobjectList fields = objects.lookupClass(fieldType);
 
     //typename HashTable
     //         <

@@ -1,11 +1,24 @@
 # .dep files
-*.dep
+test/**/*.dep
 
 # .o files
-*.o
+test/**/*.o
+
+# .so files (dynamic libraries)
+test/**/*.so
+
+# VIM related metadata
+test/**/*.vim
+test/**/*.swp
 
 # directories with 'linux' in their names.
 # directories with 'test' or 'Test' in their names.
-*linux*
-*test*
-*Test*
+test/**/*linux*
+test/**/*test*
+test/**/*Test*
+
+# binary directories (containing, e.g., *.so files)
+test/**/bin/*
+
+# large directories (and obviously their content)
+test/myBekaert-v2.0
