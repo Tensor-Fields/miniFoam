@@ -1,0 +1,3 @@
+mySmoothMesh.C
+
+EXE = $(FOAM_USER_APPBIN)/mySmoothMesh
