@@ -246,9 +246,23 @@ int main(int argc, char* argv[])
     //dimensionedScalar rho("rho", dimMass/dimVolume, );
     dimensionedScalar rho(physicalProperties.lookup("rho"));
  
-    dimensionedScalar mu(physicalProperties.lookup("mu"));
+    dimensionedScalar muS(physicalProperties.lookup("mu"));
 
     dimensionedScalar E(physicalProperties.lookup("E"));
+
+    volScalarField mu
+    (
+        IOobject
+        (
+            "mu",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        E/(2.0*(1.0 + 0.25))
+        //E/(2.0*(1.0 + nu))
+    );
 
     dimensionedScalar lambda(physicalProperties.lookup("lambda"));
 
@@ -262,7 +276,7 @@ int main(int argc, char* argv[])
     surfaceScalarField phi = rho * linearInterpolate(w - v) & mesh.Sf();
 
     /// Read solution controls
-    
+ 
     //solutionControl simple(mesh, "SIMPLE");
     //simpleControl simple(mesh);
 
@@ -293,10 +307,10 @@ int main(int argc, char* argv[])
             fvVectorMatrix vEq
             (
                 rho * fvm::ddt(v)
-             == runTime.deltaT() / 2 * fvm::laplacian(mu, v)
-              + runTime.deltaT() / 2 * fvc::laplacian(mu, v)
+             == runTime.deltaT() / 2 * fvm::laplacian(muS, v)
+              + runTime.deltaT() / 2 * fvc::laplacian(muS, v)
               + fvc::div(stress)
-              - fvc::laplacian(mu, D)
+              - fvc::laplacian(muS, D)
               + fvm::div(phi, v) // Non-linearity
             );
 
