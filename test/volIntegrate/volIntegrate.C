@@ -15,6 +15,7 @@
 #include "fvPatchField.H"
 #include "volMesh.H"
 #include "word.H"
+#include "IOmanip.H"
 
 namespace Foam
 {
@@ -28,7 +29,7 @@ class Mesh
     /// Public
     public:
         Mesh(const Time& runTime);
-        bool volInt(const word& fieldName);
+        bool volInt(const word& fieldName, const scalar& p);
 };
 }
 
@@ -55,7 +56,7 @@ mesh_
 {}
 
 /// Member function
-bool Foam::Mesh::volInt(const word& fieldName)
+bool Foam::Mesh::volInt(const word& fieldName, const scalar& p)
 {
     /// Reference to time
     const Time& runTime = mesh_.db().time();
@@ -155,6 +156,9 @@ bool Foam::Mesh::volInt(const word& fieldName)
         sum += fieldPtr()[cellI] * V[cellI];
     }
  
+    Info<< fixed
+        << setprecision(p);
+
     Info<< "sum = "
         << sum
         << endl;
@@ -171,11 +175,15 @@ try
 
     argList::validOptions.insert("time","timeName");
 
+    argList::validOptions.insert("p","precision");
+
     argList args(argc, argv);
 
     const word& field = args.additionalArgs()[0];
 
     const word& timeName = args.options()["time"];
+
+    const scalar& precision = readScalar(IStringStream(args.options()["p"])());
 
     // Error when defined as a reference
     //const Time& runTime("controlDict", args.rootPath(), args.caseName());
@@ -202,7 +210,7 @@ try
 
     Mesh mesh(runTime);   
 
-    if(mesh.volInt(field))
+    if(mesh.volInt(field, precision))
     {
         Info<< "\n\nEnd."
             << endl;
