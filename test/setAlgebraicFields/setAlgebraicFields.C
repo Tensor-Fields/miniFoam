@@ -38,7 +38,8 @@ template<class Type>
 void fieldExact
 (
     GeometricField<Type, fvPatchField, volMesh>& f,
-    const volVectorField& meshTargetCellCenters
+    const volVectorField& meshTargetCellCenters,
+    const argList args
     //const List<point>& p
 )
 {
@@ -54,7 +55,19 @@ void fieldExact
 
         // Foam::sin, as calling sin out of the namespace is ambigious
         // pointI is equivalent to the cell index.
-        f[pointI] = 1 + Foam::sin(2 * pi * x) * Foam::cos(2 * pi * y);
+        const scalar a = readScalar(IStringStream(args.options()["a"])());
+        const scalar b = readScalar(IStringStream(args.options()["b"])());
+        const scalar c = readScalar(IStringStream(args.options()["c"])());
+        const scalar d = readScalar(IStringStream(args.options()["d"])());
+
+        if (args.optionFound("sinsin"))
+        {
+            f[pointI] = a + b * Foam::sin(c * pi * x) * Foam::sin(d * pi * y);
+        }
+        else
+        {
+            f[pointI] = a + b * Foam::sin(c * pi * x) * Foam::cos(d * pi * y);
+        }
     }
 }
 
@@ -106,7 +119,7 @@ void setAlgebraicFields
             << endl;
 
        /// Evaluate fields
-       fieldExact(fieldSource, meshSource.C());
+       fieldExact(fieldSource, meshSource.C(), args);
 
        /// Overwrite fields
        fieldSource.write();
@@ -115,25 +128,38 @@ void setAlgebraicFields
 
 int main (int argc, char* argv[])
 {
-    /// N rand points per cell can be variable for each cell, however, the
-    /// curren pass-by-argument accepts a fixed number. Alternative
-    /// generalization is:
-    /// - pass a list specifying N for each cell
-    /// - hard code how many random points per cell
-    //argList::validArgs.append("No. rand points per cell");
-
-    // N is read as an option's argument, not a mandatory arg.
-    argList::validOptions.insert("randomPoints","No. of random points");
-
-    // Whether the reference is the correct answer on meshTarget or the
-    // approximate answer on meshSource
-    argList::validOptions.insert("atSourceCellCenters","");
-
-    // Default behaviour is bounded, i.e., out-of-bound extrapolated values
-    // will be replaced by fieldSource min/max.
-    argList::validOptions.insert("unbounded","");
+    argList::validOptions.insert("a","value");
+    argList::validOptions.insert("b","value");
+    argList::validOptions.insert("c","value");
+    argList::validOptions.insert("d","value");
+    argList::validOptions.insert("h","");
+    argList::validOptions.insert("sinsin","");
 
     argList args(argc, argv);
+
+    if (args.optionFound("h"))
+    {
+        Info<< "Creates the field fieldName,\n"
+            << "fieldName = a + b sin(c * pi * x) cos(d * pi * y)\n\n"
+            << "of if `-sinsin` is specified,\n\n"
+            << "fieldName = a + b sin(c * pi * x) sin(d * pi * y)\n\n"
+            << "Usage:\n\n"
+            << "setAlgebraicFields \\\n"
+            << "    -a <value> -b <value> -c <value> -d <value> \\\n"
+            << "    -region <name>\n\n"
+            << "All options are \"optional\". If values not provided, all\n"
+            << "coefficients are `1`."
+            << endl;
+
+        return 0;
+    }
+
+    word regionName = polyMesh::defaultRegion;
+
+    if (args.optionFound("region"))
+    {
+        regionName = args.options()["region"];
+    }
 
     Time runTime
     (
@@ -144,13 +170,11 @@ int main (int argc, char* argv[])
 
     const word& startTime = runTime.startTime().name();
 
-    fvMesh meshSource
+    fvMesh mesh
     (
         IOobject
         (
-            //polyMesh::defaultRegion,
-            "meshSource",
-            //runTime.timeName(),
+            regionName,
             startTime,
             runTime,
             IOobject::MUST_READ,
@@ -161,8 +185,7 @@ int main (int argc, char* argv[])
     /// Update (read) fields by initializing them
     setAlgebraicFields<scalar>
     (
-        meshSource, 
-        //args.optionFound("randomPoints")
+        mesh, 
         args
     );
 

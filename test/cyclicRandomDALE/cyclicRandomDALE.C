@@ -10,7 +10,8 @@
   *     -writeIntermediateMeshes
   * 
   * where two meshes will be created, one random and one final mesh which
-  * matches the initial mesh, while there are only 2 cells in Y direction.
+  * matches the initial mesh. 'nY' means that there are only 2 cells in Y 
+  * direction.
   * More on alpha and nY in meshDance lib.
   *
   * \author: Maalik (Ali Shayegh, ali@tensorfields.com), Richmond Hill, Dublin,
@@ -221,8 +222,8 @@ int main(int argc, char* argv[])
                 /// Move the mesh incrementally, new timestep size takes effect.
                 myMesh.stepTowards(/*rp, */startTime);
 
-                /// Advect Field
-                //myMesh.advect<scalar>();
+                /// Advect fields
+                myMesh.advect<scalar>();
 
                 /// Write intermediate mesh
                 if (writeIntermediateMeshes)
@@ -282,7 +283,7 @@ int main(int argc, char* argv[])
                 myMesh.cyclicStep(/*secondLastPoints, */startTime);
 
                 /// Advect Field
-                //myMesh.advect<scalar>();
+                myMesh.advect<scalar>();
 
                 /// Write intermediate mesh
                 if (writeIntermediateMeshes)

@@ -36,9 +36,6 @@
 #include "fvm.H"
 #include "volPointInterpolation.H"
 #include "pointVolInterpolation.H"
-//#include "zeroGradientFvPatchFields.H"
-//#include "zeroGradientPointPatchFields.H"
-//#include "ZeroGradientPointPatchField.H"
 #include "leastSquaresVolPointInterpolation.H"
 #include "boundaryMesh.H"
 // Added from autoPatch.C to see if double free error is resolved
@@ -46,32 +43,6 @@
 //#include "ListOps.H"
 
 using namespace Foam;
-
-//typedef GeometricField<vector, pointPatchField, pointMesh> pointVectorField;
-//typedef GeometricField<vector, fvPatchField, volMesh> volVectorField;
-
-/// Get all feature edges---from autoPatch.C
-//void collectFeatureEdges(const boundaryMesh& bMesh, labelList& markedEdges)
-//{
-//    markedEdges.setSize(bMesh.mesh().nEdges());
-//
-//    label markedI = 0;
-//
-//    forAll(bMesh.featureSegments(), i)
-//    {
-//        const labelList& segment = bMesh.featureSegments()[i];
-//
-//        forAll(segment, j)
-//        {
-//            label featEdgeI = segment[j];
-//
-//            label meshEdgeI = bMesh.featureToEdge()[featEdgeI];
-//
-//            markedEdges[markedI++] = meshEdgeI;
-//        }
-//    }
-//    markedEdges.setSize(markedI);
-//}
 
 /// Driver
 int main (int argc, char* argv[])
@@ -97,16 +68,10 @@ int main (int argc, char* argv[])
         )
     );
 
-    //argList::noParallel();
-    //argList::validArgs.append("feature angle[0-180]");
-    //argList::validOptions.insert("overwrite", "");
-
     runTime.functionObjects().off();
 
-    //const word oldInstance = mesh.pointsInstance();
-
     //
-    // Use boundaryMesh to reuse all the featureEdge stuff in there.
+    // Use boundaryMesh to reuse all the featureEdge stuff there.
     //
 
     //boundaryMesh bMesh;

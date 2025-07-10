@@ -15,6 +15,9 @@
  * that in the latter, the field needs to be created beforehand, then it will be
  * modified by the interpolation function.
  *
+ * You need meshSource and meshTarget to create polyMesh objects. However, the
+ * target fvMesh is the default region, i.e., inside the time directories.
+ *
  * \note: Due to implementation technicalities, we create tha target field
  * beforehand anyway, regardless which interpolation function is going to be
  * used. In any case, the target field values will be overritten and the
