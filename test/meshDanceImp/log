@@ -1,0 +1,265 @@
+Making dependency list for source file myMeshDanceImp.C
+SOURCE=myMeshDanceImp.C ;  g++ -m64 -Dlinux64 -DWM_DP -Wall -Wextra -Wno-unused-parameter -Wold-style-cast -Wnon-virtual-dtor -O3  -DNoRepository -ftemplate-depth-200 -I/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude     -I/root/foam/foam-extend-4.0/src/foam/lnInclude     -I/root/foam/foam-extend-4.0/src/meshTools/lnInclude     -I/root/foam/foam-extend-4.0/src/dynamicMesh/dynamicMesh/lnInclude     -I/root/foam/foam-extend-4.0/src/conversion/lnInclude     -I/root/foam/foam-extend-4.0/src/mesh/lnInclude -IlnInclude -I. -I/root/foam/foam-extend-4.0/src/foam/lnInclude -I/root/foam/foam-extend-4.0/src/OSspecific/POSIX/lnInclude   -fPIC -c $SOURCE -o Make/linux64GccDPOpt/myMeshDanceImp.o
+myMeshDanceImp.C: In function 'volScalarField advectField(const volScalarField&, const Foam::fvMesh&, const pointVectorField&, const volVectorField&, const Foam::Time&)':
+myMeshDanceImp.C:146:75: error: 'meshPtr' was not declared in this scope
+      fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                                                                           ^
+myMeshDanceImp.C:151:30: error: passing 'const volScalarField {aka const Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh>}' as 'this' argument discards qualifiers [-fpermissive]
+  T.correctBoundaryConditions();
+                              ^
+In file included from /root/foam/foam-extend-4.0/src/foam/lnInclude/GeometricField.H:615:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvPatchField.C:30,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvPatchField.H:537,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/slicedVolFieldsFwd.H:32,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvMesh.H:59,
+                 from myMeshDanceImp.C:25:
+/root/foam/foam-extend-4.0/src/foam/lnInclude/GeometricField.C:875:6: note:   in call to 'void Foam::GeometricField<Type, PatchField, GeoMesh>::correctBoundaryConditions() [with Type = double; PatchField = Foam::fvPatchField; GeoMesh = Foam::volMesh]'
+ void Foam::GeometricField<Type, PatchField, GeoMesh>::
+      ^
+myMeshDanceImp.C: In function 'int main(int, char**)':
+myMeshDanceImp.C:437:20: error: no matching function for call to 'ddt(Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >&)'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43:0,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:54:26: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&, const Foam::word&)
+     tmp<fvMatrix<Type> > ddt
+                          ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:54:26: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >' is not derived from 'const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43:0,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:61:26: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(const Foam::geometricOneField&, const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&, const Foam::word&)
+     tmp<fvMatrix<Type> > ddt
+                          ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:61:26: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   cannot convert 'T' (type 'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >') to type 'const Foam::geometricOneField&'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43:0,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:69:26: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(const dimensionedScalar&, const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&, const Foam::word&)
+     tmp<fvMatrix<Type> > ddt
+                          ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:69:26: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   cannot convert 'T' (type 'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >') to type 'const dimensionedScalar& {aka const Foam::dimensioned<double>&}'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43:0,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:77:26: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(const volScalarField&, const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&, const Foam::word&)
+     tmp<fvMatrix<Type> > ddt
+                          ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:77:26: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   candidate expects 3 arguments, 1 provided
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43:0,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:85:26: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&)
+     tmp<fvMatrix<Type> > ddt
+                          ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:85:26: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >' is not derived from 'const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43:0,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:91:26: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(const Foam::geometricOneField&, const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&)
+     tmp<fvMatrix<Type> > ddt
+                          ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:91:26: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   cannot convert 'T' (type 'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >') to type 'const Foam::geometricOneField&'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43:0,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:98:26: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(const dimensionedScalar&, const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&)
+     tmp<fvMatrix<Type> > ddt
+                          ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:98:26: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   cannot convert 'T' (type 'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >') to type 'const dimensionedScalar& {aka const Foam::dimensioned<double>&}'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43:0,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:105:26: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(const volScalarField&, const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&)
+     tmp<fvMatrix<Type> > ddt
+                          ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:105:26: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   candidate expects 2 arguments, 1 provided
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:120:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:45:1: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&, const Foam::word&)
+ ddt
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:45:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >' is not derived from 'Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:120:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:61:1: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(const Foam::geometricOneField&, Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&, const Foam::word&)
+ ddt
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:61:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   cannot convert 'T' (type 'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >') to type 'const Foam::geometricOneField&'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:120:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:74:1: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(const dimensionedScalar&, Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&, const Foam::word&)
+ ddt
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:74:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   cannot convert 'T' (type 'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >') to type 'const dimensionedScalar& {aka const Foam::dimensioned<double>&}'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:120:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:91:1: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(const volScalarField&, Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&, const Foam::word&)
+ ddt
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:91:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   candidate expects 3 arguments, 1 provided
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:120:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:108:1: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&)
+ ddt
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:108:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >' is not derived from 'Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:120:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:119:1: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(const Foam::geometricOneField&, Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&)
+ ddt
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:119:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   cannot convert 'T' (type 'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >') to type 'const Foam::geometricOneField&'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:120:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:131:1: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(const dimensionedScalar&, Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&)
+ ddt
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:131:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   cannot convert 'T' (type 'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >') to type 'const dimensionedScalar& {aka const Foam::dimensioned<double>&}'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.H:120:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:43,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:143:1: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::ddt(const volScalarField&, Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&)
+ ddt
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDdt.C:143:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:20: note:   candidate expects 2 arguments, 1 provided
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                    ^
+myMeshDanceImp.C:437:35: error: no matching function for call to 'ddt(Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >&)'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                                   ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvcDdt.H:135:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvc.H:44,
+                 from myMeshDanceImp.C:40:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvcDdt.C:44:1: note: candidate: template<class Type> Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> > Foam::fvc::ddt(Foam::dimensioned<Type>, const Foam::fvMesh&)
+ ddt
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvcDdt.C:44:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:35: note:   'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >' is not derived from 'Foam::dimensioned<Type>'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                                   ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvcDdt.H:135:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvc.H:44,
+                 from myMeshDanceImp.C:40:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvcDdt.C:60:1: note: candidate: template<class Type> Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> > Foam::fvc::ddt(const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&)
+ ddt
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvcDdt.C:60:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:35: note:   'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >' is not derived from 'const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                                   ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvcDdt.H:135:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvc.H:44,
+                 from myMeshDanceImp.C:40:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvcDdt.C:75:1: note: candidate: template<class Type> Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> > Foam::fvc::ddt(const dimensionedScalar&, const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&)
+ ddt
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvcDdt.C:75:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:35: note:   cannot convert 'T' (type 'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >') to type 'const dimensionedScalar& {aka const Foam::dimensioned<double>&}'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                                   ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvcDdt.H:135:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvc.H:44,
+                 from myMeshDanceImp.C:40:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvcDdt.C:94:1: note: candidate: template<class Type> Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> > Foam::fvc::ddt(const volScalarField&, const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&)
+ ddt
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvcDdt.C:94:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:35: note:   candidate expects 2 arguments, 1 provided
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                                   ^
+myMeshDanceImp.C:437:89: error: no matching function for call to 'div(const surfaceScalarField&, Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >&)'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                                                                                         ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDiv.H:156:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:45,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDiv.C:45:1: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::div(const surfaceScalarField&, const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&, const Foam::word&)
+ div
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDiv.C:45:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:89: note:   'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >' is not derived from 'const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                                                                                         ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDiv.H:156:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:45,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDiv.C:63:1: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::div(const Foam::tmp<Foam::GeometricField<double, Foam::fvsPatchField, Foam::surfaceMesh> >&, const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&, const Foam::word&)
+ div
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDiv.C:63:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:89: note:   'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >' is not derived from 'const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                                                                                         ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDiv.H:156:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:45,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDiv.C:78:1: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::div(const surfaceScalarField&, const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&)
+ div
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDiv.C:78:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:89: note:   'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >' is not derived from 'const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                                                                                         ^
+In file included from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDiv.H:156:0,
+                 from /root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvm.H:45,
+                 from myMeshDanceImp.C:41:
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDiv.C:90:1: note: candidate: template<class Type> Foam::tmp<Foam::fvMatrix<Type> > Foam::fvm::div(const Foam::tmp<Foam::GeometricField<double, Foam::fvsPatchField, Foam::surfaceMesh> >&, const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&)
+ div
+ ^
+/root/foam/foam-extend-4.0/src/finiteVolume/lnInclude/fvmDiv.C:90:1: note:   template argument deduction/substitution failed:
+myMeshDanceImp.C:437:89: note:   'Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >' is not derived from 'const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>'
+          fvm::ddt(T) == fvc::ddt(T) /*- fvm::div(phi, T)*/ + fvm::div(meshPtr().phi(), T)
+                                                                                         ^
+myMeshDanceImp.C:442:8: error: 'class Foam::autoPtr<Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> >' has no member named 'correctBoundaryConditions'
+      T.correctBoundaryConditions();
+        ^
+myMeshDanceImp.dep:710: recipe for target 'Make/linux64GccDPOpt/myMeshDanceImp.o' failed
+make: *** [Make/linux64GccDPOpt/myMeshDanceImp.o] Error 1

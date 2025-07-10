@@ -1,0 +1,137 @@
+#include "IOobjectList.H"
+
+/**
+ * Create fields from objects, insert them in mesh's HashTable
+ */
+
+//template<class Type>
+//void CreateFields
+//(
+//    const IOobjectList& objects,
+//	/*const*/ fvMesh& mesh
+//)
+//{
+//	/// Table of fields
+//    HashTable
+//    <
+//        GeometricField<Type, fvPatchField, volMesh>
+//    >                
+//    tof;
+//
+//    word fieldClassName
+//	(
+//	    GeometricField<Type, fvPatchField, volMesh>::typeName
+//	);
+//
+//	IOobjectList fields = objects.lookupClass(fieldClassName);
+//
+//	for
+//	(
+//	    IOobjectList::iterator fieldIter = fields.begin();
+//		fieldIter !=fields.end();
+//		++fieldIter
+//	)
+//	{
+//	    IOobject fieldIOobject
+//		(
+//		    fieldIter()->name(),
+//			mesh.time().timeName(),
+//			mesh,
+//			IOobject::MUST_READ
+//		);
+//
+//		if (fieldIOobject.headerOk())
+//		{
+//		    Info<< "    Reading "
+//			    << fieldIter()->name()
+//				<< endl;
+//
+//			/// If one creates a field (not autoPtr<>), field finally goes out of scop
+//			/// Update: autoPtr<> field also does not lead to field stay in mesh.toc()
+//			/// when if-scope finishes
+//			autoPtr<GeometricField<Type, fvPatchField, volMesh> > field // '>>' is Error 
+//			                                                            // '> >' is correct
+//			(
+//			    new GeometricField<Type, fvPatchField, volMesh>
+//			        //fieldIter()->name() // Impossible to create name dynaimcally this way
+//			        (
+//			            *fieldIter(),
+//			        	mesh
+//			        )
+//			);
+//		
+//			mesh.insert
+//			(
+//			    fieldIter()->name(),
+//				field.ptr()
+//			);
+//
+//	        //Info<<"(Inside if inside loop) mesh.toc() = " 
+//	        //    << mesh.toc()
+//	        //    << endl;
+//
+//			/// 'field' will be overwritten so keep a record of all 'field's in 'tof'
+//			//tof.insert
+//			//(
+//			//    fieldIter()->name(),
+//			//	field
+//			//);
+//		}
+//	}
+//}
+
+template<class Type>
+void CreateFields
+(
+    const IOobjectList& objects,
+	const fvMesh& mesh
+)
+{
+	/// Table of fields
+    HashTable
+    <
+        GeometricField<Type, fvPatchField, volMesh>
+    >                
+    tof;
+
+    word fieldClassName
+	(
+	    GeometricField<Type, fvPatchField, volMesh>::typeName
+	);
+
+	IOobjectList fields = objects.lookupClass(fieldClassName);
+
+	for
+	(
+	    IOobjectList::iterator fieldIter = fields.begin();
+		fieldIter !=fields.end();
+		++fieldIter
+	)
+	{
+	    IOobject fieldIOobject
+		(
+		    fieldIter()->name(),
+			mesh.time().timeName(),
+			mesh,
+			IOobject::MUST_READ,
+			IOobject::AUTO_WRITE
+		);
+
+		if (fieldIOobject.headerOk())
+		{
+		    Info<< "    Reading "
+			    << fieldIter()->name()
+				<< endl;
+
+			/// If one creates a field (not autoPtr<>), field finally goes out of scop
+			/// Update: autoPtr<> field also does not lead to field stay in mesh.toc()
+			/// when if-scope finishes
+			GeometricField<Type, fvPatchField, volMesh> field
+			//fieldIter()->name() // Impossible to create name dynaimcally this way
+			(
+			    *fieldIter(),
+				mesh
+			);
+		}
+	}
+}
