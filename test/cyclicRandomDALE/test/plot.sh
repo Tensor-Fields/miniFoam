@@ -8,7 +8,7 @@
 # Important: EOF needs escaping bash '$', so does gnuplot -e '...'
 # Important: 'EOF' does not need escaping bash '$'
 
-source test_table.sh
+source test_table.dat
 
 # Create table of data
 if [ -d plot_src ]; then
@@ -20,8 +20,11 @@ mkdir plot_src
 echo "# sqrt(nX * nY)    L1_err"
 echo "# sqrt(nX * nY)    L1_err" > "L1_err.dat"
 
-#for((i=0; i<s; i++))
-for((i=0; i<1; i++))
+# Get the number of tests
+s=${#M[@]}
+
+for((i=0; i<s; i++))
+#for((i=0; i<1; i++))
 do
     Case=${nX[i]}x${nY[i]}_${M[i]}
 

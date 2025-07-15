@@ -1,15 +1,22 @@
+#!/bin/bash
+
 # Do the cyclic random mesh motion test with advective remap.
 # Plot L1 error vs mesh spacing.
 
 # Test data
-source test_table.sh
+#source test_table.dat
+
+# Lipnikov and Shashkov
+declare -a  M=(8 16 32 64)
+declare -a nX=(15 30 60 120)
+declare -a nY=(16 32 64 128)
 
 # Get the number of tests
 s=${#M[@]}
 
 # Traverse all tests
-#for((i=0; i<s; i++))
-for((i=0; i<1; i++))
+for((i=0; i<s; i++))
+#for((i=0; i<1; i++))
 do
     Case=${nX[i]}x${nY[i]}_${M[i]}
 
