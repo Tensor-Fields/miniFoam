@@ -4,12 +4,12 @@
 # Plot L1 error vs mesh spacing.
 
 # Test data
-#source test_table.dat
+source test_table.dat
 
 # Lipnikov and Shashkov
-declare -a  M=(8 16 32 64)
-declare -a nX=(15 30 60 120)
-declare -a nY=(16 32 64 128)
+#declare -a  M=(8 16 32 64)
+#declare -a nX=(15 30 60 120)
+#declare -a nY=(16 32 64 128)
 
 # Get the number of tests
 s=${#M[@]}
