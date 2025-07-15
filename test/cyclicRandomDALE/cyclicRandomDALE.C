@@ -39,7 +39,8 @@
 #include "fvm.H"
 #include "IOobjectList.H"
 #include "meshDance.H"
-#include "pointGenerator.H"
+//#include "pointGenerator.H"
+#include "meshWire.H"
 
 using namespace Foam;
 
@@ -149,8 +150,12 @@ int main(int argc, char* argv[])
             << meshi+1
             << endl;
 
-        /// Create the random point generator, based of the frozen points
-        pointGenerator pGen(frozenInitialPoints, alpha/nY, isRandom, isPatch);
+        /// Create the random point generator, based on the frozen points
+        //pointGenerator pGen(frozenInitialPoints, alpha/nY, isRandom, isPatch);
+        meshWire pGen(frozenInitialPoints, alpha/nY, isRandom, isPatch, mesh);
+
+        Info<< "meshWire point generator created"
+            << endl;
 
         /// If !last_mesh
         /// Create next random mesh

@@ -51,6 +51,9 @@ int main (int argc, char* argv[])
     // N is read as an option's argument, not a mandatory arg.
     argList::validOptions.insert("randomPoints","No. of random points");
 
+    // Source case
+    argList::validOptions.insert("sourceCase","dir");
+
     // Whether the reference is the correct answer on meshTarget or the
     // approximate answer on meshSource
     argList::validOptions.insert("atSourceCellCenters","");
@@ -63,6 +66,8 @@ int main (int argc, char* argv[])
     argList::validOptions.insert("b","value");
     argList::validOptions.insert("c","value");
     argList::validOptions.insert("d","value");
+
+    argList::validOptions.insert("noPrescribedFields","");
 
     argList args(argc, argv);
 
@@ -79,11 +84,8 @@ int main (int argc, char* argv[])
     (
         IOobject
         (
-            //polyMesh::defaultRegion,
-            "meshSource",
-            //startTime,
-            //runTime.timeName(),
-            runTime.constant(),
+            polyMesh::defaultRegion,
+            args.options()["sourceCase"],
             runTime,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
@@ -96,8 +98,6 @@ int main (int argc, char* argv[])
         IOobject
         (
             polyMesh::defaultRegion,
-            //"meshTarget",
-            runTime.timeName(),
             runTime,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
@@ -105,6 +105,7 @@ int main (int argc, char* argv[])
     );
 
     /// Create the error object
+    /// Make sure every argument recognised by err<> is passed to it
     err<scalar> scalarFieldError
     (
         args,
@@ -133,6 +134,9 @@ int main (int argc, char* argv[])
         //meshTarget.readUpdate();
         scalarFieldError.updateMeshTarget();
 
+        Info<< "Mesh updated"
+            << endl;
+
         //Info<< "Mesh target updated."
         //    << endl;
 
@@ -145,6 +149,9 @@ int main (int argc, char* argv[])
         //    args
         //);
         scalarFieldError.calcErr();
+
+        Info<< "meshToMeshError: Error calculated"
+            << endl;
 
         /// Report error
         scalarFieldError.report();
