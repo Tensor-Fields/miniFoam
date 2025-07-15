@@ -1,8 +1,10 @@
 # .dep files
 test/**/*.dep
+src/**/*.dep
 
 # .o files
 test/**/*.o
+src/**/*.o
 
 # .so files (dynamic libraries)
 test/**/*.so
@@ -16,6 +18,8 @@ test/**/*.swp
 test/**/*linux*
 test/**/*test*
 test/**/*Test*
+
+src/**/*linux*
 
 # binary directories (containing, e.g., *.so files)
 test/**/bin/*

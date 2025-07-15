@@ -1,0 +1,7 @@
+meshDance/pointGenerator.C
+meshDance/meshWire.C
+meshDance/meshDance.C
+
+err/err.C
+
+LIB=$(FOAM_USER_LIBBIN)/libminiFoam
