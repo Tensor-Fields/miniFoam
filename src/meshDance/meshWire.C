@@ -120,8 +120,8 @@ Foam::pointField Foam::meshWire::randomize
             ///
             wire(pointI);
 
-            Info<< "\nwire created\n"
-                << endl;
+            //Info<< "\nwire created\n"
+            //    << endl;
 
             forAll(isRandom_, dirI)
             {
