@@ -4,12 +4,6 @@
 # The comprehensive plot script, which scans the logs to find L1 errors
 # is plot.sh which includes this script as well.
 
-if [ -d plot_src ]; then
-    rm -r plot_src
-fi
-
-mkdir plot_src
-
 #
 # Gnuplot
 #
@@ -25,15 +19,15 @@ set logscale xy 10
 
 set key bottom right box opaque
 
-#plot "dt_1/L1_err.dat" u    (1/$1):2:xtic((1/$1)) w p pt 7 t "$\\Delta t=1$", \
-#     "dt_1e-3/L1_err.dat" u (1/$1):2:xtic((1/$1)) w p pt 9 t "$\\Delta t=1E-03$", \
-#     "dt_2e-4/L1_err.dat" u (1/$1):2:xtic((1/$1)) w p pt 11 t "$\\Delta t=2E-04$", \
+#plot "plot_src/L1_err_dt_1.dat" u    (1/$1):2:xtic((1/$1)) w p pt 7 t "$\\Delta t=1$", \
+#     "plot_src/L1_err_dt_1.dat" u (1/$1):2:xtic((1/$1)) w p pt 9 t "$\\Delta t=1E-03$", \
+#     "plot_src/L1_err_dt_1.dat" u (1/$1):2:xtic((1/$1)) w p pt 11 t "$\\Delta t=2E-04$", \
 #     "-"                  u (1/$1):3 w l t "2nd Order", \
 #     "-"                  u (1/$1):3 w l t "1st Order", \
 
-plot "dt_1/L1_err.dat"    u ($1):2:xtic(($1)) w p pt 7 t "$\\Delta t=1$", \
-     "dt_1e-3/L1_err.dat" u ($1):2:xtic(($1)) w p pt 9 t "$\\Delta t=1E-03$", \
-     "dt_2e-4/L1_err.dat" u ($1):2:xtic(($1)) w p pt 11 t "$\\Delta t=2E-04$", \
+plot "plot_src/L1_err_dt_1.dat"    u ($1):2:xtic(($1)) w p pt 7 t "$\\Delta t=1$", \
+     "plot_src/L1_err_dt_1e-3.dat" u ($1):2:xtic(($1)) w p pt 9 t "$\\Delta t=1E-03$", \
+     "plot_src/L1_err_dt_2e-4.dat" u ($1):2:xtic(($1)) w p pt 11 t "$\\Delta t=2E-04$", \
      "-"                  u ($1):3 w l t "2nd Order", \
      "-"                  u ($1):3 w l t "1st Order", \
      # 2nd order

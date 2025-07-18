@@ -7,15 +7,29 @@
   *     -alpha .125 \
   *     -nY 2 \
   *     -randomDirs \( "1" "1" "0" \) \
-  *     -writeIntermediateMeshes
-  * 
+  *     -writeIntermediateMeshes \
+  *     -fixedTimeStep
+  *
   * where two meshes will be created, one random and one final mesh which
   * matches the initial mesh. 'nY' means that there are only 2 cells in Y 
   * direction.
   * More on alpha and nY in meshDance lib.
   *
+  * \note: If `fixedTimeStep` is not specified, mesh motion will be
+  * Courant-number-aware, and one needs to provide the relevant info in
+  * controlDict, i.e., 
+  * - maxCo (default to 1)
+  * - adjustTimeStep (default to false)
+  * - maxDeltaT (default to GREAT)
+  *
+  * \note: stepTowards() is overshoot-proof, but not undershoot-proof.
+  * We've not checked if logically it is possible for undershoot to occur, but,
+  * if at the last stepTowards(), at which mesh points are supposed to be at the
+  * prescribed final points, some/all points fall behind those target points,
+  * the class meshDance have no control over them as of now.
+  * 
   * \author: Maalik (Ali Shayegh, ali@tensorfields.com), Richmond Hill, Dublin,
-  * \date: May 15 2025
+  * \date: Started at May 15 2025
   */
 
 #include "argList.H"
@@ -52,6 +66,7 @@ int main(int argc, char* argv[])
     argList::validOptions.insert("randomDirs", "1/0, dirs to be randomized");
     argList::validOptions.insert("notFixedPatchNames", "Names");
     argList::validOptions.insert("writeIntermediateMeshes", "");
+    argList::validOptions.insert("fixedTimeStep", "");
 
     argList args(argc, argv);
 
@@ -161,9 +176,6 @@ int main(int argc, char* argv[])
         /// Create next random mesh
         if (meshi < M-1)
         {
-            /// Move mesh back to the very first geometry
-            //myMesh.resetPoints();
-
             ///
             /// Final random points of the mesh at the step meshi
             /// Avoid re-calculation by taking it outside the fictitious-time
@@ -179,53 +191,37 @@ int main(int argc, char* argv[])
             /// Set overall point motion
             myMesh.setOverallPointMotion(myMesh.updatedStartingPoints(), rp);
 
-            /// Re-set time, so controlDict settings is used for time loop
-            //runTime.setTime
-            //(
-            //    instant
-            //    (
-            //        runTime.startTime().value(),
-            //        runTime.timeName()
-            //    ), 
-            //    runTime.startTime().value()
-            //);
-
             ///
             /// Fictitious time loop for advective remap
             ///
 
             while (runTime.run())
             {
-                #include "readTimeControls.H"
+                /// If time step is NOT fixed
+                if (!args.optionFound("fixedTimeStep"))
+                {
+                    #include "readTimeControls.H"
 
-                //resetTime(runTime);
+                    /// Set time step
+                    /// Uses delta, not cell edges, to calculate meshCo.
+                    #include "meshCourantNo.H"
 
-                //void resetTime(const Time& runTime)
-                //{
-                //    /// sigfpe: apparently a division/0
-                //    #include "meshCourantNo.H"
-                //
-                //    Info<< "meshCourant did"
-                //        << endl;
-                //
-                //    scalar& CoNum = meshCoNum;
-                //
-                //    // Re-set time step
-                //    // Place it inside time loop for online interaction with 
-                //    // Co settings
-                //    if (adjustTimeStep)
-                //    {
-                //        #include "setDeltaT.H"
-                //    }
-                //
-                //    Info<< "DeltaT set"
-                //        << endl;
-                //}
+                    /// setDeltaT.H needs CoNum
+                    scalar& CoNum = meshCoNum;
 
+                    /// Re-set time step, if requested
+                    /// Place it inside time loop for online interaction with Co settings
+                    if (adjustTimeStep)
+                    {
+                        #include "setDeltaT.H"
+                    }
+                }
+
+                /// March time
                 runTime++;
 
-                /// Move the mesh incrementally, new timestep size takes effect.
-                myMesh.stepTowards(/*rp, */startTime);
+                /// Move the mesh incrementally
+                myMesh.stepTowards();
 
                 /// Advect fields
                 myMesh.advect<scalar>();
@@ -260,7 +256,7 @@ int main(int argc, char* argv[])
             ///
 
             /// Re-set startTime
-            startTime = runTime.endTime();
+            myMesh.setStartTime(runTime.endTime());
 
             /// Re-set endTime
             runTime.setEndTime(runTime.endTime() + timeSpan);
@@ -285,7 +281,7 @@ int main(int argc, char* argv[])
                 //    << endl;
 
                 /// Move the mesh incrementally, new timestep size takes effect.
-                myMesh.cyclicStep(/*secondLastPoints, */startTime);
+                myMesh.cyclicStep();
 
                 /// Advect Field
                 myMesh.advect<scalar>();

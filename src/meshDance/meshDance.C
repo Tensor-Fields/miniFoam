@@ -23,8 +23,11 @@ mesh_
 ),
 fields_(mesh_, runTime.timeName()),
 startingPoints_(mesh_.points()),
+startTime_(runTime.startTime()),
 updatedStartingPoints_(mesh_.points()),
-overallPointMotion_(pointField(mesh_.points().size(), vector::zero))
+overallPointMotion_(pointField(mesh_.points().size(), vector::zero)),
+motionFraction_(0),
+sumMotionFraction_(0)
 {
     //startingPoints_ = mesh_.points(); // Error
 
@@ -39,8 +42,17 @@ overallPointMotion_(pointField(mesh_.points().size(), vector::zero))
 }
 
 ///
-/// Members
+/// Private members
 ///
+
+///
+/// Public members
+///
+
+void Foam::meshDance::setStartTime(const dimensionedScalar& st)
+{
+    const_cast<dimensionedScalar&>(startTime_) = st;
+}
 
 void Foam::meshDance::setOverallPointMotion
 (
@@ -54,29 +66,100 @@ void Foam::meshDance::setOverallPointMotion
 /// Time-step adaptive point increment
 void Foam::meshDance::stepTowards
 (
-    const dimensionedScalar& startTime
+    //const dimensionedScalar& startTime
 )
 {
-    mesh_.movePoints
-    (
-        mesh_.points() + 
-        (
-            mesh_.time().deltaT().value()
-            /
+    /// Incremental motion, dx = (dt / Time) * totalMove
+    /// This formula is correct when Time/dt = N, number of iterations,
+    /// in which case 
+    /// dx = totalMove / N.
+    
+    /// When N is not integer, e.g., Time = 1, dt = 0.3, 
+    /// - Does Time class automatically adjust the last step to 0.1, to fit
+    ///   time into `1' window? If it does, we are getting the right answer.
+    /// - If dt is changing, not a constant, chances are:
+    /// dt_1 = 0.5, Time = 1, dt_1/Time = 0.5 provides half of the motion.
+    /// dt_2 = 0.6, dt_2/Time = 0.6 provides more than half which is
+    /// the remaining motion.
+    
+    /// The first point above should be tested.
+    
+    /// As far as mesh motion, we should always check that the motion does
+    /// overshoot.
+                
+    /// First update motion fraction
+    updateMotionFraction();
+    
+    /// Check if motionFraction <= 1, otherwise, motion overshoots. 
+    if (motionFraction_/*()*/ > 1)
+    {
+        FatalErrorIn("stepTowards()\n")
+            << "Motion overshoots, so not applied\n"
+            << "Seems like deltaT > (endTime - startTime)"
+            << abort(FatalError);
+    }
+    else
+    {
+        if (sumMotionFraction_/*()*/ > 1)
+        {
+            WarningIn("stepTowards()\n")
+                << "This incremental motion overshoots;\n"
+                << "Mesh moves to the final points, ignoring the overshoot."
+                << endl;
+
+            hitFinalMesh();
+        }
+        else
+        {
+            /// Motion is allowed, as it, at most, hits the final mesh
+            /// (sumMotionFraction == 1).
+            
+            /// However, check is needed to see if it undershoots when it
+            /// supposed not to? Possibly this is the driver's responsibility.
+            mesh_.movePoints
             (
-                mesh_.time().endTime().value() 
-              //- mesh_.time().startTime().value()
-              - startTime.value()
-            )
-            *
-            overallPointMotion_
-        )
-    );      
+                /// New points
+                mesh_.points() + motionFraction_ * overallPointMotion_
+            );
+        }
+    }
 }
+
+void Foam::meshDance::hitFinalMesh()
+{
+    /// Move the much that the final mesh implied by overall motion hits
+    mesh_.movePoints(overallPointMotion_ - mesh_.points());
+}
+
+/// Update motion fraction
+void Foam::meshDance::updateMotionFraction()
+{
+    /// dt / Time, or 1/N where N is #iter
+    motionFraction_ = 
+        mesh_.time().deltaT().value() /
+        (
+            mesh_.time().endTime().value() 
+          //- mesh_.time().startTime().value()
+          - startTime_.value()
+        );
+
+    sumMotionFraction_ += motionFraction_; 
+}
+
+/// Access motion fraction
+//scalar Foam::meshDance::motionFraction()
+//{
+//    return motionFraction_;
+//}
+//
+//scalar Foam::meshDance::sumMotionFraction()
+//{
+//    return sumMotionFraction_;
+//}
 
 /// Move the mesh back to its initial config, incrementally
 void Foam::meshDance::cyclicStep
-(const dimensionedScalar& startTime)
+(/*const dimensionedScalar& startTime*/)
 {
     mesh_.movePoints
     (
@@ -87,189 +170,13 @@ void Foam::meshDance::cyclicStep
             (
                 mesh_.time().endTime().value() 
               //- mesh_.time().startTime().value()
-              - startTime.value()
+              - startTime_.value()
             ) 
             * 
             overallPointMotion_
         )
     );
 }
-
-//template<class Type>
-//void Foam::meshDance::advect()
-//{
-//    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-//
-//    HashTable
-//    <
-//        const GeometricField<Type, fvPatchField, volMesh>*
-//    > fields = mesh_.thisDb().lookupClass
-//    <
-//        GeometricField<Type, fvPatchField, volMesh>
-//    >();
-//
-//    typename
-//    HashTable
-//    <
-//        const GeometricField<Type, fvPatchField, volMesh>*
-//    >::iterator fieldIter;
-//
-//    for
-//    (
-//        fieldIter = fields.begin();
-//        fieldIter !=fields.end();
-//        ++fieldIter
-//    )
-//    {
-//
-//        GeometricField
-//	<
-//	    Type, fvPatchField, volMesh
-//	>& field = const_cast
-//	<
-//        GeometricField
-//	<
-//	    Type, fvPatchField, volMesh
-//	>&
-//	>(*fieldIter());
-//
-//        /// Filter out field's name to not be advected
-//        /// Note: you can use Foam::reg(something) class as well
-//        std::smatch matches;
-//        std::regex fieldName {R"(ddt0+)"}; 
-//
-//        if 
-//        (
-//            std::regex_search(field.name(), matches, fieldName)
-//        )
-//        {
-//            Info<< "    "
-//                << "Field "
-//                << field.name()
-//                << " will not be advected."
-//                << endl;
-//        }
-//        else
-//        {
-//            //tmp<scalarField>& sweptVol = 
-//            //    mesh_.movePoints
-//            //    (
-//            //        incrementPoints
-//            //        (
-//            //            mesh_,
-//            //            totalMove
-//            //        )
-//            //    );
-//
-//            //volScalarField& meshPhi = fvc::surfaceIntegrate(mesh.phi())();
-//
-//            //fvMatrix<Type>& fieldEq // Error
-//
-//            if (mesh_.moving())
-//            {
-//                Info<< "    "
-//                    << "Mesh is moving"
-//                    << endl;
-//            }
-//
-//            fvMatrix<Type> fieldEq
-//            (
-//                fvm::div(mesh_.phi(), field)
-//                //fvm::div(/*mesh.*/phi/*()*/, field)
-//                //fvm::div
-//                //(
-//                //    mesh.updatePhi
-//                //    (
-//                //        sweptVol
-//                //    ), 
-//                //    field
-//                //)
-//             == fvm::ddt(field)
-//            );
-//
-//            /// Found faulty, as fvm::ddt multiplies field by cell volume
-//            //if(ddtTV)
-//            //{
-//
-//            //    fvScalarMatrix fieldEq
-//            //    (
-//            //        fvm::div(mesh.phi(), field)
-//            //        //fvm::div(/*mesh.*/phi/*()*/, field)
-//            //        //fvm::div
-//            //        //(
-//            //        //    mesh.updatePhi
-//            //        //    (
-//            //        //        sweptVol
-//            //        //    ), 
-//            //        //    field
-//            //        //)
-//            //     == fvm::ddt(mesh.V(), field)
-//            //    );
-//
-//            //    //fieldEq = fieldEq2;
-//            //}
-//
-//            Info<< "    "
-//                << "fieldEq "
-//                << "created."
-//                << endl;
-//
-//            //TEq.solve();
-//            fieldEq.solve();
-//
-//            Info<< "    " 
-//                << "Field " 
-//                << field.name()
-//                //<< fieldPtr->name()
-//                << " advected."
-//                << endl;
-//            
-//            //TPtr().correctBoundaryConditions();
-//            field.correctBoundaryConditions();
-//            //fieldPtr->correctBoundaryConditions();
-//            
-//            Info<< "    " 
-//                << "Boundary condition of " 
-//                << field.name()
-//                //<< fieldPtr->name()
-//                << " corrected."
-//                << endl;
-//
-//            /// De-register old time objects created by Crank-Nicklson
-//            if 
-//            (
-//                mesh_.thisDb().foundObject<fieldType>
-//                (word(field.name() + "_0"))
-//            )
-//            {
-//                const_cast<objectRegistry&>(mesh_.thisDb()).checkOut
-//                (
-//                    const_cast<fieldType&>
-//                    (
-//                        mesh_.thisDb().lookupObject<fieldType>
-//                        (word(field.name() + "_0"))
-//                    )
-//                );
-//            }
-//            
-//            if 
-//            (
-//                mesh_.thisDb().foundObject<fieldType>
-//                (word(field.name() + "_0_0"))
-//            )
-//            {
-//                const_cast<objectRegistry&>(mesh_.thisDb()).checkOut
-//                (
-//                    const_cast<fieldType&>
-//                    (
-//                        mesh_.thisDb().lookupObject<fieldType>
-//                        (word(field.name() + "_0_0"))
-//                    )
-//                );
-//            }
-//        }
-//    }
-//}
 
 void Foam::meshDance::write()
 {
