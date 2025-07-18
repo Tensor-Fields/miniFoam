@@ -161,16 +161,18 @@ int main(int argc, char* argv[])
     for (label meshi = 0; meshi < M; ++meshi)
     {
         /// "mesh 0" is the init mesh
-        Info<< "Overall random mesh gen loop: mesh "
+        Info<< "\nCycle: "
             << meshi+1
+            << " out of "
+            << M
             << endl;
 
         /// Create the random point generator, based on the frozen points
         //pointGenerator pGen(frozenInitialPoints, alpha/nY, isRandom, isPatch);
         meshWire pGen(frozenInitialPoints, alpha/nY, isRandom, isPatch, mesh);
 
-        Info<< "meshWire point generator created"
-            << endl;
+        //Info<< "meshWire point generator created"
+        //    << endl;
 
         /// If !last_mesh
         /// Create next random mesh
@@ -185,7 +187,7 @@ int main(int argc, char* argv[])
             /// 1000 is some arbitrary number, used for seed generation
             const pointField& rp = pGen.randomize(1000 * meshi);
 
-            Info<< "Random points generated successfully"
+            Info<< "Random mesh points generated"
                 << endl;
 
             /// Set overall point motion
@@ -219,6 +221,10 @@ int main(int argc, char* argv[])
 
                 /// March time
                 runTime++;
+
+                Info<< "    Time: "
+                    << runTime.value()
+                    << endl;
 
                 /// Move the mesh incrementally
                 myMesh.stepTowards();
