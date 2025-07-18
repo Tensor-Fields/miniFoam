@@ -97,6 +97,7 @@ do
 
     # Move back times to Case
     mv "$Case/times/"* "$Case/"
+    rm -r "$Case/times"
 done
 
 #
