@@ -14,8 +14,8 @@ void Foam::meshDance::registerFields()
         GeometricField<Type, fvPatchField, volMesh>::typeName
     );
 
-    Info<< "Find fields"
-        << endl;
+    //Info<< "Find fields"
+    //    << endl;
 
     IOobjectList fields = fields_.lookupClass(fieldClassName);
 
@@ -237,7 +237,9 @@ void Foam::meshDance::advect()
                 << endl;
 
             //TEq.solve();
-            fieldEq.solve();
+            Info<<"    "
+                << fieldEq.solve()
+                << endl;
 
             Info<< "    " 
                 << "Field " 
