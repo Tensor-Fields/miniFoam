@@ -9,6 +9,6 @@ ls -1v test | while read -r app; do
     done
 
 echo
-echo See log for errors, if any.
+echo See above for errors, if any.
 echo End.
 echo

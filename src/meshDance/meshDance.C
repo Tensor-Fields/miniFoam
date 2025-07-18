@@ -49,11 +49,6 @@ sumMotionFraction_(0)
 /// Public members
 ///
 
-void Foam::meshDance::setStartTime(const dimensionedScalar& st)
-{
-    const_cast<dimensionedScalar&>(startTime_) = st;
-}
-
 void Foam::meshDance::setOverallPointMotion
 (
     const pointField& start,
@@ -64,10 +59,7 @@ void Foam::meshDance::setOverallPointMotion
 }
 
 /// Time-step adaptive point increment
-void Foam::meshDance::stepTowards
-(
-    //const dimensionedScalar& startTime
-)
+void Foam::meshDance::stepTowards()
 {
     /// Incremental motion, dx = (dt / Time) * totalMove
     /// This formula is correct when Time/dt = N, number of iterations,
@@ -85,7 +77,7 @@ void Foam::meshDance::stepTowards
     /// The first point above should be tested.
     
     /// As far as mesh motion, we should always check that the motion does
-    /// overshoot.
+    /// not overshoot.
                 
     /// First update motion fraction
     updateMotionFraction();
@@ -191,4 +183,24 @@ void Foam::meshDance::resetPoints()
 void Foam::meshDance::resetStartingPoints(const pointField& pf)
 {
     const_cast<pointField&>(updatedStartingPoints_) = pf;
+}
+
+/// Re-set mesh motion settings when a cycle is finished.
+/// - startTime
+/// - starting points
+/// - sumMotionFraction
+/// \note: It is the driver's responsibility to use it when needed.
+/// This class is not aware of when the cycle finishes as of now.
+void Foam::meshDance::resetMotion()
+{
+    const Time& runTime = mesh_.time();
+
+    setStartTime(runTime.endTime());
+    resetStartingPoints(points());
+    resetSumMotionFraction();
+
+    /// Re-set endTime
+    const dimensionedScalar timeSpan = runTime.endTime() - runTime.startTime();
+
+    runTime.setEndTime(runTime.endTime() + timeSpan);
 }

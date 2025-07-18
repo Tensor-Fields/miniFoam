@@ -153,15 +153,15 @@ int main(int argc, char* argv[])
     }
 
     /// Init startTime, needed by stepTowards()
-    dimensionedScalar startTime = runTime.startTime();
-    dimensionedScalar initialEndTime = runTime.endTime();
-    dimensionedScalar timeSpan = initialEndTime - startTime;
+    //dimensionedScalar startTime = runTime.startTime();
+    //dimensionedScalar initialEndTime = runTime.endTime();
+    //dimensionedScalar timeSpan = initialEndTime - startTime;
 
     /// Loop over random meshes
     for (label meshi = 0; meshi < M; ++meshi)
     {
         /// "mesh 0" is the init mesh
-        Info<< "\nCycle: "
+        Info<< "\nCycle "
             << meshi+1
             << " out of "
             << M
@@ -262,13 +262,20 @@ int main(int argc, char* argv[])
             ///
 
             /// Re-set startTime
-            myMesh.setStartTime(runTime.endTime());
-
-            /// Re-set endTime
-            runTime.setEndTime(runTime.endTime() + timeSpan);
+            //myMesh.setStartTime(runTime.endTime());
 
             /// Re-set starting points
-            myMesh.resetStartingPoints(myMesh.points());
+            //myMesh.resetStartingPoints(myMesh.points());
+
+            /// Re-set mesh motion settings at the end of each cycle
+	    /// - startTime
+	    /// - starting points
+	    /// - sumMotionFraction
+	    /// - endTime
+	    ///
+	    myMesh.resetMotion();
+ 
+            //runTime.setEndTime(runTime.endTime() + timeSpan);
         }
         /// Else
         /// Force last mesh to be the first mesh

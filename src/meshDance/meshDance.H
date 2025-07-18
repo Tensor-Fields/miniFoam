@@ -48,6 +48,21 @@ class meshDance//: public fvMesh
 
     void hitFinalMesh();
 
+    /// Reset start time
+    void setStartTime(const dimensionedScalar& st);
+    {
+        const_cast<dimensionedScalar&>(startTime_) = st;
+    }
+
+    /// Reset starting points
+    void resetStartingPoints(const pointField&);
+
+    /// Reset sumMotionFraction_
+    inline void resetSumMotionFraction()
+    {
+        sumMotionFraction_ = 0;
+    }
+
     /// Public
     public:
 
@@ -99,9 +114,6 @@ class meshDance//: public fvMesh
         
         /// Reset points to their initial positions
         void resetPoints();
-
-        /// Reset starting points
-        void resetStartingPoints(const pointField&);
         
         /// Return updatedStartingPoints_
         const pointField& updatedStartingPoints()
@@ -109,8 +121,13 @@ class meshDance//: public fvMesh
             return updatedStartingPoints_;
         }
 
-        /// Reset start time
-        void setStartTime(const dimensionedScalar&);
+        /// Re-set mesh motion settings when a cycle is finished.
+        /// - startTime
+        /// - starting points
+        /// - sumMotionFraction
+	/// \note: It is the driver's responsibility to use it when needed.
+	/// This class is not aware of when the cycle finishes as of now.
+	void resetMotion();
 };
 }
 
