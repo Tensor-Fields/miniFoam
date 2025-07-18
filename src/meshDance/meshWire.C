@@ -54,11 +54,11 @@ void Foam::meshWire::wire(const label& pointI)
     /// For all edges connected to pointI
     forAll(meshPointEdges_[pointI], edgeI)
     {
-        Info<<"a="<< meshEdges_[meshPointEdges_[pointI][edgeI]]
-                     .vec(newPoints_)
-            <<"\n"<<"b="
-            << fixedDir_
-            << endl;
+        //Info<<"a="<< meshEdges_[meshPointEdges_[pointI][edgeI]]
+        //             .vec(newPoints_)
+        //    <<"\n"<<"b="
+        //    << fixedDir_
+        //    << endl;
 
         /// If edge is parallel to fixedDir_, this edge is the wire
         if 
