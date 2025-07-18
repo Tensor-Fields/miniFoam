@@ -51,7 +51,8 @@ do
                      -randomDirs \( "1" "1" "0" \)  \
                      -notFixedPatchNames \( "front" \)  \
                      -writeIntermediateMeshes \
-                     -case $Case > $Case/log.cyclicRandomDALE
+                     -case $Case > $Case/log.cyclicRandomDALE \
+		     -fixedTimeStep
 
     #
     # Arrange files for map error application
@@ -95,7 +96,7 @@ do
         -sourceCase source > "$Case/log.meshToMeshError"
 
     # Move back times to Case
-    mv "$Case/$time/"* "$Case/"
+    mv "$Case/times/"* "$Case/"
 done
 
 #
