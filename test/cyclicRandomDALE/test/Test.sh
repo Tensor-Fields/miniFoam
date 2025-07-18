@@ -93,6 +93,9 @@ do
     meshToMeshError \
         -case $Case \
         -sourceCase source > "$Case/log.meshToMeshError"
+
+    # Move back times to Case
+    mv "$Case/$time/"* "$Case/"
 done
 
 #

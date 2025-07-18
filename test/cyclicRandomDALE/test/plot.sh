@@ -18,7 +18,7 @@ fi
 mkdir plot_src
 
 echo "# sqrt(nX * nY)    L1_err"
-echo "# sqrt(nX * nY)    L1_err" > "L1_err.dat"
+echo "# sqrt(nX * nY)    L1_err" > "plot_src/L1_err.dat"
 
 # Get the number of tests
 s=${#M[@]}
@@ -34,7 +34,7 @@ do
         '{print sqrt(nX*nY)" "$NF}')
 
     echo $row
-    echo $row >> "L1_err.dat"
+    echo $row >> "plot_src/L1_err.dat"
 done
 
 . gplt.sh
