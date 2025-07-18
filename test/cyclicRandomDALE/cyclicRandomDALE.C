@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
             /// Duplicate for the last loop iter
             myMesh.write();
 
-            Info<< "Results of mesh "
+            Info<< "Cycle "
                 << meshi+1
                 << " written to "
                 << runTime.timeName()
@@ -303,7 +303,7 @@ int main(int argc, char* argv[])
             /// Mesh and fields will be written to caseDir/M/
             myMesh.write();
 
-            Info<< "Results of mesh "
+            Info<< "Cycle "
                 << meshi + 1
                 << " written to "
                 << runTime.timeName()
