@@ -51,8 +51,8 @@ do
                      -randomDirs \( "1" "1" "0" \)  \
                      -notFixedPatchNames \( "front" \)  \
                      -writeIntermediateMeshes \
-                     -case $Case > $Case/log.cyclicRandomDALE \
-		     -fixedTimeStep
+                     -case $Case > $Case/log.cyclicRandomDALE #\
+		    #-fixedTimeStep
 
     #
     # Arrange files for map error application

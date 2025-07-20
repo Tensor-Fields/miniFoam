@@ -201,12 +201,12 @@ void Foam::meshDance::resetMotion()
     const_cast<Time&>(runTime)
     .setEndTime(runTime.endTime() + timeSpan_);
 
-    Info<< "New startTime = "
-        << startTime_
-        << "\n"
-        << "New endTime = "
-        << runTime.endTime()
-        << endl;
+    //Info<< "New startTime = "
+    //    << startTime_
+    //    << "\n"
+    //    << "New endTime = "
+    //    << runTime.endTime()
+    //    << endl;
 
     resetStartingPoints(points());
     resetSumMotionFraction();
