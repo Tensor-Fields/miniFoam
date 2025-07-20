@@ -49,7 +49,7 @@ class meshDance//: public fvMesh
     void hitFinalMesh();
 
     /// Reset start time
-    void setStartTime(const dimensionedScalar& st);
+    void setStartTime(const dimensionedScalar& st)
     {
         const_cast<dimensionedScalar&>(startTime_) = st;
     }

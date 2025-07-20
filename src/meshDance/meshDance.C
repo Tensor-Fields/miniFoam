@@ -194,13 +194,13 @@ void Foam::meshDance::resetStartingPoints(const pointField& pf)
 void Foam::meshDance::resetMotion()
 {
     const Time& runTime = mesh_.time();
-
-    setStartTime(runTime.endTime());
-    resetStartingPoints(points());
-    resetSumMotionFraction();
-
-    /// Re-set endTime
     const dimensionedScalar timeSpan = runTime.endTime() - runTime.startTime();
 
-    runTime.setEndTime(runTime.endTime() + timeSpan);
+    /// Re-set startTime and endTime
+    setStartTime(runTime.endTime());
+    const_cast<Time&>(runTime)
+    .setEndTime(runTime.endTime() + timeSpan);
+
+    resetStartingPoints(points());
+    resetSumMotionFraction();
 }
