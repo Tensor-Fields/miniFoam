@@ -95,9 +95,14 @@ void Foam::meshDance::stepTowards()
     {
         if (sumMotionFraction_/*()*/ > 1)
         {
-            WarningIn("stepTowards()\n")
+            Info<<"\n"<< endl;
+
+            WarningIn("stepTowards()")
+                << "sumMotionFraction_ = "
+                << sumMotionFraction_
+                << "\n"
                 << "This incremental motion overshoots;\n"
-                << "Mesh moves to the final points, ignoring the overshoot."
+                << "Mesh moves to the final points, ignoring the overshoot.\n"
                 << endl;
 
             hitFinalMesh();
@@ -120,8 +125,9 @@ void Foam::meshDance::stepTowards()
 
 void Foam::meshDance::hitFinalMesh()
 {
-    /// Move the much that the final mesh implied by overall motion hits
-    mesh_.movePoints(overallPointMotion_ - mesh_.points());
+    /// Move the mesh, the much that the final mesh implied by overall motion
+    /// hits
+    mesh_.movePoints(overallPointMotion_ + startingPoints_);
 }
 
 /// Update motion fraction
