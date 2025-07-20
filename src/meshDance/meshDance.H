@@ -28,6 +28,8 @@ class meshDance//: public fvMesh
 
     const dimensionedScalar startTime_;
 
+    const dimensionedScalar timeSpan_;
+
     const pointField/*&*/ updatedStartingPoints_;
 
     const pointField overallPointMotion_;
