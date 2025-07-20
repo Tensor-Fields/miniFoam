@@ -94,7 +94,7 @@ void Foam::meshDance::stepTowards()
     }
     else
     {
-        if ((sumMotionFraction - 1.0) > SMALL)
+        if ((sumMotionFraction_ - 1.0) > SMALL)
         {
             Info<<"\n"<< endl;
 
