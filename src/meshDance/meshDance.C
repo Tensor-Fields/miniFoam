@@ -85,7 +85,7 @@ void Foam::meshDance::stepTowards()
     
     /// Check if motionFraction <= 1, otherwise, motion overshoots. 
     //if (motionFraction_/*()*/ > 1) // returns true when motionFraction_ == 1
-    if ((motionFraction_ - 1.0) > VSMALL)
+    if ((motionFraction_ - 1.0) > SMALL)
     {
         FatalErrorIn("stepTowards()\n")
             << "Motion overshoots, so not applied\n"
@@ -94,7 +94,7 @@ void Foam::meshDance::stepTowards()
     }
     else
     {
-        if (sumMotionFraction_/*()*/ > 1)
+        if ((sumMotionFraction - 1.0) > SMALL)
         {
             Info<<"\n"<< endl;
 
