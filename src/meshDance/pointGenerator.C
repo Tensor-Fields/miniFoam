@@ -8,6 +8,7 @@ Foam::pointGenerator::pointGenerator
     const scalar& alpha,
     const boolList& isRandom,
     const boolList& isPatch,
+    const scalar seed,
     const bool fixPatches
 )
 :
@@ -15,19 +16,20 @@ newPoints_(oldPoints),
 alpha_(alpha),
 isRandom_(isRandom),
 isPatch_(isPatch),
-fixPatches_(fixPatches)
+fixPatches_(fixPatches),
+rand_(seed)
 {}
 
 /// Member functions
-Foam::pointField Foam::pointGenerator::randomize
-(const scalar& seed)
+Foam::pointField Foam::pointGenerator::randomize()
 {
     ///
     /// Create the random vector
     ///
 
     /// Seed
-    Random rand(seed);
+    //Random rand(seed_);
+    Random& rand = rand_;
 
     /// Create a list of "point increment"s, whose components are random,
     /// between -1 and 1.

@@ -20,6 +20,7 @@ class pointGenerator
         const scalar alpha_;
         const boolList isRandom_;
         const boolList isPatch_;
+	Random rand_;
         const bool fixPatches_;
 
     // Public
@@ -31,10 +32,11 @@ class pointGenerator
             const scalar& randomizingAmplitude,
             const boolList& directionsToBeRandomized,
             const boolList& trueIfPatchPoint,
+	    const scalar seed,
             const bool fixPatches = true
         );
 
-        pointField randomize(const scalar& seed);
+        pointField randomize();
         //const pointField operator++(pointGenerator&)
 };
 }

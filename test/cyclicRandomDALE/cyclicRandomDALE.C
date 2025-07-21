@@ -67,6 +67,7 @@ int main(int argc, char* argv[])
     argList::validOptions.insert("notFixedPatchNames", "Names");
     argList::validOptions.insert("writeIntermediateMeshes", "");
     argList::validOptions.insert("fixedTimeStep", "");
+    argList::validOptions.insert("seed", "<number>");
 
     argList args(argc, argv);
 
@@ -152,11 +153,6 @@ int main(int argc, char* argv[])
         }
     }
 
-    /// Init startTime, needed by stepTowards()
-    //dimensionedScalar startTime = runTime.startTime();
-    //dimensionedScalar initialEndTime = runTime.endTime();
-    //dimensionedScalar timeSpan = initialEndTime - startTime;
-
     /// Loop over random meshes
     for (label meshi = 0; meshi < M; ++meshi)
     {
@@ -169,7 +165,16 @@ int main(int argc, char* argv[])
 
         /// Create the random point generator, based on the frozen points
         //pointGenerator pGen(frozenInitialPoints, alpha/nY, isRandom, isPatch);
-        meshWire pGen(frozenInitialPoints, alpha/nY, isRandom, isPatch, mesh);
+        //meshWire pGen(frozenInitialPoints, alpha/nY, isRandom, isPatch, mesh);
+        meshWire pGen
+	(
+	    frozenInitialPoints,
+	    alpha/nY,
+	    isRandom,
+	    isPatch,
+	    readScalar(IStringStream(args.options()["seed"])()),
+	    mesh
+	);
 
         //Info<< "meshWire point generator created"
         //    << endl;
@@ -185,7 +190,8 @@ int main(int argc, char* argv[])
             ///
 
             /// 1000 is some arbitrary number, used for seed generation
-            const pointField& rp = pGen.randomize(1000 * meshi);
+            //const pointField& rp = pGen.randomize(1000 * meshi);
+            const pointField& rp = pGen.randomize();
 
             Info<< "Random mesh points generated"
                 << endl;
