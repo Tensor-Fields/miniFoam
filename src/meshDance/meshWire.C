@@ -8,7 +8,6 @@ Foam::meshWire::meshWire
     const scalar& alpha,
     const boolList& isRandom,
     const boolList& isPatch,
-    const scalar seed,
     const fvMesh& mesh,
     const bool fixPatches
 )
@@ -19,7 +18,6 @@ pointGenerator
      alpha,
      isRandom,
      isPatch,
-     seed,
      fixPatches
 ),
 mesh_(mesh),
@@ -94,14 +92,14 @@ void Foam::meshWire::wire(const label& pointI)
     }
 }
 
-Foam::pointField Foam::meshWire::randomize()
+Foam::pointField Foam::meshWire::randomize(const scalar& seed)
 {
     ///
     /// Create the random vector
     ///
 
     /// Seed
-    Random& rand = rand_;
+    Random rand(seed);
 
     /// Create a list of "point increment"s, whose components are random,
     /// between -1 and 1.

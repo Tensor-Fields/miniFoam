@@ -47,13 +47,12 @@ class meshWire: public pointGenerator
             const scalar& randomizingAmplitude,
             const boolList& directionsToBeRandomized,
             const boolList& trueIfPatchPoint,
-	    const scalar seed,
             const fvMesh& mesh,
             const bool fixPatches = true
         );
 
         /// Move wires randomely
-        pointField randomize();
+        pointField randomize(const scalar& seed);
 
 	/// Move wires sinusoidally
         pointField sinCycle();
