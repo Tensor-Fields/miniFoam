@@ -51,7 +51,9 @@ do
                      -randomDirs \( "1" "1" "0" \)  \
                      -notFixedPatchNames \( "front" \)  \
                      -writeIntermediateMeshes \
-                     -case $Case > $Case/log.cyclicRandomDALE #\
+                     -case $Case \
+		     -seed $((RANDOM))
+                     > $Case/log.cyclicRandomDALE #\
 		    #-fixedTimeStep
 
     #
@@ -104,7 +106,7 @@ done
 # Plot
 #
 
-#source "plot.sh"
+source "plot.sh"
 
 echo End.
 echo
