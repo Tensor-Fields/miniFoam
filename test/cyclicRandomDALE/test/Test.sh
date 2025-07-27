@@ -54,7 +54,8 @@ do
                      -case $Case \
 		     -seed $((RANDOM))
                      > $Case/log.cyclicRandomDALE #\
-		    #-fixedTimeStep
+		    #-fixedTimeStep # Unnecessary, time will not be adjusted
+		    # when controlDict.adjustTimestep is commented.
 
     #
     # Arrange files for map error application

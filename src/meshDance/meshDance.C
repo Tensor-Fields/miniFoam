@@ -60,7 +60,7 @@ void Foam::meshDance::setOverallPointMotion
 }
 
 /// Time-step adaptive point increment
-void Foam::meshDance::stepTowards()
+bool Foam::meshDance::stepTowards()
 {
     /// Incremental motion, dx = (dt / Time) * totalMove
     /// This formula is correct when Time/dt = N, number of iterations,
@@ -87,10 +87,14 @@ void Foam::meshDance::stepTowards()
     //if (motionFraction_/*()*/ > 1) // returns true when motionFraction_ == 1
     if ((motionFraction_ - 1.0) > SMALL)
     {
-        FatalErrorIn("stepTowards()\n")
-            << "Motion overshoots, so not applied\n"
+        /*FatalErrorIn*/WarningIn("stepTowards()\n")
+            << "Motion overshoots,"
             << "Seems like deltaT > (endTime - startTime)"
-            << abort(FatalError);
+            << "Mesh moves to the final points, ignoring the overshoot.\n"
+            << /*abort(FatalError)*/endl;
+
+            hitFinalMesh();
+	    return true;
     }
     else
     {
@@ -107,6 +111,7 @@ void Foam::meshDance::stepTowards()
                 << endl;
 
             hitFinalMesh();
+	    return true;
         }
         else
         {
@@ -121,14 +126,16 @@ void Foam::meshDance::stepTowards()
                 mesh_.points() + motionFraction_ * overallPointMotion_
             );
         }
+
+	return false;
     }
 }
 
 void Foam::meshDance::hitFinalMesh()
 {
-    /// Move the mesh, the much that the final mesh implied by overall motion
+    /// Move the mesh, so that the overall motion
     /// hits
-    mesh_.movePoints(overallPointMotion_ + startingPoints_);
+    mesh_.movePoints(overallPointMotion_ + updatedStartingPoints_);
 }
 
 /// Update motion fraction

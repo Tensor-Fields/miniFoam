@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
 
 	/// Workaround to create a new random number every time: Re-seed
 	/// the Random object
-        Random rand(seed);
+        //Random rand(seed);
 
 	// \note: It was observed that when seed ~ 0.75, scalar01() gets stuck
 	// at this number.
@@ -216,32 +216,41 @@ int main(int argc, char* argv[])
 
         /// If !last_mesh
         /// Create next random mesh
-        if (meshi < M-1)
+        //if (meshi < M)
         {
-            ///
-            /// Final random points of the mesh at the step meshi
-            /// Avoid re-calculation by taking it outside the fictitious-time
-            /// loop
-            ///
+            /// Set overall point motion, depending on whether it is the last
+	    /// cycle or not
+	    if (meshi < M-1)
+            {
+                ///
+                /// Final random points of the mesh at the step meshi
+                /// Avoid re-calculation by taking it outside the fictitious-time
+                /// loop
+                ///
 
-            /// 1000 is some arbitrary number, used for seed generation
-            //const pointField& rp = pGen.randomize(1000 * meshi);
+                /// 1000 is some arbitrary number, used for seed generation
+                //const pointField& rp = pGen.randomize(1000 * meshi);
 
-	    /// Seed with a random number
-	    /// \note: scalar01() returned a fixed number given a fixed seed
-	    /// \note: rand.GaussNormal() returns a fixed number
-            //const pointField& rp = pGen.randomize(rand.scalar01());
-            //const pointField& rp = pGen.randomize(rand.GaussNormal());
+	        /// Seed with a random number
+	        /// \note: scalar01() returned a fixed number given a fixed seed
+	        /// \note: rand.GaussNormal() returns a fixed number
+                //const pointField& rp = pGen.randomize(rand.scalar01());
+                //const pointField& rp = pGen.randomize(rand.GaussNormal());
 
-            const pointField& rp = pGen.randomize(seed);
+                const pointField& rp = pGen.randomize(seed);
 
-            Info<< "Random mesh points generated (seed:"
-		<< seed
-		<< ")"
-                << endl;
-
-            /// Set overall point motion
-            myMesh.setOverallPointMotion(myMesh.updatedStartingPoints(), rp);
+                Info<< "Random mesh points generated (seed:"
+	            << seed
+	            << ")"
+                    << endl;
+                    myMesh
+		.setOverallPointMotion(myMesh.updatedStartingPoints(), rp);
+	    }
+	    else if (meshi == M-1)
+            {
+                myMesh
+		.setOverallPointMotion(myMesh.points(), frozenInitialPoints);
+	    }
 
             ///
             /// Fictitious time loop for advective remap
@@ -250,7 +259,7 @@ int main(int argc, char* argv[])
             while (runTime.run())
             {
                 /// If time step is NOT fixed
-                if (!args.optionFound("fixedTimeStep"))
+                //if (!args.optionFound("fixedTimeStep"))
                 {
                     #include "readTimeControls.H"
 
@@ -263,10 +272,7 @@ int main(int argc, char* argv[])
 
                     /// Re-set time step, if requested
                     /// Place it inside time loop for online interaction with Co settings
-                    if (adjustTimeStep)
-                    {
-                        #include "setDeltaT.H"
-                    }
+                    #include "setDeltaT.H"
                 }
 
                 /// March time
@@ -277,7 +283,15 @@ int main(int argc, char* argv[])
                     << endl;
 
                 /// Move the mesh incrementally
-                myMesh.stepTowards();
+		/// Break if the end of the cycle is hit.
+                if(myMesh.stepTowards())
+		{
+		    Info<< "\n    Final mesh in this cycle is hit; ignore next"
+			<< "\n    time steps, move to the next cycle."
+			<< endl;
+
+		    break;
+		}
 
                 /// Advect fields
                 myMesh.advect<scalar>();
@@ -329,55 +343,67 @@ int main(int argc, char* argv[])
         }
         /// Else
         /// Force last mesh to be the first mesh
-        else if (meshi == M-1)
-        {
-            /// Move mesh back to its undeformed shape
-            myMesh.setOverallPointMotion(myMesh.points(), frozenInitialPoints);
+        //else if (meshi == M-1)
+        //{
+        //    /// Move mesh back to its undeformed shape, given start and end
+	//    /// points
+        //    myMesh.setOverallPointMotion(myMesh.points(), frozenInitialPoints);
 
-            /// Fictitious time loop for advective remap
-            while (runTime.run())
-            {
-                runTime++;
+        //    /// Fictitious time loop for advective remap
+        //    while (runTime.run())
+        //    {
+        //        runTime++;
 
-                //Info<< "Time = "
-                //    << runTime.timeName()
-                //    << endl;
+        //        //Info<< "Time = "
+        //        //    << runTime.timeName()
+        //        //    << endl;
 
-                /// Move the mesh incrementally, new timestep size takes effect.
-                myMesh.cyclicStep();
+        //        /// Move the mesh incrementally, new timestep size takes effect.
+	//	/// Use stepTowards() which is overshoot-proof.
+        //        //myMesh.cyclicStep();
+        //        /// Move the mesh incrementally
+	//	/// Break if the end of the cycle is hit.
+        //        if(myMesh.stepTowards())
+	//	{
+	//	    Info<< "\n    Final mesh in this cycle is hit; ignore next"
+	//		<< "\n    time steps, move to the next cycle."
+	//		<< endl;
 
-                /// Advect Field
-                myMesh.advect<scalar>();
+	//	    break;
+	//	}
 
-                /// Write intermediate mesh
-                if (writeIntermediateMeshes)
-                {
-                    if (runTime.write())
-                    {
-                        myMesh.write();
-                    }
-                }
-            }
+        //        /// Advect Field
+        //        myMesh.advect<scalar>();
 
-            ///
-            /// Write final mesh and fields of each random step
-            ///
+        //        /// Write intermediate mesh
+        //        if (writeIntermediateMeshes)
+        //        {
+        //            if (runTime.write())
+        //            {
+        //                myMesh.write();
+        //            }
+        //        }
+        //    }
 
-            /// Mesh and fields will be written to caseDir/M/
-            myMesh.write();
+        //    ///
+        //    /// Write final mesh and fields of each random step
+        //    ///
 
-            Info<< "Cycle "
-                << meshi + 1
-                << " written to "
-                << runTime.timeName()
-                << endl;
-        }
-        else
-        {
-            FatalErrorIn("meshCounter")
-                << "meshi is !(< or == or >) M"
-                << abort(FatalError);
-        }
+        //    /// Mesh and fields will be written to caseDir/M/
+        //    myMesh.write();
+
+        //    Info<< "Cycle "
+        //        << meshi + 1
+        //        << " written to "
+        //        << runTime.timeName()
+        //        << endl;
+        //}
+        //else
+        //{
+        //    FatalErrorIn("meshCounter")
+        //        << "meshi is !(< or == or >) M"
+        //        << abort(FatalError);
+        //}
     }
 
     Info<< "\n\nEnd."

@@ -83,7 +83,7 @@ class meshDance//: public fvMesh
         );
 
         /// Incrementally change the mesh towards the final points
-        void stepTowards
+        bool stepTowards
         (/*const pointField& finalPoints, const dimensionedScalar& startTime*/);
 
         /// Move the mesh back to its initial config, incrementally

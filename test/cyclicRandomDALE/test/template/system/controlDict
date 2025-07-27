@@ -17,7 +17,6 @@ FoamFile
  
 application icoFoam;
 
-startFrom       startTime;
 startFrom       latestTime;
 
 startTime       0;
@@ -46,9 +45,9 @@ timePrecision   6;
 
 runTimeModifiable yes;
 
-adjustableTimeStep true;
-
-maxCo 1.0;
+//adjustTimeStep true;
+//
+//maxCo 1.0; // Also default
 
 
 // ************************************************************************* //
