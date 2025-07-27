@@ -148,7 +148,9 @@ int main (int argc, char* argv[])
         //    //args.optionFound("randomPoints")
         //    args
         //);
-        scalarFieldError.calcErr();
+
+        //scalarFieldError.calcErr();
+        scalarFieldError.calcErr_2();
 
         Info<< "meshToMeshError: Error calculated"
             << endl;

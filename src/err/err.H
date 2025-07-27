@@ -31,12 +31,6 @@ class err
         /// Private data
         const argList& args_;
 
-        //GeometricField<T, fvPatchField, volMesh> fieldTarget_;
-
-        //GeometricField<T, fvPatchField, volMesh> fieldSource_;
-
-        //GeometricField<T, fvPatchField, volMesh> fieldExact_;
-
         autoPtr<GeometricField<T, fvPatchField, volMesh> > fieldExactPtr_;
 
         autoPtr<GeometricField<T, fvPatchField, volMesh> > errPtr_; 
@@ -62,8 +56,6 @@ class err
 
         scalar L1Err();
 
-        //void errStats();
-
     /// Public
     public:
 
@@ -77,6 +69,8 @@ class err
 
         /// Members
         void calcErr();
+
+        void calcErr_wrt_same_mesh(const word& sourceCase);
 
         void report();
 

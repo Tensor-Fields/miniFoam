@@ -112,7 +112,8 @@ Foam::scalar Foam::err<type>::int_over_whole_mesh
     forAll(integrandField, cellI)
     {
         // Operator precedence: [] > *
-        // see: https://en.cppreference.com/w/c/language/operator_precedence.html
+        // see: https://en.cppreference.com/w/c/language/
+	// operator_precedence.html
         intValue += ( integrandField[cellI] * meshVol[cellI] );
     }
 
@@ -219,15 +220,6 @@ void Foam::err<Type>::calcErr()
     const fvMesh& meshSource = meshSource_;
     const fvMesh& meshTarget = meshTarget_;
     const argList& args = args_;
-    //GeometricField
-    //<
-    //    Type, fvPatchField, volMesh
-    //>& fieldTarget = fieldTarget_;
-
-    //GeometricField
-    //<
-    //    Type, fvPatchField, volMesh
-    //>& fieldSource = fieldSource_;
 
     ///
     /// Function body actually begins
@@ -903,6 +895,93 @@ void Foam::err<Type>::calcErr()
             /// Report errors
             //report();
         }
+    }
+}
+
+template<class Type>
+void Foam::err<Type>::calcErr_wrt_same_mesh(const word& sourceCase)
+{
+    ///
+    /// Function body actually begins
+    ///
+
+    /// calcErr is meant to be called in the time loop, and for times >
+    /// startTime.
+    const Time& runTime = meshTarget_.time();
+
+    Info<< "Read objects ..."
+        << endl;
+
+    IOobjectList fieldsTarget(meshTarget_, runTime.timeName());
+
+    typedef
+    GeometricField
+    <
+        Type, fvPatchField, volMesh
+    > fieldType;
+
+    IOobjectList objectsTarget = fieldsTarget
+    .lookupClass(word(fieldType::typeName));
+
+    for 
+    (
+        IOobjectList::iterator iteratorTarget = objectsTarget.begin();
+        iteratorTarget != objectsTarget.end();
+        ++iteratorTarget
+    )
+    {
+        GeometricField
+        <
+            Type, fvPatchField, volMesh
+        > fieldTarget(*iteratorTarget(), meshTarget_);
+
+        Info<< "Target field "
+            << fieldTarget.name()
+            << " found at "
+            << fieldTarget.objectPath()
+            << endl;
+
+        const IOobject fieldSourceIO
+        (
+            fieldTarget.name(),
+            meshSource_.instance(),
+            "0",
+            meshSource_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        );
+
+        GeometricField
+        <
+            Type, fvPatchField, volMesh
+        > fieldSource(fieldSourceIO, meshSource_);
+
+        Info<< "meshSource.instance(): "
+            << meshSource_.instance()
+            << endl;
+
+        Info<< "Source field "
+            << fieldSource.name()
+            << " found at "
+            << fieldSource.objectPath()
+            << endl;
+
+        ///
+        /// Calc err wrt a given source mesh and field
+        ///
+
+        /// Error at the cell centers of the target mesh, wrt the source
+        /// mesh
+        errPtr_.reset
+        (
+            new GeometricField<Type, fvPatchField, volMesh>
+            (fieldTarget - fieldSource)
+        );
+
+        errPtr_().rename(fieldTarget.name()+"_err");
+
+        Info<< "Error calculated."
+            << endl;
     }
 }
 
