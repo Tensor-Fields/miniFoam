@@ -1,0 +1,24 @@
+# Keep M for consistency between Test.sh and plot.sh
+# Case name generator should be ideally a separate script
+
+# Now, name generator script is separate. Keep M for generality
+declare -a M=(25 50 100 200)
+
+# Cases
+declare -a nX=(25 50 100 200)
+declare -a nY=(25 50 100 200)
+declare -a nGradX=(1  1  1  1)
+declare -a nGradY=(10 10 10 10)
+declare -a meshPhiScheme=('Gauss linear' 'Gauss linear' 'Gauss linear' 'Gauss linear')
+declare -a ddtScheme=("backward" "backward" "backward" "backward")
+
+# Study
+declare -a studyTimeSteps=(1)
+declare -a studyEndTimes=(1)
+declare -a studyWriteIntervals=(1) 
+declare -a studyNames=("${studyEndTimes[@]}")
+
+#declare -a studyTimeSteps=(1  1   1    1   )
+#declare -a studyEndTimes=(1  11  97   199  )
+#declare -a studyWriteIntervals=(1  11  97   199) 
+#declare -a studyNames=("${studyEndTimes[@]}")
