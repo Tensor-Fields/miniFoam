@@ -150,7 +150,8 @@ int main (int argc, char* argv[])
         //);
 
         //scalarFieldError.calcErr();
-        scalarFieldError.calcErr_2();
+        scalarFieldError
+        .calcErr_wrt_same_mesh(args.options()["sourceCase"]);
 
         Info<< "meshToMeshError: Error calculated"
             << endl;

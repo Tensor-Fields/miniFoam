@@ -14,6 +14,7 @@ echo
 #    done
 
 wmake test/cyclicRandomDALE
+wmake test/meshToMeshError
 
 echo
 echo See above for errors, if any.
