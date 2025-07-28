@@ -15,6 +15,7 @@ echo
 
 wmake test/cyclicRandomDALE
 wmake test/meshToMeshError
+wmake test/meshDanceImp
 
 echo
 echo See above for errors, if any.
