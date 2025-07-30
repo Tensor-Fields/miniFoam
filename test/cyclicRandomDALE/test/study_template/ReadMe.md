@@ -1,1 +1,1 @@
-Run study.sh or sbatch study.slurm.
+/home/maalik/foam/maalik-4.0/run/miniFoam/test/scripts/rezoneAndRemap/ReadMe.md

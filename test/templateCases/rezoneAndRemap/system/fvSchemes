@@ -16,7 +16,8 @@ FoamFile
 
 ddtSchemes
 {
-    default         backward;
+    default         none;
+    ddt(p)          DDT;
     //default         CrankNicolson 0.9;
 }
 
@@ -24,6 +25,7 @@ gradSchemes
 {
     default         none;//Gauss linear;
     //grad(p)         Gauss linear;
+    grad(p)         GRAD_1 GRAD_2;
 }
 
 divSchemes
@@ -42,8 +44,8 @@ divSchemes
     //div(meshPhi,p)      Gauss blended 0.5; // Diverges
     //div(meshPhi,p)      Gauss blended 0.1; // Diverges
     //div(meshPhi,p)      Gauss blended 0.99; // Diverges
-    div(meshPhi,p)      Gauss blended 0.90; // Diverges
-    //div(meshPhi,p)      Gauss linear;
+    //div(meshPhi,p)      Gauss blended 0.90; // Diverges
+    div(meshPhi,p)     Gauss MESH_PHI;
 }
 
 laplacianSchemes

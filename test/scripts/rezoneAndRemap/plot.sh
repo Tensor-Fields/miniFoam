@@ -27,11 +27,12 @@ s=${#M[@]}
 for((i=0; i<s; i++))
 #for((i=0; i<1; i++))
 do
-    Case=${nX[i]}x${nY[i]}_${M[i]}
+    #Case=${nX[i]}x${nY[i]}_${M[i]}
+    source caseName.sh
 
     row=$(grep "L1 error" "$Case/log.meshToMeshError"| \
-        awk -F" " -v nX=${nX[i]} -v nY=${nY[i]} \
-        '{print sqrt(nX*nY)" "$NF}')
+        awk -F" " -v nX=${nX[i]} -v nY=${nY[i]} -v Case=${caseNameSuffix[i]}\
+        '{print sqrt(nX*nY)" "$NF" "Case}')
 
     echo $row
     echo $row >> "plot_src/L1_err.dat"

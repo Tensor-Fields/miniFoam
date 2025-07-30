@@ -5,7 +5,7 @@
 #SBATCH --partition=main
 #SBATCH --ntasks=6
 #SBATCH --cpus-per-task=1
-#SBATCH --time=03:30:00
+#SBATCH --time=09:30:00
 
 # Good practice to navigate to the submission directory
 #cd $SLURM_SUBMIT_DIR
@@ -19,4 +19,4 @@ fe40
 
 # Execute the run script
 #./Allrun &> log.Allrun
-./study.sh
+./Test.sh MODE

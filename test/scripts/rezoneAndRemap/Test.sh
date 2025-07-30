@@ -43,6 +43,7 @@ do
     echo Source uniform mesh
     sed -i "s/nX/${nX[i]}/g" $Case/source/constant/polyMesh/blockMeshDict
     sed -i "s/nY/${nX[i]}/g" $Case/source/constant/polyMesh/blockMeshDict
+    # Uniform grading
     sed -i "s/nGradX/1/g" $Case/source/constant/polyMesh/blockMeshDict
     sed -i "s/nGradY/1/g" $Case/source/constant/polyMesh/blockMeshDict
 
@@ -51,26 +52,31 @@ do
 
     # Update schemes
     echo Update schemes
-    sed -i "s/MESH_PHI/${meshPhiScheme[i]}/g" $Case/system/fvSchemes
     sed -i "s/DDT/${ddtScheme[i]}/g" $Case/system/fvSchemes
+    sed -i "s/GRAD_1/${grad1Scheme[i]}/g" $Case/system/fvSchemes
+    sed -i "s/GRAD_2/${grad2Scheme[i]}/g" $Case/system/fvSchemes
+    sed -i "s/MESH_PHI/${meshPhiScheme[i]}/g" $Case/system/fvSchemes
 
     # Update field
     echo Update field
     cp -r $Case/0_orig $Case/0
     cp -r $Case/0 $Case/source
 
-    if (($1=="once")); then
-        setAlgebraicFields -case $Case/source -a 0 -b 1 -c 1 -d 1 -sinsin \
-            > $Case/log.setAlgebraicFields
+    setAlgebraicFields -case $Case/source -a 0 -b 1 -c 1 -d 1 -sinsin \
+        > $Case/source/log.setAlgebraicFields
 
+    setAlgebraicFields -case $Case -a 0 -b 1 -c 1 -d 1 -sinsin \
+        > $Case/log.setAlgebraicFields
+
+    # Rezone + Remap
+    if [[ $1 = "once" ]]; then
+
+	# Required by meshDancImp implementation
         ln -rs $Case/source/constant $Case/constant/sourceMesh
 
         meshDanceImp "sourceMesh" -case $Case > $Case/log.meshDanceImp
 
-    elif (($1=="cyclic")); then
-
-        setAlgebraicFields -case $Case -a 0 -b 1 -c 1 -d 1 -sinsin \
-            > $Case/log.setAlgebraicFields
+    elif [[ $1 = "cyclic" ]]; then
 
         # Cyclic rezone + remap
         echo Cyclic rezone + remap ...

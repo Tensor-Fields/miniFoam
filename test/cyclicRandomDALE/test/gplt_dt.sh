@@ -1,1 +1,1 @@
-/home/maalik/foam/maalik-4.0/run/miniFoam/test/scripts/gplt_dt.sh
+rezoneAndRemap/gplt_dt.sh
