@@ -32,7 +32,7 @@ do
 
     row=$(grep "L1 error" "$Case/log.meshToMeshError"| \
         awk -F" " -v nX=${nX[i]} -v nY=${nY[i]} -v Case=${caseNameSuffix[i]}\
-        '{print sqrt(nX*nY)" "$NF" "Case}')
+        '{print sqrt(nX*nY)" "$NF" \""Case"\""}')
 
     echo $row
     echo $row >> "plot_src/L1_err.dat"

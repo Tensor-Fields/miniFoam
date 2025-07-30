@@ -16,18 +16,26 @@ mkdir plot_src
 echo Gnuplot ...
 
 gnuplot << 'EOF'
-set term epslatex 
+set term epslatex size 27cm,9cm
+
 set output "plot_src/L1_err.tex"
+
+#set term qt
 
 set datafile commentschars '#'
 
 set logscale xy 10
 
-set key top box opaque horizontal outside
+unset key
+
+#set key font ",20"
+#set key maxrows 9
+set key right box opaque outside
 
 set format y "10^{%L}"
 
-set yrange [*:0.01]
+#set yrange [*:0.001]
+set yrange [3e-6:0.001]
 
 unset grid
 
@@ -51,49 +59,53 @@ unset grid
 #     "2000/plot_src/L1_err.dat"  u ($1):2:xtic(($1)) w lp dt 2 pt 67 t "$N_\\mathrm{iter}=2000$", \
 #     "4000/plot_src/L1_err.dat"  u ($1):2:xtic(($1)) w lp dt 2 pt 67 t "$N_\\mathrm{iter}=4000$", \
 #     "8000/plot_src/L1_err.dat"  u ($1):2:xtic(($1)) w lp dt 2 pt 67 t "$N_\\mathrm{iter}=8000$", \
+
+#    "200/plot_src/L1_err.dat"  u ($1 > 0?1:1/0):2 w lp dt 2 pt 67 t "200, linear"
+#    "200/plot_src/L1_err.dat"  u ($1):2:xtic(($1)) w lp dt 2 pt 67 t "$N_\\mathrm{iter}=8000$"
+
 plot \
-     "200/plot_src/L1_err.dat"  u 1:2:((stringcolumn(3) eq "linear"      ?$2:1/0) w lp dt 2 pt 67 t "200, linear", \
-     "200/plot_src/L1_err.dat"  u 1:2:((stringcolumn(3) eq "cubic"       ?$2:1/0) w lp dt 2 pt 67 t "200, cubic", \
-     "200/plot_src/L1_err.dat"  u 1:2:((stringcolumn(3) eq "Gamma_0.01"  ?$2:1/0) w lp dt 2 pt 67 t "200, Gamma$=$0.01", \
-     "200/plot_src/L1_err.dat"  u 1:2:((stringcolumn(3) eq "Gamma_0.1"   ?$2:1/0) w lp dt 2 pt 67 t "200, Gamma$=$0.1", \
-     "200/plot_src/L1_err.dat"  u 1:2:((stringcolumn(3) eq "Gamma_0.5"   ?$2:1/0) w lp dt 2 pt 67 t "200, Gamma$=$0.5", \
-     "200/plot_src/L1_err.dat"  u 1:2:((stringcolumn(3) eq "Gamma_0.9"   ?$2:1/0) w lp dt 2 pt 67 t "200, Gamma$=$0.9", \
-     "200/plot_src/L1_err.dat"  u 1:2:((stringcolumn(3) eq "Gamma01_0.01"?$2:1/0) w lp dt 2 pt 67 t "200, Gamma01, 0.01", \
-     "200/plot_src/L1_err.dat"  u 1:2:((stringcolumn(3) eq "Gamma01_0.1" ?$2:1/0) w lp dt 2 pt 67 t "200, Gamma01, 0.1", \
-     "200/plot_src/L1_err.dat"  u 1:2:((stringcolumn(3) eq "Gamma01_0.5" ?$2:1/0) w lp dt 2 pt 67 t "200, Gamma01, 0.5", \
-     "200/plot_src/L1_err.dat"  u 1:2:((stringcolumn(3) eq "Gamma01_0.9" ?$2:1/0) w lp dt 2 pt 67 t "200, Gamma01, 0.9", \
-     "200/plot_src/L1_err.dat"  u 1:2:((stringcolumn(3) eq "GammaDC_0.01"?$2:1/0) w lp dt 2 pt 67 t "200,GammaDC, 0.01", \
-     "200/plot_src/L1_err.dat"  u 1:2:((stringcolumn(3) eq "GammaDC_0.1" ?$2:1/0) w lp dt 2 pt 67 t "200, GammaDC, 0.1", \
-     "200/plot_src/L1_err.dat"  u 1:2:((stringcolumn(3) eq "GammaDC_0.5" ?$2:1/0) w lp dt 2 pt 67 t "200, GammaDC, 0.5", \
-     "200/plot_src/L1_err.dat"  u 1:2:((stringcolumn(3) eq "GammaDC_0.9" ?$2:1/0) w lp dt 2 pt 67 t "200, GammaDC, 0.9", \
-     "4000/plot_src/L1_err.dat" u 1:2:((stringcolumn(3) eq "linear"      ?$2:1/0) w lp dt 2 pt 67 t "4000, linear", \
-     "4000/plot_src/L1_err.dat" u 1:2:((stringcolumn(3) eq "cubic"       ?$2:1/0) w lp dt 2 pt 67 t "4000, cubic", \
-     "4000/plot_src/L1_err.dat" u 1:2:((stringcolumn(3) eq "Gamma_0.01"?$2:1/0) w lp dt 2 pt 67 t "4000, Gamma$=$0.01", \
-     "4000/plot_src/L1_err.dat" u 1:2:((stringcolumn(3) eq "Gamma_0.1"   ?$2:1/0) w lp dt 2 pt 67 t "4000, Gamma$=$0.1", \
-     "4000/plot_src/L1_err.dat" u 1:2:((stringcolumn(3) eq "Gamma_0.5"   ?$2:1/0) w lp dt 2 pt 67 t "4000, Gamma$=$0.5", \
-     "4000/plot_src/L1_err.dat" u 1:2:((stringcolumn(3) eq "Gamma_0.9"?$2:1/0) w lp dt 2 pt 67 t "4000, Gamma$=$0.9", \
-     "4000/plot_src/L1_err.dat" u 1:2:((stringcolumn(3) eq "Gamma01_0.01"?$2:1/0) w lp dt 2 pt 67 t "4000, Gamma01, 0.01", \
-     "4000/plot_src/L1_err.dat" u 1:2:((stringcolumn(3) eq "Gamma01_0.1" ?$2:1/0) w lp dt 2 pt 67 t "4000, Gamma01, 0.1", \
-     "4000/plot_src/L1_err.dat" u 1:2:((stringcolumn(3) eq "Gamma01_0.5" ?$2:1/0) w lp dt 2 pt 67 t "4000, Gamma01, 0.5", \
-     "4000/plot_src/L1_err.dat" u 1:2:((stringcolumn(3) eq "Gamma01_0.9" ?$2:1/0) w lp dt 2 pt 67 t "4000, Gamma01, 0.9", \
-     "4000/plot_src/L1_err.dat" u 1:2:((stringcolumn(3) eq "GammaDC_0.01"?$2:1/0) w lp dt 2 pt 67 t "4000,GammaDC, 0.01", \
-     "4000/plot_src/L1_err.dat" u 1:2:((stringcolumn(3) eq "GammaDC_0.1" ?$2:1/0) w lp dt 2 pt 67 t "4000, GammaDC, 0.1", \
-     "4000/plot_src/L1_err.dat" u 1:2:((stringcolumn(3) eq "GammaDC_0.5" ?$2:1/0) w lp dt 2 pt 67 t "4000, GammaDC, 0.5", \
-     "4000/plot_src/L1_err.dat" u 1:2:((stringcolumn(3) eq "GammaDC_0.9" ?$2:1/0) w lp dt 2 pt 67 t "4000, GammaDC, 0.9", \
-     "-"                  u ($1):3 w l t "2nd Order", \
-     "-"                  u ($1):3 w l t "1st Order", \
-     # 2nd order
-     25            0.04    0.000229544
-     50            0.02    0.000057386
-     100           0.01    0.0000143465
-     200           0.005   0.000003586625
-     e
-     # 1st order
-     25            0.04    0.000229544 
-     50            0.02    0.000114772 
-     100           0.01    0.000057386
-     200           0.005    0.000028693
-     e
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "linear"?$2:1/0)       w lp dt 2 pt 60 t "\\tiny{200, linear}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "cubic"       ?$2:1/0) w lp dt 2 pt 61 t "\\tiny{200, cubic}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "Gamma_0.01"  ?$2:1/0) w lp dt 2 pt 62 t "\\tiny{200, Gamma$=$0.01}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "Gamma_0.1"   ?$2:1/0) w lp dt 2 pt 63 t "\\tiny{200, Gamma$=$0.1}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "Gamma_0.5"   ?$2:1/0) w lp dt 2 pt 64 t "\\tiny{200, Gamma$=$0.5}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "Gamma_0.9"   ?$2:1/0) w lp dt 2 pt 65 t "\\tiny{200, Gamma$=$0.9}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "Gamma01_0.01"?$2:1/0) w lp dt 2 pt 66 t "\\tiny{200, Gamma01, 0.01}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "Gamma01_0.1" ?$2:1/0) w lp dt 2 pt 67 t "\\tiny{200, Gamma01, 0.1}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "Gamma01_0.5" ?$2:1/0) w lp dt 2 pt 68 t "\\tiny{200, Gamma01, 0.5}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "Gamma01_0.9" ?$2:1/0) w lp dt 2 pt 69 t "\\tiny{200, Gamma01, 0.9}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "GammaDC_0.01"?$2:1/0) w lp dt 2 pt 70 t "\\tiny{200,GammaDC, 0.01}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "GammaDC_0.1" ?$2:1/0) w lp dt 2 pt 71 t "\\tiny{200, GammaDC, 0.1}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "GammaDC_0.5" ?$2:1/0) w lp dt 2 pt 72 t "\\tiny{200, GammaDC, 0.5}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "GammaDC_0.9" ?$2:1/0) w lp dt 2 pt 73 t "\\tiny{200, GammaDC, 0.9}", \
+     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "linear"      ?$2:1/0) w lp dt 2 pt 74 t "\\tiny{4000, linear}", \
+     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "cubic"       ?$2:1/0) w lp dt 2 pt 75 t "\\tiny{4000, cubic}", \
+     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "Gamma_0.01"?$2:1/0)   w lp dt 2 pt 76 t "\\tiny{4000, Gamma$=$0.01}", \
+     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "Gamma_0.1"   ?$2:1/0) w lp dt 2 pt 77 t "\\tiny{4000, Gamma$=$0.1}", \
+     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "Gamma_0.5"   ?$2:1/0) w lp dt 2 pt 78 t "\\tiny{4000, Gamma$=$0.5}", \
+     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "Gamma_0.9"?$2:1/0)    w lp dt 2 pt 79 t "\\tiny{4000, Gamma$=$0.9}", \
+     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "Gamma01_0.01"?$2:1/0) w lp dt 2 pt 80 t "\\tiny{4000, Gamma01, 0.01}", \
+     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "Gamma01_0.1" ?$2:1/0) w lp dt 2 pt 81 t "\\tiny{4000, Gamma01, 0.1}", \
+     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "Gamma01_0.5" ?$2:1/0) w lp dt 2 pt 82 t "\\tiny{4000, Gamma01, 0.5}", \
+     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "Gamma01_0.9" ?$2:1/0) w lp dt 2 pt 83 t "\\tiny{4000, Gamma01, 0.9}", \
+     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "GammaDC_0.01"?$2:1/0) w lp dt 2 pt 84 t "\\tiny{4000,GammaDC, 0.01}", \
+     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "GammaDC_0.1" ?$2:1/0) w lp dt 2 pt 85 t "\\tiny{4000, GammaDC, 0.1}", \
+     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "GammaDC_0.5" ?$2:1/0) w lp dt 2 pt 86 t "\\tiny{4000, GammaDC, 0.5}", \
+     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "GammaDC_0.9" ?$2:1/0) w lp dt 2 pt 87 t "\\tiny{4000, GammaDC, 0.9}"
+#     "-"                  u ($1):3 w l t "2nd Order", \
+#     "-"                  u ($1):3 w l t "1st Order", \
+#     # 2nd order
+#     25            0.04    0.000229544
+#     50            0.02    0.000057386
+#     100           0.01    0.0000143465
+#     200           0.005   0.000003586625
+#     e
+#     # 1st order
+#     25            0.04    0.000229544 
+#     50            0.02    0.000114772 
+#     100           0.01    0.000057386
+#     200           0.005    0.000028693
+#     e
 EOF
 
 # Error handling
