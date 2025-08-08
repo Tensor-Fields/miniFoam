@@ -42,6 +42,10 @@ class meshDance//: public fvMesh
 
     /*static*/ const word meshTargetDir_ = "meshTarget";
 
+    const bool flipFluxSign_;
+
+    /// Private members
+ 
     /// Register fields_ of type Type with mesh_
     template<class Type>
     void registerFields();
@@ -65,11 +69,13 @@ class meshDance//: public fvMesh
         sumMotionFraction_ = 0;
     }
 
+    scalar fluxSign();
+
     /// Public
     public:
 
         /// Constructor
-        meshDance(const Time& runTime);
+        meshDance(const Time& runTime, const bool flipFluxSign = false);
 
         /// Members
 

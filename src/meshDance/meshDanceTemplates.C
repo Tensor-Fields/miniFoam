@@ -196,7 +196,7 @@ void Foam::meshDance::advect()
 
             fvMatrix<Type> fieldEq
             (
-                fvm::div(mesh_.phi(), field)
+                fluxSign() * fvm::div(fluxSign() * mesh_.phi(), field)
                 //fvm::div(/*mesh.*/phi/*()*/, field)
                 //fvm::div
                 //(

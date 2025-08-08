@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
     #include "createTimeControls.H"
     
     /// Create the dancing mesh
-    meshDance    myMesh(runTime);
+    meshDance    myMesh(runTime, args.optionFound("flipFluxSign"));
 
     /// Access the underlying fvMesh
     const fvMesh& mesh = myMesh.mesh();

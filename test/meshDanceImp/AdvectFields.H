@@ -4,11 +4,12 @@
 template<class Type>
 void AdvectFields
 (
-    const fvMesh& mesh, 
+    const fvMesh& mesh,
+    const bool flip
     //const surfaceScalarField& phi,
     //const vectorField& totalMove=vector::zero,
     //bool ddtTV=false,
-    const word& smoothMeshDir="smoothMesh"
+    //const word& smoothMeshDir="smoothMesh"
 )
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
@@ -87,7 +88,7 @@ void AdvectFields
 
             fvMatrix<Type> fieldEq
             (
-                fvm::div(mesh.phi(), field)
+                fluxSign(flip) * fvm::div(fluxSign(flip) * mesh.phi(), field)
                 //fvm::div(/*mesh.*/phi/*()*/, field)
                 //fvm::div
                 //(

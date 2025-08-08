@@ -74,7 +74,9 @@ do
 	# Required by meshDancImp implementation
         ln -rs $Case/source/constant $Case/constant/sourceMesh
 
-        meshDanceImp "sourceMesh" -case $Case > $Case/log.meshDanceImp
+        meshDanceImp "sourceMesh" -case $Case \
+		                  -flipFluxSign \
+				  > $Case/log.meshDanceImp
 
     elif [[ $1 = "cyclic" ]]; then
 
@@ -87,7 +89,7 @@ do
                          -notFixedPatchNames \( "front" \)  \
                          -writeIntermediateMeshes \
                          -case $Case \
-	  	         -seed $((RANDOM))
+	  	         -seed $((RANDOM)) \
                          > $Case/log.cyclicRandomDALE #\
 	  	         #-fixedTimeStep # Unnecessary, time will not be adjusted
 	  	         # when controlDict.adjustTimestep is commented.

@@ -45,7 +45,8 @@ divSchemes
     //div(meshPhi,p)      Gauss blended 0.1; // Diverges
     //div(meshPhi,p)      Gauss blended 0.99; // Diverges
     //div(meshPhi,p)      Gauss blended 0.90; // Diverges
-    div(meshPhi,p)     Gauss MESH_PHI;
+    div(meshPhi,p)          Gauss MESH_PHI;
+    div((-1*meshPhi),p)     Gauss MESH_PHI; // Flip flux sign
 }
 
 laplacianSchemes

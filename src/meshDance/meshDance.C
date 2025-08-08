@@ -7,7 +7,7 @@
 /// Constructors
 ///
 
-Foam::meshDance::meshDance(const Time& runTime) 
+Foam::meshDance::meshDance(const Time& runTime, const bool flipFluxSign)
 /// \note: Initializing mesh_
 /// with an fvMesh parameter is private to fvMesh.
 :
@@ -28,7 +28,8 @@ timeSpan_(runTime.endTime() - runTime.startTime()),
 updatedStartingPoints_(mesh_.points()),
 overallPointMotion_(pointField(mesh_.points().size(), vector::zero)),
 motionFraction_(0),
-sumMotionFraction_(0)
+sumMotionFraction_(0),
+flipFluxSign_(flipFluxSign)
 {
     //startingPoints_ = mesh_.points(); // Error
 
@@ -224,4 +225,14 @@ void Foam::meshDance::resetMotion()
 
     resetStartingPoints(points());
     resetSumMotionFraction();
+}
+
+Foam::scalar Foam::meshDance::fluxSign()
+{
+    if (flipFluxSign_)
+    {
+        return -1.0;
+    }
+
+    return 1.0;
 }

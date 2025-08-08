@@ -190,6 +190,7 @@ typedef GeometricField<vector, pointPatchField, pointMesh> pointVectorField;
 typedef GeometricField<vector, fvPatchField, volMesh> volVectorField;
 
 #include "CreateFields.H"
+#include "fluxSign.H"
 #include "AdvectFields.H"
 
 int main(int argc, char* argv[])
@@ -197,6 +198,7 @@ int main(int argc, char* argv[])
     argList::validArgs.append("Smooth mesh directory name (in constant)");
     //argList::validArgs.append
     //    ("true/false if temporal term is ddt(T,V)/ddt(T)");
+    argList::validOptions.insert("flipFluxSign","");
 
     argList args(argc, argv);
 
@@ -279,7 +281,7 @@ int main(int argc, char* argv[])
 
         //const surfaceScalarField& phi = mesh.phi();
 
-	AdvectFields<scalar>(mesh);
+	AdvectFields<scalar>(mesh, args.optionFound("flipFluxSign"));
 
         if (runTime.write()) // Time dirs written without fields
         {
