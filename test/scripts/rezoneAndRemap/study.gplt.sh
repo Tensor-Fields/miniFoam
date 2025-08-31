@@ -100,7 +100,8 @@ unset grid
 #     "4000/plot_src/L1_err.dat" u ($1):(stringcolumn(3) eq "GammaDC_0.9" ?$2:1/0) w lp dt 2 pt 87 t "\\tiny{4000, GammaDC, 0.9}"
 
 plot \
-     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "linear"?$2:1/0)          w lp dt 2 pt 60 t "\\tiny{200, linear}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "linear"?$2:1/0) w lp dt 2 pt 60 t "\\tiny{200, linear}", \
+     "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "linearUpwind"?$2:1/0) w lp dt 2 pt 60 t "\\tiny{200, linearUpwind}", \
      "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "linearUpwind_Gauss_linear"?$2:1/0) w lp dt 2 pt 61 t "\\tiny{200, linearUpwind Gauss linear}", \
      "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "linearUpwind_leastSquares"  ?$2:1/0) w lp dt 2 pt 62 t "\\tiny{200, linearUpwind leastSquares}", \
      "200/plot_src/L1_err.dat"  u ($1):(stringcolumn(3) eq "linearUpwindV"   ?$2:1/0) w lp dt 2 pt 63 t "\\tiny{200, linearUpwindV}", \

@@ -7,7 +7,7 @@
 /// Constructors
 ///
 
-Foam::meshDance::meshDance(const Time& runTime, const bool flipFluxSign)
+Foam::meshDance::meshDance(const Time& runTime, const label maxIter, const bool flipFluxSign)
 /// \note: Initializing mesh_
 /// with an fvMesh parameter is private to fvMesh.
 :
@@ -29,7 +29,8 @@ updatedStartingPoints_(mesh_.points()),
 overallPointMotion_(pointField(mesh_.points().size(), vector::zero)),
 motionFraction_(0),
 sumMotionFraction_(0),
-flipFluxSign_(flipFluxSign)
+flipFluxSign_(flipFluxSign),
+maxIter_(maxIter)
 {
     //startingPoints_ = mesh_.points(); // Error
 

@@ -194,52 +194,55 @@ void Foam::meshDance::advect()
                     << endl;
             }
 
-            fvMatrix<Type> fieldEq
-            (
-                fluxSign() * fvm::div(fluxSign() * mesh_.phi(), field)
-                //fvm::div(/*mesh.*/phi/*()*/, field)
-                //fvm::div
-                //(
-                //    mesh.updatePhi
+	    for (label iter=0; iter < maxIter_; iter++)
+	    {
+                fvMatrix<Type> fieldEq
+                (
+                    fluxSign() * fvm::div(fluxSign() * mesh_.phi(), field)
+                    //fvm::div(/*mesh.*/phi/*()*/, field)
+                    //fvm::div
+                    //(
+                    //    mesh.updatePhi
+                    //    (
+                    //        sweptVol
+                    //    ), 
+                    //    field
+                    //)
+                 == fvm::ddt(field)
+                );
+
+                /// Found faulty, as fvm::ddt multiplies field by cell volume
+                //if(ddtTV)
+                //{
+
+                //    fvScalarMatrix fieldEq
                 //    (
-                //        sweptVol
-                //    ), 
-                //    field
-                //)
-             == fvm::ddt(field)
-            );
+                //        fvm::div(mesh.phi(), field)
+                //        //fvm::div(/*mesh.*/phi/*()*/, field)
+                //        //fvm::div
+                //        //(
+                //        //    mesh.updatePhi
+                //        //    (
+                //        //        sweptVol
+                //        //    ), 
+                //        //    field
+                //        //)
+                //     == fvm::ddt(mesh.V(), field)
+                //    );
 
-            /// Found faulty, as fvm::ddt multiplies field by cell volume
-            //if(ddtTV)
-            //{
+                //    //fieldEq = fieldEq2;
+                //}
 
-            //    fvScalarMatrix fieldEq
-            //    (
-            //        fvm::div(mesh.phi(), field)
-            //        //fvm::div(/*mesh.*/phi/*()*/, field)
-            //        //fvm::div
-            //        //(
-            //        //    mesh.updatePhi
-            //        //    (
-            //        //        sweptVol
-            //        //    ), 
-            //        //    field
-            //        //)
-            //     == fvm::ddt(mesh.V(), field)
-            //    );
+                //Info<< "    "
+                //    << "fieldEq "
+                //    << "created."
+                //    << endl;
 
-            //    //fieldEq = fieldEq2;
-            //}
-
-            Info<< "    "
-                << "fieldEq "
-                << "created."
-                << endl;
-
-            //TEq.solve();
-            Info<<"    "
-                << fieldEq.solve()
-                << endl;
+                //TEq.solve();
+                Info<<"    "
+                    << fieldEq.solve()
+                    << endl;
+	    }
 
             Info<< "    " 
                 << "Field " 

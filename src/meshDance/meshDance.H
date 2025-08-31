@@ -44,6 +44,8 @@ class meshDance//: public fvMesh
 
     const bool flipFluxSign_;
 
+    const label maxIter_;
+
     /// Private members
  
     /// Register fields_ of type Type with mesh_
@@ -75,7 +77,7 @@ class meshDance//: public fvMesh
     public:
 
         /// Constructor
-        meshDance(const Time& runTime, const bool flipFluxSign = false);
+        meshDance(const Time& runTime, const label maxIter, const bool flipFluxSign = false);
 
         /// Members
 

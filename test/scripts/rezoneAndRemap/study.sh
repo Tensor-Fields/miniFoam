@@ -141,7 +141,7 @@ do
     sed -i "s/MODE/$2/g" $study/run.slurm
     cd $study;
     sbatch run.slurm
-    #./Test.sh
+    #./Test.sh $2
     cd ..;
 
     echo

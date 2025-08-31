@@ -23,8 +23,8 @@ ddtSchemes
 
 gradSchemes
 {
-    default         none;//Gauss linear;
-    //grad(p)         Gauss linear;
+    default         none;
+    //default         GRAD_1 GRAD_2;
     grad(p)         GRAD_1 GRAD_2;
 }
 
@@ -45,24 +45,25 @@ divSchemes
     //div(meshPhi,p)      Gauss blended 0.1; // Diverges
     //div(meshPhi,p)      Gauss blended 0.99; // Diverges
     //div(meshPhi,p)      Gauss blended 0.90; // Diverges
-    div(meshPhi,p)          Gauss MESH_PHI;
-    div((-1*meshPhi),p)     Gauss MESH_PHI; // Flip flux sign
+    div(meshPhi,p)        MESH_PHI;
+    div((-1*meshPhi),p)   MESH_PHI; // Flip flux sign
+    div((1*meshPhi),p)    MESH_PHI; // Flip flux sign
 }
 
 laplacianSchemes
 {
-    default         Gauss linear orthogonal;
+    default         none;//Gauss linear orthogonal;
 }
 
 interpolationSchemes
 {
-    default         linear;
-    interpolate(HbyA) linear;
+    default         banana;
+    //interpolate(HbyA) linear;
 }
 
 snGradSchemes
 {
-    default         orthogonal;
+    default         none;//orthogonal;
 }
 
 

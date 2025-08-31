@@ -19,4 +19,8 @@ fe40
 
 # Execute the run script
 #./Allrun &> log.Allrun
+
+# Random is not cyclic, see Test.sh
+# random, once, or cyclic
 ./study.sh "study_template" "once"
+./study.gplt.sh

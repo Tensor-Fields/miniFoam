@@ -35,14 +35,14 @@ do
     # Case grading mesh
     echo Case grading mesh
     sed -i "s/nX/${nX[i]}/g" $Case/constant/polyMesh/blockMeshDict
-    sed -i "s/nY/${nX[i]}/g" $Case/constant/polyMesh/blockMeshDict
+    sed -i "s/nY/${nY[i]}/g" $Case/constant/polyMesh/blockMeshDict
     sed -i "s/nGradX/${nGradX[i]}/g" $Case/constant/polyMesh/blockMeshDict
     sed -i "s/nGradY/${nGradY[i]}/g" $Case/constant/polyMesh/blockMeshDict
 
     # Source uniform mesh
     echo Source uniform mesh
     sed -i "s/nX/${nX[i]}/g" $Case/source/constant/polyMesh/blockMeshDict
-    sed -i "s/nY/${nX[i]}/g" $Case/source/constant/polyMesh/blockMeshDict
+    sed -i "s/nY/${nY[i]}/g" $Case/source/constant/polyMesh/blockMeshDict
     # Uniform grading
     sed -i "s/nGradX/1/g" $Case/source/constant/polyMesh/blockMeshDict
     sed -i "s/nGradY/1/g" $Case/source/constant/polyMesh/blockMeshDict
@@ -72,11 +72,45 @@ do
     if [[ $1 = "once" ]]; then
 
 	# Required by meshDancImp implementation
-        ln -rs $Case/source/constant $Case/constant/sourceMesh
+        #ln -rs $Case/source/constant $Case/constant/sourceMesh
 
-        meshDanceImp "sourceMesh" -case $Case \
-		                  -flipFluxSign \
-				  > $Case/log.meshDanceImp
+	# Required by cyclicRandomDALE
+        ln -rs $Case/source $Case/constant/
+
+        #meshDanceImp "sourceMesh" -case $Case \
+	#	                  -flipFluxSign \
+	#			  > $Case/log.meshDanceImp
+	
+        cyclicRandomDALE -nY ${nY[i]} \
+                         -M ${M[i]} \
+                         -alpha .125 \
+                         -randomDirs \( "1" "1" "0" \)  \
+                         -notFixedPatchNames \( "front" \)  \
+                         -writeIntermediateMeshes \
+                         -case $Case \
+	  	         -seed $((RANDOM)) \
+			 -targetMesh "source" \
+			 -maxIter 1 \
+                         -flipFluxSign \
+                         > $Case/log.cyclicRandomDALE #\
+	  	         #-fixedTimeStep # Unnecessary, time will not be adjusted
+	  	         # when controlDict.adjustTimestep is commented.
+
+	#
+        # Reset source to be the the same final mesh with exact values
+	#
+
+	# Find latest time
+        times=$(ls -1v $Case | grep -E '^[0-9]+(\.[0-9]+)?$')
+
+        latestTime=$(ls -1v $Case | grep -E '^[0-9]+(\.[0-9]+)?$' | tail -n1)
+
+	# Overwrite source mesh with the final mesh
+        cp -r "$Case/$latestTime"/polyMesh/* "$Case/source/"constant/polyMesh
+
+	# Evaluate source field at source cells
+        setAlgebraicFields -case $Case/source -a 0 -b 1 -c 1 -d 1 -sinsin \
+            > $Case/source/log.setAlgebraicFields
 
     elif [[ $1 = "cyclic" ]]; then
 
@@ -88,11 +122,46 @@ do
                          -randomDirs \( "1" "1" "0" \)  \
                          -notFixedPatchNames \( "front" \)  \
                          -writeIntermediateMeshes \
+			 -cyclic \
                          -case $Case \
 	  	         -seed $((RANDOM)) \
+			 -maxIter 1 \
                          > $Case/log.cyclicRandomDALE #\
 	  	         #-fixedTimeStep # Unnecessary, time will not be adjusted
 	  	         # when controlDict.adjustTimestep is commented.
+    elif [[ $1 = "random" ]]; then
+
+        # Random rezone + remap
+        echo Random rezone + remap ...
+        cyclicRandomDALE -nY ${nY[i]} \
+                         -M ${M[i]} \
+                         -alpha .125 \
+                         -randomDirs \( "1" "1" "0" \)  \
+                         -notFixedPatchNames \( "front" \)  \
+                         -writeIntermediateMeshes \
+                         -case $Case \
+	  	         -seed $((RANDOM)) \
+			 -maxIter 10 \
+			 -flipFluxSign \
+                         > $Case/log.cyclicRandomDALE #\
+	  	         #-fixedTimeStep # Unnecessary, time will not be adjusted
+	  	         # when controlDict.adjustTimestep is commented.
+
+	#
+        # Reset source to be the random mesh with exact values
+	#
+
+	# Find latest time
+        times=$(ls -1v $Case | grep -E '^[0-9]+(\.[0-9]+)?$')
+
+        latestTime=$(ls -1v $Case | grep -E '^[0-9]+(\.[0-9]+)?$' | tail -n1)
+
+	# Overwrite source mesh with the final random mesh
+        cp -r "$Case/$latestTime"/polyMesh/* "$Case/source/"constant/polyMesh
+
+	# Evaluate source field at random cells
+        setAlgebraicFields -case $Case/source -a 0 -b 1 -c 1 -d 1 -sinsin \
+            > $Case/source/log.setAlgebraicFields
     else
 	 echo; echo Error: Test.sh needs an argument:
 	 echo cyclic or once
