@@ -16,6 +16,7 @@ echo
 wmake test/cyclicRandomDALE
 wmake test/meshToMeshError
 wmake test/meshDanceImp
+wmake test/LaplacianSmoothBilletMesh/
 
 echo
 echo See above for errors, if any.
