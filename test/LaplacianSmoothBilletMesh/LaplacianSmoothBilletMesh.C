@@ -38,6 +38,9 @@ Description
 #include "emptyPolyPatch.H"
 #include "twoDPointCorrector.H"
 
+// degToRad
+#include "unitConversion.H"
+
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -61,6 +64,13 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("slideCrossingPoints", "");
 
     argList::validOptions.insert("maxIter", "<N>, or default to 1000");
+    argList::validOptions.insert("maxRes", "maxRes or 1e-3");
+
+    argList::validOptions.insert("noWedge", "");
+    argList::validOptions.insert("wedgeDir", "0, 1, or 2");
+    argList::validOptions.insert("emptyDir", "0, 1, or 2");
+    argList::validOptions.insert("radialDir", "0, 1, or 2");
+    argList::validOptions.insert("wedgeAperture", "in degrees");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -91,7 +101,14 @@ int main(int argc, char *argv[])
 
     if (args.optionFound("maxIter"))
     {
-        maxIter = readScalar(IStringStream(args.options()["maxIter"])());
+        maxIter = label(readScalar(IStringStream(args.options()["maxIter"])()));
+    }
+
+    scalar maxRes = 1e-3;
+
+    if (args.optionFound("maxRes"))
+    {
+        maxRes = readScalar(IStringStream(args.options()["maxRes"])());
     }
 
     //if (mesh.nGeometricD() == 3)
@@ -277,7 +294,123 @@ int main(int argc, char *argv[])
                              )/*&& !freePoints[pointI]*/
                         )
                         {
-                            newPoints[pointI] = curNewPoint;
+                            newPoints[pointI][0] = curNewPoint[0];
+                            newPoints[pointI][1] = curNewPoint[1];
+                            if 
+                            (
+                                !args.optionFound("noWedge") &&
+                                args.optionFound("wedgeDir") &&
+                                args.optionFound("radialDir") &&
+                                args.optionFound("wedgeAperture")
+                            )
+                            {
+                                label wedgeDir = label
+                                (
+                                    readScalar
+                                    (IStringStream(args.options()["wedgeDir"])())
+                                );
+
+                                label radialDir = label
+                                (
+                                    readScalar
+                                    (IStringStream(args.options()["radialDir"])())
+                                );
+
+                                for (label dir = 0; dir < 3; ++dir)
+                                {
+                                    if (dir != wedgeDir)
+                                    newPoints[pointI][dir] = curNewPoint[dir];
+                                }
+
+                                // Safeguard denomirator from vanishing
+                                if (curNewPoint[wedgeDir] > SMALL)
+                                {
+                                    newPoints[pointI][wedgeDir] =
+                                    // Sign (+/-)
+                                    curNewPoint[wedgeDir]
+                                    /// abs(curNewPoint[wedgeDir]) // Error:
+                                    // returns 0
+                                    / Foam::sqrt(pow(curNewPoint[wedgeDir],2))
+                                    // radialDirComponent * tan(aperture)
+                                    * curNewPoint[radialDir]
+                                    * Foam::tan
+                                      (
+                                          degToRad
+                                          (
+                                              readScalar
+                                              (IStringStream(args
+                                              .options()["wedgeAperture"])())
+                                          ) / 2
+                                      );
+                                }
+                            }
+                            else if 
+                            (
+                                (
+                                    !args.optionFound("noWedge") &&
+                                    !args.optionFound("wedgeDir") &&
+                                    args.optionFound("radialDir") &&
+                                    args.optionFound("wedgeAperture")
+                                )
+                                ||
+                                (
+                                    !args.optionFound("noWedge") &&
+                                    args.optionFound("wedgeDir") &&
+                                    args.optionFound("radialDir") &&
+                                    !args.optionFound("wedgeAperture")
+                                )
+                                ||
+                                (
+                                    !args.optionFound("noWedge") &&
+                                    args.optionFound("wedgeDir") &&
+                                    !args.optionFound("radialDir") &&
+                                    args.optionFound("wedgeAperture")
+                                )
+                            )
+                            {
+                                FatalErrorIn("Smoother loop")
+                                    << "-wedgeDir, -radialDir, and " 
+                                    << "-wedgeAperture must be "
+                                    << "specified together."
+                                    << abort(FatalError);
+                            }
+                            else if
+                            (
+                                args.optionFound("noWedge") &&
+                                args.optionFound("emptyDir")
+                            )
+                            {
+                                label emptyDir = label
+                                (
+                                    readScalar
+                                    (IStringStream(args.options()["emptyDir"])())
+                                );
+
+                                for (label dir = 0; dir < 3; ++dir)
+                                {
+                                    if (dir != emptyDir)
+                                    newPoints[pointI][dir] = curNewPoint[dir];
+                                }
+                            }
+                            else if
+                            (
+                                (
+                                    !args.optionFound("noWedge") &&
+                                    args.optionFound("emptyDir")
+                                )
+                                ||
+                                (
+                                    args.optionFound("noWedge") &&
+                                    !args.optionFound("emptyDir")
+                                )
+                            )
+                            {
+                                FatalErrorIn("Smoother loop")
+                                    << "-noWedge and -emptyDir must be "
+                                    << "specified together."
+                                    << abort(FatalError);
+                            }
+
                         }
 
                         else if
@@ -289,89 +422,15 @@ int main(int argc, char *argv[])
                             )/*&& !freePoints[pointI]*/
                         )
                         {
-                            //Info<< "Point "
-                            //    << pointI
-                            //    << " is sliding"
-                            //    << endl;
-
-                            /// Let points on 'axis' only slide 'along' the axis
-
-                            /// Vector connecting old point to the calculated new
-                            /// point
-                            //vector d = curNewPoint - newPoints[pointI];
-
-                            /// Projection of 'd' on the 'sliding direction'; first
-                            /// normalize the sliding direction.
-                            //vector dir(1, 0, 0);
-
-                            //dir = dir/mag(dir);
-
-                            //newPoints[pointI] += (d & dir) * dir;
-
-                            /// Uncomment
                             newPoints[pointI][0] = curNewPoint[0];
                         }
                     }
                 }
             }
 
-        // smoothed patch points independently
-        // but we do not smooth points on the boundary of the patch
-        // we reset these points
-        // problem: we need to smooth feature edges separately
-        // if(smoothPatches)
-        //   {
-        //      forAll(mesh.boundaryMesh(), patchI)
-        //        {
-        //          const labelList& meshPoints =
-        //            mesh.boundaryMesh()[patchI].meshPoints();
-
-        //          forAll(meshPoints, pointI)
-        //            {
-        //          label pointID = meshPoints[pointI];
-        //          vector curNewPoint = vector::zero;
-        //          scalar sumW = 0;
-
-        //          forAll(pointEdges[pointID], eI)
-        //            {
-        //              label curEdgeIndex = pointEdges[pointID][eI];
-        //              const edge& curEdge = edges[curEdgeIndex];
-
-        //              // use only boundary points
-        //              label otherPointID = curEdge.otherVertex(pointID);
-        //              if(fixedPoints[otherPointID])
-        //                {
-        //              vector d =
-        //                newPoints[otherPointID]
-        //                - newPoints[pointID];
-
-        //              scalar w = 1.0;
-        //              curNewPoint += w*d;
-        //              sumW += w;
-        //                }
-        //            }
-
-        //          curNewPoint /= sumW;
-        //          curNewPoint += newPoints[pointID];
-        //          residual[pointID] = mag(curNewPoint - newPoints[pointID]);
-        //          newPoints[pointID] = curNewPoint;
-        //            }
-
-        //          // reset boundary points
-        //          const labelList& boundaryPoints =
-            // mesh.boundaryMesh()[patchI].boundaryPoints();
-        //          forAll(boundaryPoints, bpi)
-        //            {
-        //          label boundaryPointID = meshPoints[boundaryPoints[bpi]];
-        //          newPoints[boundaryPointID] = oldPoints[boundaryPointID];
-        //          residual[boundaryPointID] = 0.0;
-        //            }
-        //        }
-        //   }
-
             residual /= max(mag(newPoints - oldPoints) + SMALL);
         }
-        while(max(residual) > 1e-3 && maxIter > counter);
+        while(max(residual) > maxRes && maxIter > counter);
 
         Info << "Internal points, max residual: " << max(residual)
             << ", num of iterations: " << counter << endl;
@@ -379,101 +438,6 @@ int main(int argc, char *argv[])
         twoDPointCorrector twoDCorrector(mesh);
         twoDCorrector.correctPoints(newPoints);
     }
-    //else // 2-D
-    //{
-    //    Info << "2-D mesh" << endl;
-
-    //    forAll(mesh.boundaryMesh(), patchI)
-    //    {
-    //        if
-    //        (
-    //            mesh.boundaryMesh()[patchI].type()
-    //         == emptyPolyPatch::typeName
-    //        )
-    //        {
-    //            const labelList& bPoints =
-    //                mesh.boundaryMesh()[patchI].boundaryPoints();
-
-    //            const vectorField& oldPatchPoints =
-    //                mesh.boundaryMesh()[patchI].localPoints();
-
-    //            vectorField newPatchPoints = oldPatchPoints;
-
-    //            const labelListList& patchPointEdges =
-    //                mesh.boundaryMesh()[patchI].pointEdges();
-
-    //            const edgeList& patchEdges =
-    //                mesh.boundaryMesh()[patchI].edges();
-
-    //            boolList fixedPoints(newPatchPoints.size(), false);
-
-    //            forAll(bPoints, pointI)
-    //            {
-    //                fixedPoints[bPoints[pointI]] = true;
-    //            }
-
-    //            scalarField residual(newPatchPoints.size(), 0);
-    //            label counter = 0;
-    //            do
-    //            {
-    //                counter++;
-
-    //                forAll(newPatchPoints, pointI)
-    //                {
-    //                    if (!fixedPoints[pointI])
-    //                    {
-    //                        vector curNewPatchPoint = vector::zero;
-
-    //                        scalar sumW = 0;
-
-    //                        forAll(patchPointEdges[pointI], eI)
-    //                        {
-    //                            label curEdgeIndex =
-    //                                patchPointEdges[pointI][eI];
-
-    //                            const edge& curEdge = patchEdges[curEdgeIndex];
-
-    //                            vector d =
-    //                                newPatchPoints[curEdge.otherVertex(pointI)]
-    //                              - newPatchPoints[pointI];
-
-    //                            scalar w = 1.0;
-
-    //                            curNewPatchPoint += w*d;
-
-    //                            sumW += w;
-    //                        }
-
-    //                        curNewPatchPoint /= sumW;
-
-    //                        curNewPatchPoint += newPatchPoints[pointI];
-
-    //                        residual[pointI] =
-    //                            mag(curNewPatchPoint - newPatchPoints[pointI]);
-
-    //                        newPatchPoints[pointI] = curNewPatchPoint;
-    //                    }
-    //                }
-
-    //                residual /=
-    //                    max(mag(newPatchPoints - oldPatchPoints) + SMALL);
-    //            }
-    //            while(max(residual) > 1e-6);
-
-    //            Info << "Empty points, max residual: " << max(residual)
-    //                << ", num of iterations: " << counter << endl;
-
-    //            const labelList& meshPoints =
-    //                mesh.boundaryMesh()[patchI].meshPoints();
-
-    //            forAll(meshPoints, pointI)
-    //            {
-    //                newPoints[meshPoints[pointI]] = newPatchPoints[pointI];
-    //            }
-    //        }
-    //    }
-    //}
-
 
     twoDPointCorrector twoDCorrector(mesh);
     twoDCorrector.correctPoints(newPoints);
