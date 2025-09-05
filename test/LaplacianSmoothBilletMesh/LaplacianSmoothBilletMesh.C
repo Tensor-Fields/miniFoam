@@ -323,14 +323,25 @@ int main(int argc, char *argv[])
                                 }
 
                                 // Safeguard denomirator from vanishing
-                                if (curNewPoint[wedgeDir] > SMALL)
+                                //if (curNewPoint[wedgeDir] > SMALL)
                                 {
+                                    scalar sign = 1;
+
+                                    if (curNewPoint[wedgeDir] < 0)
+                                    {
+                                        sign = -1;
+                                    }
+
                                     newPoints[pointI][wedgeDir] =
+
                                     // Sign (+/-)
-                                    curNewPoint[wedgeDir]
+                                    //curNewPoint[wedgeDir]
+
+                                    /// Foam::sqrt(pow(curNewPoint[wedgeDir],2))
                                     /// abs(curNewPoint[wedgeDir]) // Error:
                                     // returns 0
-                                    / Foam::sqrt(pow(curNewPoint[wedgeDir],2))
+
+                                    sign
                                     // radialDirComponent * tan(aperture)
                                     * curNewPoint[radialDir]
                                     * Foam::tan
@@ -340,7 +351,8 @@ int main(int argc, char *argv[])
                                               readScalar
                                               (IStringStream(args
                                               .options()["wedgeAperture"])())
-                                          ) / 2
+                                              / 2.0
+                                          )
                                       );
                                 }
                             }

@@ -1,5 +1,6 @@
 EXE_INC = \
     -I$(FOAM_SRC)/finiteVolume/lnInclude \
+    -I$(FOAM_SRC)/finiteArea/lnInclude \
     -I$(FOAM_RUN)/miniFoam/src/lnInclude \
     -std=c++11
 

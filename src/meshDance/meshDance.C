@@ -7,7 +7,13 @@
 /// Constructors
 ///
 
-Foam::meshDance::meshDance(const Time& runTime, const label maxIter, const bool flipFluxSign)
+Foam::meshDance::meshDance
+(
+    const Time& runTime, 
+    const label maxIter, 
+    const List<string>& fixedPatches,
+    const bool flipFluxSign
+)
 /// \note: Initializing mesh_
 /// with an fvMesh parameter is private to fvMesh.
 :
@@ -30,7 +36,8 @@ overallPointMotion_(pointField(mesh_.points().size(), vector::zero)),
 motionFraction_(0),
 sumMotionFraction_(0),
 flipFluxSign_(flipFluxSign),
-maxIter_(maxIter)
+maxIter_(maxIter),
+fixedPatches_(fixedPatches)
 {
     //startingPoints_ = mesh_.points(); // Error
 
@@ -42,6 +49,61 @@ maxIter_(maxIter)
     registerFields<tensor>();
     registerFields<symmTensor>();
     registerFields<sphericalTensor>();
+
+    //registerFields<scalar, fvsPatchField, surfaceMesh>();
+    //registerFields<vector, fvsPatchField, surfaceMesh>();
+    //registerFields<tensor, fvsPatchField, surfaceMesh>();
+    //registerFields<symmTensor, fvsPatchField, surfaceMesh>();
+    //registerFields<sphericalTensor, fvsPatchField, surfaceMesh>();
+
+    /// Create grad(DD), needed when copying convected DD_tmp into DD
+    //if 
+    //(
+    //    !mesh_
+    //    .foundObject<GeometricField<tensor, fvPatchField, volMesh> >
+    //    ("grad(DD)")
+    //)
+    //{
+    //    Info<< "    Create grad(DD)"
+    //        << endl;
+
+    //    GeometricField<tensor, fvPatchField, volMesh>* dummyName = new
+    //    GeometricField<tensor, fvPatchField, volMesh>
+    //    (
+    //        //IOobject
+    //        //(
+    //        //    "grad(DD)",
+    //        //    mesh_.time().timeName(),
+    //        //    mesh_,
+    //        //    IOobject::NO_READ,
+    //        //    IOobject::AUTO_WRITE
+    //        //),
+    //        fvc::grad
+    //        (
+    //            mesh_
+    //            .thisDb()
+    //            .lookupObject<GeometricField<vector, fvPatchField, volMesh> >("DD")
+    //        )()
+    //    );
+
+    //    //GeometricField<tensor, fvPatchField, volMesh> gradDD
+    //    //= fvc::grad
+    //    //(
+    //    //    mesh_
+    //    //    .thisDb()
+    //    //    .lookupObject<GeometricField<vector, fvPatchField, volMesh> >("DD"),
+    //    //    "grad(DD)"
+    //    //);
+    //}
+    //else
+    //{
+    //    Info<< "grad(DD) already exists"
+    //        << endl;
+    //}
+
+    //Info<< "mesh_.toc() is "
+    //    << mesh_.toc()
+    //    << endl;
 }
 
 ///
@@ -190,6 +252,71 @@ void Foam::meshDance::cyclicStep
 void Foam::meshDance::write()
 {
     mesh_.write();
+}
+
+void Foam::meshDance::writeMesh()
+{
+    Info<< "    Write "
+        << mesh_.name()
+        << endl;
+
+    // Writes registered fields too
+
+    // 1-
+    //mesh_.write()
+
+    // 2-
+    //mesh_.writeObject
+    //(
+    //    mesh_.time().writeFormat(),
+    //    IOstream::currentVersion,
+    //    mesh_.time().writeCompression()
+    //);
+
+    // 3-
+    // Copy the mesh and write it
+
+    polyMesh tmesh
+    (
+        IOobject
+        (
+            polyMesh::defaultRegion,
+            mesh_.time().timeName(),
+            mesh_.time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        xferCopy(mesh_.points()),
+        xferCopy(mesh_.faces()),
+        xferCopy(mesh_.faceOwner()),
+        xferCopy(mesh_.faceNeighbour()),
+        true
+    );
+
+    /// Add patches
+    const polyBoundaryMesh& patchList = mesh_.boundaryMesh();
+
+    List<polyPatch*> patchPtrList(patchList.size());
+
+    forAll(patchPtrList, patchI)
+    {
+        /** [index/name] returns polyPatch& (See polyBoundaryMesh.H) */
+        patchPtrList[patchI] = patchList[patchI].clone(patchList).ptr();
+    }
+
+    /// Add patches
+    tmesh.addPatches(patchPtrList);
+
+    tmesh.write();
+
+    Info<< "polyMesh written to "
+        << mesh_.time().timeName()
+        << endl;
+
+    // 4- Only write points
+    // Error
+    //mesh_.points().write()
 }
 
 void Foam::meshDance::resetPoints()

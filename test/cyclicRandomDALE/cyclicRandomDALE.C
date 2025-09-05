@@ -41,11 +41,14 @@
 #include "fvMesh.H"
 #include "IOobject.H"
 #include "GeometricField.H"
+#include "scalar.H"
 #include "vector.H"
+//#include "tensor.H"
+//#include "symmTensor.H"
+//#include "sphericalTensor.H"
 #include "fvPatchField.H"
 #include "volMesh.H"
 #include "pointField.H"
-#include "scalar.H"
 #include "faceList.H"
 #include "labelList.H"
 #include "Xfer.H"
@@ -61,6 +64,9 @@
 #include "meshWire.H"
 //#include "Rand.H"
 
+// Apparently needed when advecting fields, possibly for creating solids4foam BC's
+//#include "physicsModel.H"
+
 using namespace Foam;
 
 int main(int argc, char* argv[])
@@ -69,6 +75,7 @@ int main(int argc, char* argv[])
     argList::validOptions.insert("alpha", "Amplitude");
     argList::validOptions.insert("nY", "N cells in Y");
     argList::validOptions.insert("randomDirs", "1/0, dirs to be randomized");
+    argList::validOptions.insert("fixedPatchNames", "Names");
     argList::validOptions.insert("notFixedPatchNames", "Names");
     argList::validOptions.insert("writeIntermediateMeshes", "");
     argList::validOptions.insert("fixedTimeStep", "");
@@ -77,6 +84,9 @@ int main(int argc, char* argv[])
     argList::validOptions.insert("targetMesh", "<target case>");
     argList::validOptions.insert("maxIter", "<N>");
     argList::validOptions.insert("flipFluxSign", "");
+
+    // If you want a physicsModel to be created
+    //argList::validOptions.insert("solids4foam", "");
 
     argList args(argc, argv);
 
@@ -92,13 +102,17 @@ int main(int argc, char* argv[])
     const List<string> dirIsRandom = args.optionReadList<string>
     (word("randomDirs"));
 
+    /// List of patches whose points are fixed
+    const List<string> fixedPatchNames = args.optionReadList<string>
+    (word("fixedPatchNames"));
+
     /// List of patches whose points are allowed to move
     const List<string> notFixedPatchNames = args.optionReadList<string>
     (word("notFixedPatchNames"));
 
     /// Write intermediate meshes during advection of every random step, 1/0
-    const bool writeIntermediateMeshes = args.optionFound
-    ("writeIntermediateMeshes");
+    //const bool writeIntermediateMeshes = args.optionFound
+    //("writeIntermediateMeshes");
 
     /// No direction is random in the initializer
     List<bool> isRandom(3, false);
@@ -114,16 +128,22 @@ int main(int argc, char* argv[])
 
     #include "createTimeControls.H"
     
+    /// Create a list of fixed patches, needed by the constructor
+    // Impossible, we do not know the mesh at this point; pass it as an arg
+
     /// Create the dancing mesh
     meshDance    myMesh
     (
         runTime, 
 	label(readScalar(IStringStream(args.options()["maxIter"])())),
+        fixedPatchNames,
 	args.optionFound("flipFluxSign")
     );
 
     /// Access the underlying fvMesh
     const fvMesh& mesh = myMesh.mesh();
+
+    const_cast<fvMesh&>(mesh).setTopoWriteOpt(IOobject::AUTO_WRITE);
 
     /// Copy a frozen version of points; because myMesh.points() keeps
     /// changing
@@ -176,6 +196,14 @@ int main(int argc, char* argv[])
     /// Create the actual random number to feed the first-cycle point generator.
     scalar seed = rand.scalar01();
 
+    //if (args.optionFound("solids4foam"))
+    //{
+    //    autoPtr<physicsModel> physics = physicsModel::New(runTime);
+
+    //    Info<< "physics created"
+    //        << endl;
+    //}
+
     /// Loop over random meshes
     for (label meshi = 0; meshi < M; ++meshi)
     {
@@ -205,7 +233,7 @@ int main(int argc, char* argv[])
 	// \note: It was observed that when seed ~ 0.75, scalar01() gets stuck
 	// at this number.
 
-	Info<< "seed was     "
+	Info<< "seed was "
 	    <<seed<< endl;
 
 	/// \note: By just '=' the random number stucks
@@ -270,40 +298,9 @@ int main(int argc, char* argv[])
 			)
 		    );
 
-		    //Info<< "rootPath\n"
-		    //    << targetMesh.rootPath()<<"\n"
-		    //    << "caseName\n"
-		    //    << targetMesh.caseName()<<"\n"
-		    //    << "instance\n"
-		    //    << targetMesh.instance()<<"\n"
-		    //    << "local\n"
-		    //    << targetMesh.local()<<"\n"
-		    //    << "path\n"
-		    //    << targetMesh.path()<<"\n"
-		    //    << "objectPath\n"
-		    //    << targetMesh.objectPath()<<"\n"
-		    //    << "filePath\n"
-		    //    << targetMesh.filePath()<<"\n"
-		    //    << endl;
-
-		    //runTime++;
-		    //targetMesh.write();
- 
-		    //const_cast<pointField&>(rp) = targetMesh.points();
-		    //const pointField& rp = targetMesh.points();
 		    rp.reset(new pointField(targetMesh.points()));
-
-		    Info<< "Target mesh read from "
-		        << args.options()["targetMesh"]
-			<<"\n"<< "rp - init ="
-			<< rp() - myMesh.updatedStartingPoints()
-			<< endl;
 		}
 
-                //Info<< "Random mesh points generated (seed:"
-	        //    << seed
-	        //    << ")"
-                //    << endl;
                 myMesh
 		.setOverallPointMotion(myMesh.updatedStartingPoints(), rp());
 	    }
@@ -355,23 +352,64 @@ int main(int argc, char* argv[])
                 if(myMesh.stepTowards())
 		{
 		    Info<< "\n    Final mesh in this cycle is hit; ignore next"
-			<< "\n    time steps, move to the next cycle."
+			<< "\n    time steps, advect fields and move to the" 
+                        << "\n    next cycle."
 			<< endl;
+
+                    /// VolFields
+                    myMesh.advect<scalar>(runTime.write());
+                    myMesh.advect<vector>(runTime.write());
+                    myMesh.advect<tensor>(runTime.write());
+                    myMesh.advect<symmTensor>(runTime.write());
+
+                    /// We do not have sphericalTensor in Taylor impact problem
+                    //myMesh.advect<sphericalTensor>(runTime.write());
+
+                    /// SurfFields
+                    /// advects() does not work for now
+                    //myMesh.advects<scalar>(runTime.write());
+                    //myMesh.advects<vector>(runTime.write());
+                    //myMesh.advects<tensor>(runTime.write());
+                    //myMesh.advects<symmTensor>(runTime.write());
+
+                    if (runTime.write())
+                    {
+                        myMesh.writeMesh();
+
+                        Info<< "Write polyMesh"
+                            << endl;
+                    }
 
 		    break;
 		}
 
-                /// Advect fields
-                myMesh.advect<scalar>();
+                /// Volume fields
+                myMesh.advect<scalar>(runTime.write());
+                myMesh.advect<vector>(runTime.write());
+                myMesh.advect<tensor>(runTime.write());
+                myMesh.advect<symmTensor>(runTime.write());
+
+                /// We do not have sphericalTensor in Taylor impact problem
+                //myMesh.advect<sphericalTensor>(runTime.write());
+
+                /// Surface fields
+                /// advects() does not work for now
+                //myMesh.advects<scalar>(runTime.write());
+                //myMesh.advects<vector>(runTime.write());
+                //myMesh.advects<tensor>(runTime.write());
+                //myMesh.advects<symmTensor>(runTime.write());
 
                 /// Write intermediate mesh
-                if (writeIntermediateMeshes)
+                //if (writeIntermediateMeshes)
+                //{
+                if (runTime.write())
                 {
-                    if (runTime.write())
-                    {
-                        myMesh.write();
-                    }
+                    myMesh.writeMesh();
+
+                    Info<< "Write polyMesh"
+                        << endl;
                 }
+                //}
             }
 
             ///
@@ -380,24 +418,13 @@ int main(int argc, char* argv[])
 
             /// Mesh and fields will be written to caseDir/meshi/
             /// Duplicate for the last loop iter
-            myMesh.write();
+            //myMesh.write();
 
             Info<< "Cycle "
                 << meshi+1
                 << " written to "
                 << runTime.timeName()
                 << endl;
-
-            ///
-            /// Reset settings for the next random mesh motion step
-            /// or the last step
-            ///
-
-            /// Re-set startTime
-            //myMesh.setStartTime(runTime.endTime());
-
-            /// Re-set starting points
-            //myMesh.resetStartingPoints(myMesh.points());
 
             /// Re-set mesh motion settings at the end of each cycle
 	    /// - startTime
@@ -406,72 +433,7 @@ int main(int argc, char* argv[])
 	    /// - endTime
 	    ///
 	    myMesh.resetMotion();
- 
-            //runTime.setEndTime(runTime.endTime() + timeSpan);
         }
-        /// Else
-        /// Force last mesh to be the first mesh
-        //else if (meshi == M-1)
-        //{
-        //    /// Move mesh back to its undeformed shape, given start and end
-	//    /// points
-        //    myMesh.setOverallPointMotion(myMesh.points(), frozenInitialPoints);
-
-        //    /// Fictitious time loop for advective remap
-        //    while (runTime.run())
-        //    {
-        //        runTime++;
-
-        //        //Info<< "Time = "
-        //        //    << runTime.timeName()
-        //        //    << endl;
-
-        //        /// Move the mesh incrementally, new timestep size takes effect.
-	//	/// Use stepTowards() which is overshoot-proof.
-        //        //myMesh.cyclicStep();
-        //        /// Move the mesh incrementally
-	//	/// Break if the end of the cycle is hit.
-        //        if(myMesh.stepTowards())
-	//	{
-	//	    Info<< "\n    Final mesh in this cycle is hit; ignore next"
-	//		<< "\n    time steps, move to the next cycle."
-	//		<< endl;
-
-	//	    break;
-	//	}
-
-        //        /// Advect Field
-        //        myMesh.advect<scalar>();
-
-        //        /// Write intermediate mesh
-        //        if (writeIntermediateMeshes)
-        //        {
-        //            if (runTime.write())
-        //            {
-        //                myMesh.write();
-        //            }
-        //        }
-        //    }
-
-        //    ///
-        //    /// Write final mesh and fields of each random step
-        //    ///
-
-        //    /// Mesh and fields will be written to caseDir/M/
-        //    myMesh.write();
-
-        //    Info<< "Cycle "
-        //        << meshi + 1
-        //        << " written to "
-        //        << runTime.timeName()
-        //        << endl;
-        //}
-        //else
-        //{
-        //    FatalErrorIn("meshCounter")
-        //        << "meshi is !(< or == or >) M"
-        //        << abort(FatalError);
-        //}
     }
 
     Info<< "\n\nEnd."

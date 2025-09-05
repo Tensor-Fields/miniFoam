@@ -46,10 +46,18 @@ class meshDance//: public fvMesh
 
     const label maxIter_;
 
+    const List<string> fixedPatches_;
+
     /// Private members
  
-    /// Register fields_ of type Type with mesh_
+    /// Register fields_ of type Type with mesh_.
+    /// If reading from the disk directly whenever we need fields (e.g., for
+    /// solving the advection Eq.), we are uncesserily interacting with the disk,
+    /// which slows the process down.
     template<class Type>
+    void registerFields();
+
+    template<class Type, template<class> class PatchType, class Mesh>
     void registerFields();
 
     void updateMotionFraction();
@@ -77,7 +85,13 @@ class meshDance//: public fvMesh
     public:
 
         /// Constructor
-        meshDance(const Time& runTime, const label maxIter, const bool flipFluxSign = false);
+        meshDance
+        (
+            const Time&,
+            const label,
+            const List<string>&,
+            const bool flipFluxSign = false
+        );
 
         /// Members
 
@@ -117,10 +131,15 @@ class meshDance//: public fvMesh
 
         /// Advect fields, driven by the most recent mesh motion
         template<class Type>
-        void advect();
+        void advect(bool writeAdvectedFields);
+
+        template<class Type>
+        void advects(bool writeAdvectedFields);
 
         /// Write
         void write();
+
+        void writeMesh();
         
         /// Reset points to their initial positions
         void resetPoints();
