@@ -133,9 +133,9 @@ do
     echo study.gplt.sh copied to .
 
     # Set up the study template
-    sed -i "s/END_TIME/${studyEndTimes[i]}/" "$study/template/system/controlDict"
-    sed -i "s/DELTA_T/${studyTimeSteps[i]}/" "$study/template/system/controlDict"
-    sed -i "s/WRITE_INTERVAL/${studyWriteIntervals[i]}/" "$study/template/system/controlDict"
+    #sed -i "s/END_TIME/${studyEndTimes[i]}/" "$study/template/system/controlDict"
+    #sed -i "s/DELTA_T/${studyTimeSteps[i]}/" "$study/template/system/controlDict"
+    #sed -i "s/WRITE_INTERVAL/${studyWriteIntervals[i]}/" "$study/template/system/controlDict"
 
     # Submit the study
     sed -i "s/MODE/$2/g" $study/run.slurm

@@ -37,6 +37,10 @@ class meshDance//: public fvMesh
     /// Updates every time step (in the changing deltaT scenario)
     scalar motionFraction_;
 
+    /// Whether the mesh velocity is calculated based on the controlDict or
+    /// based on the forced N_iter's; 0 means based on controlDict.
+    label staticMotionFraction_;
+
     /// Updates every time motionFraction_ is updated
     scalar sumMotionFraction_;
 
@@ -91,6 +95,7 @@ class meshDance//: public fvMesh
             const label,
             const List<string>&,
             const bool flipFluxSign = false
+	    const label N_iter = 0
         );
 
         /// Members

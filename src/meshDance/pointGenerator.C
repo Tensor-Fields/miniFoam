@@ -46,6 +46,7 @@ Foam::pointField Foam::pointGenerator::randomize(const scalar& seed)
             {
                 if (isRandom_[dirI])
                 {
+	            /// Generate a random number in [-1, 1]
                     F[pointI][dirI] = rand.scalar01() * 2 - 1;
                 }
                 else if (!isRandom_[dirI])

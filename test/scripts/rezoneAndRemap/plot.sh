@@ -23,16 +23,27 @@ echo "# sqrt(nX * nY)    L1_err" > "plot_src/L1_err.dat"
 # Get the number of tests
 s=${#M[@]}
 
+echo $s tests found ...
+
 # Scan the log files
 for((i=0; i<s; i++))
 #for((i=0; i<1; i++))
 do
     #Case=${nX[i]}x${nY[i]}_${M[i]}
     source caseName.sh
+    #echo ${Case[i]}
+    #echo ${studyEndTimes[i]}
+    #echo "${nX[i]}x${nY[i]}"_"${caseNameSuffix[i]}"_"${studyEndTimes[i]}"
+
+        #awk -F" " -v nX=${nX[i]} -v nY=${nY[i]} -v Case=${caseNameSuffix[i]}\
 
     row=$(grep "L1 error" "$Case/log.meshToMeshError"| \
-        awk -F" " -v nX=${nX[i]} -v nY=${nY[i]} -v Case=${caseNameSuffix[i]}\
-        '{print sqrt(nX*nY)" "$NF" \""Case"\""}')
+        awk -F" " \
+	-v nX=${nX[i]} -v nY=${nY[i]} -v testCase=$Case \
+	-v et=${studyEndTimes[i]} \
+	-v ts=${studyTimeSteps[i]} \
+	-v alpha=${alpha[i]} \
+        '{print sqrt(nX*nY)" "$NF" "testCase" "alpha}')
 
     echo $row
     echo $row >> "plot_src/L1_err.dat"

@@ -13,6 +13,7 @@ Foam::meshDance::meshDance
     const label maxIter, 
     const List<string>& fixedPatches,
     const bool flipFluxSign
+    const label N_iter
 )
 /// \note: Initializing mesh_
 /// with an fvMesh parameter is private to fvMesh.
@@ -38,6 +39,7 @@ sumMotionFraction_(0),
 flipFluxSign_(flipFluxSign),
 maxIter_(maxIter),
 fixedPatches_(fixedPatches)
+staticMotionFraction_(N_iter)
 {
     //startingPoints_ = mesh_.points(); // Error
 
@@ -210,16 +212,23 @@ void Foam::meshDance::hitFinalMesh()
 /// Update motion fraction
 void Foam::meshDance::updateMotionFraction()
 {
-    /// dt / Time, or 1/N where N is #iter
-    motionFraction_ = 
-        mesh_.time().deltaT().value() /
-        (
-            mesh_.time().endTime().value() 
-          //- mesh_.time().startTime().value()
-          - startTime_.value()
-        );
+    if (!staticMotionFraction_)
+    {
+        /// dt / Time, or 1/N where N is #iter
+        motionFraction_ = 
+            mesh_.time().deltaT().value() /
+            (
+                mesh_.time().endTime().value() 
+              //- mesh_.time().startTime().value()
+              - startTime_.value()
+            );
 
-    sumMotionFraction_ += motionFraction_; 
+        sumMotionFraction_ += motionFraction_; 
+    }
+    else
+    {
+        motionFraction_ = staticMotionFraction_;
+    }
 }
 
 /// Access motion fraction

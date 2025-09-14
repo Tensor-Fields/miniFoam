@@ -31,6 +31,11 @@ do
     cp -r template $Case
     echo $Case created.
 
+    # Set up time controls
+    sed -i "s/END_TIME/${studyEndTimes[i]}/" "$Case/system/controlDict"
+    sed -i "s/DELTA_T/${studyTimeSteps[i]}/" "$Case/system/controlDict"
+    sed -i "s/WRITE_INTERVAL/${studyWriteIntervals[i]}/" "$Case/system/controlDict"
+
     # Copy source mesh and field to a new case
     echo Copy source mesh and field to source/
     if [ -d $Case/source ]; then
@@ -142,7 +147,7 @@ do
         echo Random rezone + remap ...
         cyclicRandomDALE -nY ${nY[i]} \
                          -M ${M[i]} \
-                         -alpha .125 \
+                         -alpha ${alpha[i]} \
                          -randomDirs \( "1" "1" "0" \)  \
                          -notFixedPatchNames \( "front" \)  \
                          -writeIntermediateMeshes \
@@ -151,6 +156,7 @@ do
 			 -maxIter 10 \
 			 -flipFluxSign \
                          > $Case/log.cyclicRandomDALE #\
+			 #-N_iter ${N_iter[i]} \
 	  	         #-fixedTimeStep # Unnecessary, time will not be adjusted
 	  	         # when controlDict.adjustTimestep is commented.
 
@@ -222,6 +228,8 @@ done
 #
 # Plot
 #
+
+echo
 
 source "plot.sh"
 

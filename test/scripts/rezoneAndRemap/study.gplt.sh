@@ -16,9 +16,10 @@
 echo Gnuplot ...
 
 gnuplot << 'EOF'
-set term epslatex
+#set term epslatex
 #set term epslatex size 16cm,11cm
 #set term epslatex standalone size 16cm,11cm
+set term epslatex standalone
 #set term epslatex monochrome size 16cm,11cm
 
 set output "plot_src/L1_err.tex"
@@ -35,7 +36,8 @@ unset key
 
 #set key font ",20"
 #set key maxrows 9
-set key left box opaque outside width -15
+#set key left box opaque outside width -15
+set key left box opaque outside
 #set key right Right box opaque outside width -8
 
 set format y "10^{%L}"
@@ -66,28 +68,39 @@ fi
 #
 
 # Write latex file
-echo Write latex file
+#echo Write latex file
 
-cat > plot_src/plot.tex << EOF
-\documentclass{standalone}
-
-\usepackage{xcolor, graphicx}
-
-\begin{document}
-    \input{plot_src/L1_err}
-\end{document}
-EOF
+#cat > plot_src/plot.tex << EOF
+#\documentclass{standalone}
+#
+#\usepackage{xcolor, graphicx}
+#\usepackage{amsmath}
+#
+#\begin{document}
+#    \input{plot_src/L1_err}
+#\end{document}
+#EOF
 
 # Compile latex
 echo Compile latex
-latex -interaction nonstopmode --output-dir plot_src plot_src/plot.tex \
+if ! latex -interaction nonstopmode --output-dir plot_src plot_src/L1_err.tex \
     > plot_src/log.latex
+#if ! pdflatex -interaction nonstopmode --output-dir plot_src plot_src/L1_err.tex \
+#    > plot_src/log.latex
+    #then echo Error: latex Unsuccessful; exit 1; fi
+    then echo Warning: latex Unsuccessful; fi
 
-dvips plot_src/plot.dvi > plot_src/log.dvips
+#dvips plot_src/plot.dvi > plot_src/log.dvips
+#
+#ps2pdf plot.ps > plot_src/log.ps2pdf
 
-ps2pdf plot.ps > plot_src/log.ps2pdf
+dvips plot_src/L1_err.dvi > plot_src/log.dvips
 
-echo plot.pdf written.
+ps2pdf L1_err.ps > plot_src/log.ps2pdf
 
-mv plot.ps plot_src
+echo L1_err.pdf written.
+#echo plot.pdf written.
 
+mv L1_err.ps plot_src
+#mv plot.ps plot_src
+#mv plot_src/plot.pdf .

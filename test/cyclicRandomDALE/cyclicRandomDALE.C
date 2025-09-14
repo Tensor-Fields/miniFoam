@@ -84,6 +84,7 @@ int main(int argc, char* argv[])
     argList::validOptions.insert("targetMesh", "<target case>");
     argList::validOptions.insert("maxIter", "<N>");
     argList::validOptions.insert("flipFluxSign", "");
+    argList::validOptions.insert("N_iter", "");
 
     // If you want a physicsModel to be created
     //argList::validOptions.insert("solids4foam", "");
@@ -132,12 +133,21 @@ int main(int argc, char* argv[])
     // Impossible, we do not know the mesh at this point; pass it as an arg
 
     /// Create the dancing mesh
+
+    //label N_iter = 0;
+
+    //if (args.optionFound("N_iter"))
+    //{
+    //    N_iter = (readScalar(IStringStream(args.options()["N_iter"])()));
+    //} 
+
     meshDance    myMesh
     (
         runTime, 
 	label(readScalar(IStringStream(args.options()["maxIter"])())),
         fixedPatchNames,
 	args.optionFound("flipFluxSign")
+	//N_iter // 0 means dynamic calculation
     );
 
     /// Access the underlying fvMesh
