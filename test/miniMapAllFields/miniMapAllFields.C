@@ -295,6 +295,9 @@ void mapFields
 
         const word& accuracyTag = args.additionalArgs()[0];
 
+        enum accuracy 
+        {MAP,INTERPOLATE,CELL_POINT_INTERPOLATE, NONE};
+
         if (accuracyTag == word("map"))
         {
             Info<< "    order: MAP"
@@ -453,11 +456,68 @@ int main(int argc, char* argv[])
     argList::validArgs.append("Accuracy: map|interpolate|cellPointInterpolate");
 
     argList::validOptions.insert("sourceOnly","");
+    argList::validOptions.insert("sourceMesh","directory name in constant");
+    argList::validOptions.insert("targetMesh","directory name in constant");
 
     argList args(argc, argv);
 
-    enum accuracy 
-    {MAP,INTERPOLATE,CELL_POINT_INTERPOLATE, NONE};
+    word sourceMeshDir = polyMesh::defaultRegion;
+    word targetMeshDir = polyMesh::defaultRegion;
+
+    if (args.optionFound("sourceMesh"))
+    {
+        sourceMeshDir = args.options()["sourceMesh"];
+        label nChars = sourceMeshDir.size();
+        char lastChar = sourceMeshDir[nChars - 1];
+
+        if (lastChar == '/')
+        {
+            sourceMeshDir = sourceMeshDir + "constant";
+        }
+        else //(lastChar == "/")
+        {
+            sourceMeshDir = sourceMeshDir + "/constant";
+        }
+    }
+    else
+    {
+        WarningIn("")
+            << "Option '-sourceMesh' not found, read it from"
+            << " 'constant/polyMesh'"
+            << endl;
+    }
+
+    if (args.optionFound("targetMesh"))
+    {
+        targetMeshDir = args.options()["targetMesh"];
+        label nChars = sourceMeshDir.size();
+        char lastChar = sourceMeshDir[nChars - 1];
+
+        if (lastChar == '/')
+        {
+            sourceMeshDir = sourceMeshDir + "constant";
+        }
+        else //(lastChar == "/")
+        {
+            sourceMeshDir = sourceMeshDir + "/constant";
+        }
+    }
+    else
+    {
+        WarningIn("")
+            << "Option '-targetMesh' not found, read it from"
+            << " 'constant/polyMesh'"
+            << endl;
+    }
+
+    if (targetMeshDir == sourceMeshDir)
+    {
+        WarningIn("")
+            << "The source mesh directory is the same as the target mesh"
+            << " directory; both are "
+            << sourceMeshDir
+            << endl;
+    }
 
     Time runTime
     (
@@ -469,88 +529,198 @@ int main(int argc, char* argv[])
     Info<< "Time created."
         << endl;
 
-    const polyMesh polyMeshSource
+    //const polyMesh polyMeshSource
+    //(
+    //    IOobject
+    //    (
+    //        //polyMesh::defaultRegion,
+    //        "meshSource",
+    //        runTime.timeName(),
+    //        runTime,
+    //        IOobject::MUST_READ
+    //    )
+    //);
+
+    //IOobject polyMeshTargetIO
+    //(
+    //    "meshTarget",
+    //    //polyMesh::defaultRegion,
+    //    runTime.timeName(),
+    //    runTime,
+    //    IOobject::MUST_READ
+    //);
+
+    //polyMesh polyMeshTarget(polyMeshTargetIO);
+
+    //Info<< "polyMeshSource read from "
+    //    << polyMeshSource.path()
+    //    << endl;
+
+    //Info<< "polyMeshTarget read from "
+    //    << polyMeshTarget.path()
+    //    << endl;
+
+    //patchManipulationFunctions::reorderPatchesConsistently
+    //    (polyMeshSource, polyMeshTarget);
+
+    //const fvMesh& meshSource = fvMesh(polyMeshSource);
+
+    ///// If you want fvMesh&, it needs to be const (not tried)
+
+    ///// Assignment operator for const fvMesh falls in the private scope of 
+    ///// fvMesh, if the lhs is not a reference
+    ////const fvMesh meshTarget = fvMesh(polyMeshTarget); // Error
+    ////const fvMesh& meshTarget = fvMesh(polyMeshTarget); // OK
+
+    ////const fvMesh& meshTarget(polyMeshTarget);
+
+    ///// Changes the patch order, so we'll create the fvMesh from components
+
+    //polyMeshTargetIO.readOpt() = IOobject::NO_READ;
+
+    //IOobject fvMeshTargetIO
+    //(
+    //    polyMesh::defaultRegion,
+    //    runTime.timeName(),
+    //    runTime,
+    //    IOobject::NO_READ,
+    //    IOobject::AUTO_WRITE
+    //);
+
+    //fvMesh meshTarget
+    //(
+    //    fvMeshTargetIO,
+    //    xferCopy(polyMeshTarget.points()),
+    //    xferCopy(polyMeshTarget.faces()),
+    //    xferCopy(polyMeshTarget.faceOwner()),
+    //    xferCopy(polyMeshTarget.faceNeighbour())
+    //);
+
+    //List<polyPatch*> patchPtrList(polyMeshTarget.boundaryMesh().size());
+
+    //forAll(patchPtrList, patchI)
+    //{
+    //    patchPtrList[patchI] = 
+    //        polyMeshTarget.boundaryMesh()[patchI].clone
+    //        (
+    //            polyMeshTarget.boundaryMesh()
+    //        ).ptr();
+    //}
+
+    //meshTarget.addFvPatches(patchPtrList);
+
+    fvMesh meshSource
     (
         IOobject
         (
-            //polyMesh::defaultRegion,
-            "meshSource",
-            runTime.timeName(),
+            sourceMeshDir,
             runTime,
             IOobject::MUST_READ
         )
     );
 
-    IOobject polyMeshTargetIO
-    (
-        "meshTarget",
-        //polyMesh::defaultRegion,
-        runTime.timeName(),
-        runTime,
-        IOobject::MUST_READ
-    );
-
-    polyMesh polyMeshTarget(polyMeshTargetIO);
-
-    Info<< "polyMeshSource read from "
-        << polyMeshSource.path()
+    Info<< "meshSource read from "
+        << meshSource.objectPath()
+        << " ; nCells = "
+        << meshSource.C().size()
         << endl;
-
-    Info<< "polyMeshTarget read from "
-        << polyMeshTarget.path()
-        << endl;
-
-    patchManipulationFunctions::reorderPatchesConsistently
-        (polyMeshSource, polyMeshTarget);
-
-    const fvMesh& meshSource = fvMesh(polyMeshSource);
-
-    /// If you want fvMesh&, it needs to be const (not tried)
-
-    /// Assignment operator for const fvMesh falls in the private scope of 
-    /// fvMesh, if the lhs is not a reference
-    //const fvMesh meshTarget = fvMesh(polyMeshTarget); // Error
-    //const fvMesh& meshTarget = fvMesh(polyMeshTarget); // OK
-
-    //const fvMesh& meshTarget(polyMeshTarget);
-
-    /// Changes the patch order, so we'll create the fvMesh from components
-
-    polyMeshTargetIO.readOpt() = IOobject::NO_READ;
-
-    IOobject fvMeshTargetIO
-    (
-        polyMesh::defaultRegion,
-        runTime.timeName(),
-        runTime,
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE
-    );
 
     fvMesh meshTarget
     (
-        fvMeshTargetIO,
-        xferCopy(polyMeshTarget.points()),
-        xferCopy(polyMeshTarget.faces()),
-        xferCopy(polyMeshTarget.faceOwner()),
-        xferCopy(polyMeshTarget.faceNeighbour())
+        IOobject
+        (
+            targetMeshDir,
+            runTime,
+            IOobject::MUST_READ
+        )
     );
 
-    List<polyPatch*> patchPtrList(polyMeshTarget.boundaryMesh().size());
-
-    forAll(patchPtrList, patchI)
-    {
-        patchPtrList[patchI] = 
-            polyMeshTarget.boundaryMesh()[patchI].clone
-            (
-                polyMeshTarget.boundaryMesh()
-            ).ptr();
-    }
-
-    meshTarget.addFvPatches(patchPtrList);
+    Info<< "meshTarget read from "
+        << meshTarget.objectPath()
+        << " ; nCells = "
+        << meshTarget.C().size()
+        << endl;
 
     /// Read and register fields with meshSource
-    IOobjectList objects(meshSource, runTime.timeName());
+    IOobjectList objects
+    (meshSource, args.options()["sourceMesh"], runTime.timeName());
+
+    if (objects.size() != 0)
+    {
+        Info<< "Fields to be read from the source mesh are:\n"
+            << objects.names()
+            << endl;
+
+        /// IOobjectList is not a List, but it is a HashTable
+
+        //forAll(objects, objectI)
+        //{
+        //    Info<< (objects[objectI]).name()
+        //        << endl;
+        //}
+    }
+    //-------------------------------------------------------------------//
+    // Start debug
+    //-------------------------------------------------------------------//
+    else
+    {
+        objectRegistry& db = meshSource;
+
+        word instance = args.options()["sourceMesh"];
+        word newInstance = instance;
+
+        if (!isDir(db.path(instance)))
+        {
+            Info<< "    "
+                << db.path(instance)
+                << " is not a directory"
+                << endl;
+
+            newInstance = db.time().findInstancePath(instant(instance));
+
+            if (newInstance.empty())
+            {
+                WarningIn("")
+                    << newInstance
+                    << " is empty"
+                    << endl;
+
+                //return;
+            }
+        }
+        else
+        {
+            Info<< "    "
+                << db.path(instance)
+                << " exists"
+                << endl;
+
+            newInstance = db.time().findInstancePath(instant(instance));
+
+            if (newInstance.empty())
+            {
+                WarningIn("")
+                    << newInstance
+                    << " is empty"
+                    << endl;
+
+                //return;
+            }
+            else
+            {
+                Info<< newInstance
+                    << " is db.time().findInstancePath(instant(instance))"
+                    << endl;
+            }
+        }
+
+        FatalErrorIn("")
+            << "There are no fields to be read from the source mesh."
+            << abort(FatalError);
+    }
+    //-------------------------------------------------------------------//
+    // End debug
+    //-------------------------------------------------------------------//
 
     meshToMesh meshInterpolator(meshSource, meshTarget);
 
@@ -564,16 +734,23 @@ int main(int argc, char* argv[])
     mapFields<sphericalTensor>(objects, meshInterpolator, args);
 
     runTime++;
-    
-    Info<< "Write meshTarget and fileds"
-        << " ... ";
-        
-    meshTarget.write();
-    
-    Info<< "meshTarget and fields"
-        << " written to "
-        << runTime.timeName()
+
+    Info<< "Time = "
+        << runTime.value()
         << endl;
+    
+    if (runTime.write())
+    {
+        Info<< "Write meshTarget and fileds"
+            << " ... ";
+        
+        meshTarget.write();
+
+        Info<< "meshTarget and fields"
+            << " written to "
+            << runTime.timeName()
+            << endl;
+    }
     
     Info<< nl << "End."
         << endl;

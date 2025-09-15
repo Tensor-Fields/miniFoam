@@ -22,5 +22,5 @@ fe40
 
 # Random is not cyclic, see Test.sh
 # random, once, or cyclic
-./study.sh "study_template" "once"
+./study.sh "study_template" "random"
 ./study.gplt.sh

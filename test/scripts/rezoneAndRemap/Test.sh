@@ -1,7 +1,14 @@
 #!/bin/bash
 
-# Do the cyclic random mesh motion test with advective remap.
-# Plot L1 error vs mesh spacing.
+# Rezone + Remap, and
+# plot L1 error vs mesh spacing.
+
+# Rezone can be between given source and target meshes, or random.
+# Random rezoning can be cyclic two.
+# Remap is advective
+
+# Roadmap:
+# Include other remaps: Interpolative
 
 # Test data
 source test_table.dat
@@ -83,7 +90,7 @@ do
 	
         cyclicRandomDALE -nY ${nY[i]} \
                          -M ${M[i]} \
-                         -alpha .125 \
+                         -alpha ${alpha[i]} \
                          -randomDirs \( "1" "1" "0" \)  \
                          -notFixedPatchNames \( "front" \)  \
                          -writeIntermediateMeshes \
@@ -162,6 +169,11 @@ do
 	# Evaluate source field at random cells
         setAlgebraicFields -case $Case/source -a 0 -b 1 -c 1 -d 1 -sinsin \
             > $Case/source/log.setAlgebraicFields
+
+    elif [[ $1 = "interpolate" ]]; then
+        miniMapAllFields > $Case/log.miniMapAllFields
+
+
     else
 	 echo; echo Error: Test.sh needs an argument:
 	 echo cyclic or once

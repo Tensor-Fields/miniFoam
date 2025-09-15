@@ -25,6 +25,11 @@ Program received signal SIGFPE, Arithmetic exception.
 #7  0x000055555540229f in main ()
 ```
 ## rezone+remap and restart with s4f
+Note: If you see no fields are being convected, it might be a matter of I/O
+settings; a workaround is to copy your latestTime to a newDir with a proper
+number name, e.g., 1, 2, ..., and make sure writing options in controlDict
+writes the results where you want, then ./rezoneAndRemap.
+
 Runs and writes the next time step successfully, although that is physically
 wrong.
 
@@ -47,6 +52,10 @@ solidMechanics
 setSet -batch createSets -latestTime
 setsToZones
 setMatFromCellZones
+```
+or simply run
+```bash
+./createMaterials.sh
 ```
 - Edit *mechanicalProperties*
 - Remove *latestTime/U*; bekaert solver interprets it as displacement.

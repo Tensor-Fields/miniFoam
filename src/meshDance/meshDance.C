@@ -44,6 +44,11 @@ fixedPatches_(fixedPatches)
     /// Create IOobjects from existing field files
     //IOobjectList fields(mesh_, runTime.timeName());
 
+    Info<< "Read Time = "
+        << mesh_.time().timeName()
+        << " and register fields"
+        << endl;
+
     registerFields<scalar>();
     registerFields<vector>();
     registerFields<tensor>();

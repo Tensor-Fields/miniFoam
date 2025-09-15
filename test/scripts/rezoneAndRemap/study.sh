@@ -30,17 +30,6 @@ N=${#studyNames[@]}
 # Parse input
 study_tmp=$(readlink -f $1)
 
-#- ReadMe; Copy it anyway, and add descriptions from test_table.dat
-ReadMe=$(readlink -f "$study_tmp/ReadMe.md")
-#if [ -L ReadMe.md ]; then
-#    rm ReadMe.md
-    cp $ReadMe ReadMe.md
-
-    echo >> ReadMe.md
-    echo "Description:\n" >> ReadMe.md
-    echo $description >> ReadMe.md
-#fi
-
 # Create studies
 for((i=0; i<N; i++))
 do
@@ -56,6 +45,17 @@ do
     tmp=$(readlink -f study_template)
     cp -r $tmp $study
     echo $study created
+
+    #- ReadMe; Copy it anyway, and add descriptions from test_table.dat
+    ReadMe=$(readlink -f "$study_tmp/ReadMe.md")
+    #if [ -L ReadMe.md ]; then
+    #    rm ReadMe.md
+        cp $ReadMe $study/ReadMe.md
+    
+        echo >> $study/ReadMe.md
+        echo "Description:" >> $study/ReadMe.md
+        echo $description >> $study/ReadMe.md
+    #fi
 
     #
     # Link-proof copying scripts
@@ -140,8 +140,8 @@ do
     # Submit the study
     sed -i "s/MODE/$2/g" $study/run.slurm
     cd $study;
-    sbatch run.slurm
-    #./Test.sh $2
+    #sbatch run.slurm
+    ./Test.sh $2
     cd ..;
 
     echo
