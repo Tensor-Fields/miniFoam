@@ -19,3 +19,18 @@ To create a new study, go to .. (the parent dir),
 copy everything except the run-time generated files
 into a new dir.
 
+
+Description:
+Dimensionless number study
+
+Description:
+Dimensionless number study
+
+Description:
+Dimensionless number study
+
+Description:
+Study alpha in fixed everything
+
+Description:
+Study alpha in fixed everything

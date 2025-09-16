@@ -43,7 +43,7 @@ do
 	-v et=${studyEndTimes[i]} \
 	-v ts=${studyTimeSteps[i]} \
 	-v alpha=${alpha[i]} \
-        '{print sqrt(nX*nY)" "$NF" "testCase" "alpha}')
+        '{print sqrt(nX*nY)" "$NF" "testCase" "ts}')
 
     echo $row
     echo $row >> "plot_src/L1_err.dat"
