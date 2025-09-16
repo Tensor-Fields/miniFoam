@@ -441,8 +441,21 @@ int main(int argc, char *argv[])
             }
 
             residual /= max(mag(newPoints - oldPoints) + SMALL);
+ 
+            runTime++;
+
+            if (runTime.write())
+            {
+                mesh.movePoints(newPoints);
+                mesh.write();
+            }
         }
-        while(max(residual) > maxRes && maxIter > counter);
+        while
+        (
+            max(residual) > maxRes 
+         //&& maxIter > counter
+         && runTime.run()
+        );
 
         Info << "Internal points, max residual: " << max(residual)
             << ", num of iterations: " << counter << endl;
@@ -456,7 +469,7 @@ int main(int argc, char *argv[])
 
     mesh.movePoints(newPoints);
 
-    runTime++;
+    //runTime++;
 
     // Does not work
     //runTime.write();
