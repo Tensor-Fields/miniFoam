@@ -55,7 +55,12 @@ class meshWire: public pointGenerator
         pointField randomize(const scalar& seed);
 
 	/// Move wires sinusoidally
-        pointField sinCycle();
+        pointField sinCycle
+        (
+            const scalar tau,
+            const scalar maxTau,
+            const scalar phi
+        );
 };
 }
 

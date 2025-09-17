@@ -81,10 +81,12 @@ int main(int argc, char* argv[])
     argList::validOptions.insert("fixedTimeStep", "");
     argList::validOptions.insert("seed", "<number>");
     argList::validOptions.insert("cyclic", "");
+    argList::validOptions.insert("sinCycle", "");
     argList::validOptions.insert("targetMesh", "<target case>");
     argList::validOptions.insert("maxIter", "<N>");
     argList::validOptions.insert("flipFluxSign", "");
     argList::validOptions.insert("N_iter", "");
+    argList::validOptions.insert("phi", "<phase difference for sinCycle>");
 
     // If you want a physicsModel to be created
     //argList::validOptions.insert("solids4foam", "");
@@ -268,6 +270,9 @@ int main(int argc, char* argv[])
         {
             /// Set overall point motion, depending on whether it is the last
 	    /// cycle or not
+
+            autoPtr<pointField> rp(new pointField(mesh.points()));
+
 	    if (meshi < M-1 || (meshi == M-1 && !cyclic))
             {
                 ///
@@ -286,9 +291,79 @@ int main(int argc, char* argv[])
                 //const pointField& rp = pGen.randomize(rand.GaussNormal());
 
                 //const pointField& rp = pGen.randomize(seed);
-                autoPtr<pointField> rp (new pointField(pGen.randomize(seed)));
 
-		if (args.optionFound("targetMesh"))
+                bool rpNotSet = true;
+
+		if (args.optionFound("random") && rpNotSet)
+                {
+                    rp.reset(new pointField(pGen.randomize(seed)));
+
+                    rpNotSet = false;
+                }
+
+		if (args.optionFound("sinCycle") && rpNotSet)
+                {
+                    Info<< "sinCycle mesh motion is selected."
+                        << endl;
+
+                    if (args.optionFound("phi"))
+                    {
+                        if ( M < SMALL)
+                        {
+                            FatalErrorIn("")
+                                << "M=0 is not acceptable for sinusoidal"
+                                << " rezoning"
+                                << endl;
+                        }
+
+                                    //Info<< "Comment me!\n"
+                                    //    << "scalar((meshi + 1 + SMALL) / (M)) = "
+                                    //    << (meshi + SMALL + 1) / (M + SMALL)
+                                    //    << nl
+                                    //    << scalar(M)
+                                    //    << endl;
+
+                        rp.reset
+                        (
+                            new pointField
+                            (
+                                pGen.sinCycle
+                                (
+                                    (meshi + 1.0 + SMALL) / (M + SMALL),
+                                    //M + SMALL,
+                                    1,
+                                    readScalar(IStringStream(args.options()["phi"])())
+                                )
+                            )
+                        );
+                    }
+                    else
+                    {
+                        WarningIn("")
+                            << "option '-phi' not specified, defaults to 0"
+                            << endl;
+
+                        rp.reset
+                        (
+                            new pointField
+                            (
+                                pGen.sinCycle
+                                (
+                                    (meshi + 1.0 + SMALL) / (M + SMALL),
+                                    1,
+                                    0
+                                )
+                            )
+                        );
+                    }
+
+                    //myMesh
+		    //.setOverallPointMotion(myMesh.updatedStartingPoints(), rp());
+                    
+                    rpNotSet = false;
+                }
+
+		if (args.optionFound("targetMesh") && rpNotSet)
 		{
 		    //const word targetMeshDir = args.options()["targetMesh"];
 

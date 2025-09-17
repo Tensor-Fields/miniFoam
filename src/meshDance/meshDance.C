@@ -12,7 +12,7 @@ Foam::meshDance::meshDance
     const Time& runTime, 
     const label maxIter, 
     const List<string>& fixedPatches,
-    const bool flipFluxSign
+    const bool flipFluxSign,
     const label N_iter
 )
 /// \note: Initializing mesh_
@@ -38,7 +38,7 @@ motionFraction_(0),
 sumMotionFraction_(0),
 flipFluxSign_(flipFluxSign),
 maxIter_(maxIter),
-fixedPatches_(fixedPatches)
+fixedPatches_(fixedPatches),
 staticMotionFraction_(N_iter)
 {
     //startingPoints_ = mesh_.points(); // Error
