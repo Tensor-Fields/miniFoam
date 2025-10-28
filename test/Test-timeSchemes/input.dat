@@ -1,0 +1,25 @@
+##
+## Case controls
+##
+
+    ## Schemes
+    d2dt2Schemes  integrated
+    
+    ## dT, writeInterval, endTime
+    timeControls [0.1,40,8] [0.2,20,8]
+    
+    ## For each scheme, run all dT's
+    permutational true
+
+##
+## Study control
+##
+
+    ## Study name(s)
+    studyNames integrated
+    
+    ## Reference solution for error calculation
+    sourceCase analytical
+    
+    ## Description to be appended to ReadMe.md
+    description "Test Euler vs Integrated for d2dt2(rho, u) scheme, by solving wave equation and comparing the errors with the analytical solution"

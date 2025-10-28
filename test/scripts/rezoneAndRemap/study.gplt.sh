@@ -102,5 +102,6 @@ echo L1_err.pdf written.
 #echo plot.pdf written.
 
 mv L1_err.ps plot_src
+cp L1_err.pdf plot_src
 #mv plot.ps plot_src
 #mv plot_src/plot.pdf .

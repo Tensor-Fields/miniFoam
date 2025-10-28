@@ -1,0 +1,1 @@
+../../scripts/rezoneAndRemap/caseName.sh
