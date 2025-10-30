@@ -1,0 +1,4 @@
+faceSet wireInletFaces new patchToFace wireUpstream
+cellSet wireInletFacesMasterCells new zoneToCell wire
+faceSet wireOutletFaces new patchToFace wireDownstream
+cellSet wireOutletFacesMasterCells new zoneToCell wire

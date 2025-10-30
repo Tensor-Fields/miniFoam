@@ -1,0 +1,29 @@
+rollingMillPatchNames
+{
+    wireContactPatchName            wireContact;
+    wireUpstreamPatchName           wireUpstream;
+    wireDownstreamPatchName         wireDownstream;
+    wireBackPatchName               wedgeBack;
+    wireFrontPatchName              wedgeFront;
+    wireSymmetryYPatchName          wireSymmetryY;
+    wireSymmetryZPatchName          wireSymmetryZ;
+    dieToWirePatchName              dieContact;
+    dieToHousingPatchName           dieOuter;
+    dieUpstreamPatchName            dieUpstream;
+    dieDownstreamPatchName          dieDownstream;
+    dieBackPatchName                wedgeBack;
+    dieFrontPatchName               wedgeFront;
+    dieSymmetryYPatchName           dieSymmetryY;
+    dieSymmetryZPatchName           dieSymmetryZ;
+    dieEntranceConePatchName        dieEntrance;
+    dieExitConePatchName            dieExit;
+    rollerContactPatchName          rollerContact;
+    rollerAxisPatchName             RollerAxis; // e.g. topRollRollerAxis
+    rollerBackPatchName             RollerBack; // e.g. topRollRollerBack
+    rollerFrontPatchName            RollerFront; // e.g. topRollRollerFront
+    rollerSymmetryYPatchName        RollerSymmetryY; // e.g. topRollRollerSymmetryY
+    rollerSymmetryZPatchName        RollerSymmetryZ; // e.g. topRollRollerSymmetryZ
+    rollerToRollerBackPatchName     RTRBack;
+    rollerToRollerFrontPatchName    RTRFront;
+    rollerToAirPatchName            rollerToAir;
+}

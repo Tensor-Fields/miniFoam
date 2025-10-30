@@ -1,0 +1,32 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
+\*---------------------------------------------------------------------------*/
+Build    : 4.0-268bb07d15d8
+Exec     : generatePassItemsMeshScript drawing5 modifiersDrawing5/passItems drawing5/generatePassItemMeshes.sh -ignoreFields (DU)
+Date     : Jul 20 2024
+Time     : 17:26:03
+Host     : etsmartsim
+PID      : 14771
+CtrlDict : "/mnt/raidStorage/maalik/run/forming/flatRolling/flat12x4_FI41_TK31/test/system/controlDict"
+Case     : /mnt/raidStorage/maalik/run/forming/flatRolling/flat12x4_FI41_TK31/test
+nProcs   : 1
+SigFpe   : Enabling floating point exception trapping (FOAM_SIGFPE).
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+There are 2 pass items
+
+passItem: wire
+    meshSource: existingMesh
+passItem: die
+    meshSource: meshDict
+    meshingCommand: generateDieMesh
+
+Writing drawing5/generatePassItemMeshes.sh
+
+End
+

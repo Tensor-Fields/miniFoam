@@ -1,0 +1,163 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system/wire";
+    object      meshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Required: should be set to none for wire
+rollSetup       none;
+
+// Optional: specifies the symmetry, which dictates the quadrants of the
+// geometry be meshed
+// Options are none, posY, negY, posZ, negZ and axiSymmetric
+// Defaults to none (mesh entire geoemetry)
+symmetryType    none;
+
+wireMeshDict
+{
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //    Geometry
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // The wire geometry should be specified using one of the following four
+    // methods:
+    // 1. wireDiameter
+    // 2. dxfFile
+    // 3. geometryFile and optional interpolationType
+    // 4. surfaceFile and optional interpolationType
+    // They are searched for in this order e.g. if wireDiameter is present then
+    // the other three are ignored
+    // In all cases the wire will be positioned such that its most positive x
+    // coordinate wil lie at x = wireLength/2 and its most negative x coordinate
+    // will lie at x = -wireLength/2. This can be changed with the axialShift
+    // below
+
+    // 1. Specify diameter of circular wire
+    //wireDiameter    0.01905;
+
+    // 2. DXF file
+    //dxfFile     "wireProfile.DXF";
+
+    // 3. Geometry file (simple text format) and optional interpolation type
+    // which defaults to "b-spline" which should always be used
+    //geometryFile     "wireProfile.txt";
+    //interpolationType "b-spline";
+
+    // 4. Surface file and optional interpolation type as above
+    //surfaceFile     "wireProfile.fms";
+    //interpolationType "b-spline";
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //    Mesh
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Mandatory
+    wireLength      0.1;
+
+    // Mandatory: max cell size; this allows the cell size in the interior of
+    // the wire to be set larger than at the contact surface
+    maxCellSize     0.001;
+
+    // Optional: cell size in the radial direction at the wire contact patch
+    // If not found, it is calculated based on the geometryTolerance below
+    contactCellSize 0.001;
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //    Advanced mesh controls
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Optional: number of cells allow the length (axial direction) of the wire
+    // If not given, the it is calculated as int(wireLength/maxCellSize)
+    // axialResolution 40;
+
+    // Optional: translate the wire mesh in the x direction (positive means
+    // positive x direction)
+    // Defaults to 0
+    // axialShift      0;
+
+    // Optional: grade the mesh along its length. Not sure why this would be
+    // useful.
+    // Defaults to 1
+    // axialGrading  1;
+
+    // Optional: only used for circular wires and only if contactCellSize is not
+    // given. In that case, the geometryTolerance is used to calculate the
+    // contactCellSize
+    // Defaults to 1e-04
+    // geometryTolerance 1e-04;
+
+    // Optional: bool to centre wire on the origin
+    // Defaults to false. Must be a bool '0' or '1'.
+    // wireProfileCentering 0;
+
+    // Optional: bool to write the wireProfile.stl to disk
+    // Defaults to false. Must be a bool '0' or '1'.
+    // writeWireProfile 0;
+
+    // Optional: if symmetryType is axiSymmetric, then a wedgeAngle can be set
+    // Defaults to 2.5 degrees
+    // Note: if a dieMeshDict exists with a wedgeAngle then that angle takes
+    // precedence
+    // Note: this is the total wedge angle i.e. the geometry is extruded
+    // in the positive and negative directions by half of this amount
+    // wedgeAngle 2.5;
+
+    // Optional: number of layers of cells of the same size between jumps in
+    // mesh density. Using greater than 0 allows for a smoother transition in
+    // mesh grading in the wire radial direction
+    // If maxCellSize and minContactCellSize are the same then this does nothing
+    // Defaults to 0
+    // nAdditionalLayers 2;
+
+    // Optional: min number of faces in a patch. This setting seems to be for
+    // controlling small patches, which is not an issue for the wire
+    // It is not clear if it is used at all by the wire
+    // Defaults to 2
+    // minNumFacesBetweenFeatures 2;
+
+    // Optional: bool to allow a coating to be added to the wire
+    // Defaults to false. Must be a bool '0' or '1'.
+    // Does not natively work
+    // coating 1;
+}
+
+// Optional: alternative appraoch to how boundary cells are generated. It
+// results in a slightly finer mesh when enabled
+// Only relevant for non-circular wires
+// Defaults to 0
+// keepCellsIntersectingBoundary 1;
+
+// Optional: split the boundary layer of cells at the contact patch into layers
+// boundaryLayers
+// {
+//     nLayers         2;
+//     thicknessRatio  1.1;
+//     optimiseLayer   1;
+//     allowDiscontinuity 1;
+//     untangleLayer   1;
+//     optimisationParameters
+//     {
+//         nSmoothNormals  10;
+//         maxNumIterations 5;
+//         featureSizeFactor 0.4;
+//         recalculateNormals 1;
+//         relThicknessTol 0.1;
+//     }
+//     symmetryPlaneLayerTopology 1;
+// }
+
+// Names of patches
+#include "${FOAM_CASE}/system/rollingMillPatchNames"
+
+// ************************************************************************* //

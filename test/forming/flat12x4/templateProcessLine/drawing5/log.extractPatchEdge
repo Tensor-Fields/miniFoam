@@ -1,0 +1,27 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
+\*---------------------------------------------------------------------------*/
+Build    : 4.0-268bb07d15d8
+Exec     : extractPatchEdge -case drawing5 -region wire -patchName wireDownstream -profileFileName wireProfile.txt
+Date     : Jul 20 2024
+Time     : 18:03:29
+Host     : etsmartsim
+PID      : 15319
+CtrlDict : "./drawing5/system/controlDict"
+Case     : ./drawing5
+nProcs   : 1
+SigFpe   : Enabling floating point exception trapping (FOAM_SIGFPE).
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Reading mesh from 0.402
+
+Writing patch boundary points to file: "./drawing5/wireProfile.txt"
+
+End
+

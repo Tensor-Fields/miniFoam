@@ -1,0 +1,47 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      binary;
+    class       dictionary;
+    location    "constant";
+    object      mechanicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+planeStress     no;
+
+mechanical
+{
+    type            multiMaterial;
+    laws
+    {
+        wire
+        {
+            solvePressureEqn yes;
+            pressureSmoothingScaleFactor 100;
+            type            elastoPlasticKirchhoff;
+            rho             rho [ 1 -3 0 0 0 0 0 ] 7852;
+            E               E [ 1 -1 -2 0 0 0 0 ] 202000000000;
+            nu              nu [ 0 0 0 0 0 0 0 ] 0.3;
+            initialYieldStress initialYieldStress [ 1 -1 -2 0 0 0 0 ] 1000000000;
+            hardeningCoefficient hardeningCoefficient [ 1 -1 -2 0 0 0 0 ] 500000000;
+        }
+        die
+        {
+            type            elasticKirchhoff;
+            rho             rho [ 1 -3 0 0 0 0 0 ] 14000;
+            E               E [ 1 -1 -2 0 0 0 0 ] 600000000000;
+            nu              nu [ 0 0 0 0 0 0 0 ] 0.22;
+        }
+    }
+}
+
+
+// ************************************************************************* //

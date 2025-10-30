@@ -1,0 +1,1216 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
+\*---------------------------------------------------------------------------*/
+Build    : 4.0-268bb07d15d8
+Exec     : generateDieMesh -region die
+Date     : Jul 20 2024
+Time     : 17:26:03
+Host     : etsmartsim
+PID      : 14777
+CtrlDict : "/mnt/raidStorage/maalik/run/forming/flatRolling/flat12x4_FI41_TK31/test/drawing5/system/controlDict"
+Case     : /mnt/raidStorage/maalik/run/forming/flatRolling/flat12x4_FI41_TK31/test/drawing5
+nProcs   : 1
+SigFpe   : Enabling floating point exception trapping (FOAM_SIGFPE).
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Wire mesh will be saved in region die
+
+Parsing roll setup from dictionary
+Symmetry configuration posYposZ
+No rollers considered in this case
+Starting parsing die's dictionary 
+Edges are in the x-y plane
+Finished parsing die's dictionary 
+Checking for existence of duplicate triangles
+Found 0 duplicate triangles
+Found 30 duplicate points
+Checking for existence of duplicate triangles
+Found 0 duplicate triangles
+Detected a 2D surface in the x-y plane
+Created 15 surface patches
+Setting root cube size and refinement parameters
+Reading refinement settings
+Root box (-0.0325 -0.0066875 -0.019844867748) (0.0075 0.0333125 0.020155132252)
+Requested cell size corresponds to octree level 4
+Finished reading refinement settings
+Refining boundary
+Refining boundary boxes to the given size
+Finished refining boundary boxes
+Performing automatic refinement
+Starting curvature refinement
+Found 0 candidates for refinement
+Found 0 candidates for refinement
+Finished curvature refinement
+Starting proximity refinement
+Found 0 candidates for refinement
+Found 0 candidates for refinement
+Found 0 candidates for refinement
+Found 0 candidates for refinement
+Found 0 candidates for refinement
+Finished proximity refinement
+Finished with automatic refinement
+Marking inside/outside.
+Number of internal boxes is 33
+Number of outside boxes is 44
+Number of data boxes is 35
+Number of unknown boxes is 0
+Refining boxes near DATA boxes
+Marking inside/outside.
+Number of internal boxes is 57
+Number of outside boxes is 44
+Number of data boxes is 35
+Number of unknown boxes is 0
+Finished refining boxes near DATA boxes
+Extracting polyMesh
+Creating octree vertices
+Octree nodes 184
+Finished creating octree vertices
+Creating polyMesh from octree
+Reordering boundary faces 
+Finished reordering boundary faces
+Found 120 boundary faces 
+Finished creating polyMesh
+Mesh has :
+122 vertices 
+198 faces
+46 cells
+Finished extracting polyMesh
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 120 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 120 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Found 120 boundary faces 
+Found 120 boundary faces 
+Marked 0 faces for decomposition
+Found 120 boundary faces 
+Found 0 corners at the surface of the volume mesh
+Found 56 edge points at the surface of the volume mesh
+Smoothing mesh surface before mapping. Iteration:..
+Found 120 boundary faces 
+Found 14 corners at the surface of the volume mesh
+Found 42 edge points at the surface of the volume mesh
+Found 120 boundary faces 
+Found 14 corners at the surface of the volume mesh
+Found 42 edge points at the surface of the volume mesh
+Found 14 corners at the surface of the volume mesh
+Found 42 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 0
+Iteration 0. Number of bad faces 0
+Found 120 boundary faces 
+Found 14 corners at the surface of the volume mesh
+Found 42 edge points at the surface of the volume mesh
+Found 14 corners at the surface of the volume mesh
+Found 42 edge points at the surface of the volume mesh
+Starting creating layer cells
+Adding 32 cells to the mesh
+Resizing cells!
+Resizing faces!
+Finished adding cells to the mesh
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating layer cells
+Found 192 boundary faces 
+Found 14 corners at the surface of the volume mesh
+Found 58 edge points at the surface of the volume mesh
+Found 14 corners at the surface of the volume mesh
+Found 58 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 0
+Iteration 0. Number of bad faces 0
+Found 192 boundary faces 
+Found 14 corners at the surface of the volume mesh
+Found 58 edge points at the surface of the volume mesh
+Checking geometry deviation
+Found 192 boundary faces 
+Patch dieEntrance_0 has less than 2 faces
+Patch dieEntrance_2 has less than 2 faces
+Patch dieContact_4 has less than 2 faces
+Patch dieContact_6 has less than 2 faces
+Patch dieContact_7 has less than 2 faces
+Patch dieExit_8 has less than 2 faces
+Patch dieExit_9 has less than 2 faces
+Patch dieDownstream_11 has less than 2 faces
+Patch dieUpstream_13 has less than 2 faces
+Max deviation from geometry 0.00017820343764
+Mesh deviates more than the prescribed tolerance
+Number of internal boxes is 69
+Number of outside boxes is 109
+Number of data boxes is 45
+Number of unknown boxes is 0
+Extracting polyMesh
+Creating octree vertices
+Octree nodes 240
+Finished creating octree vertices
+Creating polyMesh from octree
+Reordering boundary faces 
+Finished reordering boundary faces
+Found 153 boundary faces 
+Finished creating polyMesh
+Mesh has :
+160 vertices 
+241 faces
+54 cells
+Finished extracting polyMesh
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 153 boundary faces 
+Found 2 problematic vertices
+Finished checking for faces with opposite normals
+Removing selected cells from the mesh
+New cells size 52
+Reordering boundary faces 
+Finished reordering boundary faces
+Removing faces
+Finished removing faces
+Finished removing selected cells from the mesh
+Checking for faces with opposite normals
+Found 145 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Checking for faces with opposite normals
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 145 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 145 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 145 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Found 145 boundary faces 
+Found 145 boundary faces 
+Marked 0 faces for decomposition
+Found 145 boundary faces 
+Found 4 corners at the surface of the volume mesh
+Found 78 edge points at the surface of the volume mesh
+Smoothing mesh surface before mapping. Iteration:..
+Found 145 boundary faces 
+Found 18 corners at the surface of the volume mesh
+Found 64 edge points at the surface of the volume mesh
+Found 145 boundary faces 
+Found 18 corners at the surface of the volume mesh
+Found 64 edge points at the surface of the volume mesh
+Found 18 corners at the surface of the volume mesh
+Found 64 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 2
+Iteration 1. Number of bad faces 1
+Iteration 2. Number of bad faces 1
+Iteration 3. Number of bad faces 1
+Iteration 4. Number of bad faces 1
+Iteration 0. Number of bad faces 6
+Iteration 1. Number of bad faces 5
+Iteration 2. Number of bad faces 5
+Iteration 3. Number of bad faces 5
+Iteration 4. Number of bad faces 5
+Iteration 5. Number of bad faces 5
+Iteration 6. Number of bad faces 5
+Iteration 7. Number of bad faces 5
+Iteration 8. Number of bad faces 5
+Iteration 9. Number of bad faces 5
+Found 145 boundary faces 
+Found 18 corners at the surface of the volume mesh
+Found 64 edge points at the surface of the volume mesh
+Found 18 corners at the surface of the volume mesh
+Found 64 edge points at the surface of the volume mesh
+Starting creating layer cells
+Adding 45 cells to the mesh
+Resizing cells!
+Resizing faces!
+Finished adding cells to the mesh
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating layer cells
+Found 243 boundary faces 
+Found 18 corners at the surface of the volume mesh
+Found 80 edge points at the surface of the volume mesh
+Found 18 corners at the surface of the volume mesh
+Found 80 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 1
+Iteration 1. Number of bad faces 1
+Iteration 2. Number of bad faces 0
+Iteration 0. Number of bad faces 0
+Found 243 boundary faces 
+Found 18 corners at the surface of the volume mesh
+Found 80 edge points at the surface of the volume mesh
+Checking geometry deviation
+Found 243 boundary faces 
+Patch dieEntrance_0 has less than 2 faces
+Patch dieContact_4 has less than 2 faces
+Patch dieContact_6 has less than 2 faces
+Patch dieExit_8 has less than 2 faces
+Patch dieExit_9 has less than 2 faces
+Patch dieDownstream_11 has less than 2 faces
+Patch dieUpstream_13 has less than 2 faces
+Max deviation from geometry 0.000215887208877
+Mesh deviates more than the prescribed tolerance
+Number of internal boxes is 95
+Number of outside boxes is 173
+Number of data boxes is 60
+Number of unknown boxes is 0
+Extracting polyMesh
+Creating octree vertices
+Octree nodes 356
+Finished creating octree vertices
+Creating polyMesh from octree
+Reordering boundary faces 
+Finished reordering boundary faces
+Found 217 boundary faces 
+Finished creating polyMesh
+Mesh has :
+234 vertices 
+338 faces
+74 cells
+Finished extracting polyMesh
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 217 boundary faces 
+Found 2 problematic vertices
+Finished checking for faces with opposite normals
+Removing selected cells from the mesh
+New cells size 72
+Reordering boundary faces 
+Finished reordering boundary faces
+Removing faces
+Finished removing faces
+Finished removing selected cells from the mesh
+Checking for faces with opposite normals
+Found 207 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Checking for faces with opposite normals
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 207 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 207 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 207 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Found 207 boundary faces 
+Found 207 boundary faces 
+Marked 0 faces for decomposition
+Found 207 boundary faces 
+Found 4 corners at the surface of the volume mesh
+Found 122 edge points at the surface of the volume mesh
+Smoothing mesh surface before mapping. Iteration:..
+Found 207 boundary faces 
+Found 24 corners at the surface of the volume mesh
+Found 102 edge points at the surface of the volume mesh
+Found 207 boundary faces 
+Found 24 corners at the surface of the volume mesh
+Found 102 edge points at the surface of the volume mesh
+Found 24 corners at the surface of the volume mesh
+Found 102 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 2
+Iteration 1. Number of bad faces 0
+Iteration 0. Number of bad faces 6
+Iteration 1. Number of bad faces 5
+Iteration 2. Number of bad faces 5
+Iteration 3. Number of bad faces 5
+Iteration 4. Number of bad faces 5
+Iteration 5. Number of bad faces 5
+Iteration 6. Number of bad faces 5
+Iteration 7. Number of bad faces 5
+Iteration 8. Number of bad faces 5
+Iteration 9. Number of bad faces 5
+Found 207 boundary faces 
+Found 24 corners at the surface of the volume mesh
+Found 102 edge points at the surface of the volume mesh
+Found 24 corners at the surface of the volume mesh
+Found 102 edge points at the surface of the volume mesh
+Starting creating layer cells
+Adding 67 cells to the mesh
+Resizing cells!
+Resizing faces!
+Finished adding cells to the mesh
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating layer cells
+Found 349 boundary faces 
+Found 24 corners at the surface of the volume mesh
+Found 118 edge points at the surface of the volume mesh
+Found 24 corners at the surface of the volume mesh
+Found 118 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 1
+Iteration 1. Number of bad faces 1
+Iteration 2. Number of bad faces 1
+Iteration 3. Number of bad faces 1
+Iteration 4. Number of bad faces 1
+Iteration 0. Number of bad faces 0
+Found 349 boundary faces 
+Found 24 corners at the surface of the volume mesh
+Found 118 edge points at the surface of the volume mesh
+Checking geometry deviation
+Found 349 boundary faces 
+Patch dieContact_4 has less than 2 faces
+Patch dieContact_6 has less than 2 faces
+Patch dieContact_7 has less than 2 faces
+Patch dieExit_9 has less than 2 faces
+Max deviation from geometry 2.13878465655e-06
+Mesh deviates more than the prescribed tolerance
+Number of internal boxes is 123
+Number of outside boxes is 183
+Number of data boxes is 67
+Number of unknown boxes is 0
+Extracting polyMesh
+Creating octree vertices
+Octree nodes 442
+Finished creating octree vertices
+Creating polyMesh from octree
+Reordering boundary faces 
+Finished reordering boundary faces
+Found 282 boundary faces 
+Finished creating polyMesh
+Mesh has :
+306 vertices 
+452 faces
+100 cells
+Finished extracting polyMesh
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 282 boundary faces 
+Found 2 problematic vertices
+Finished checking for faces with opposite normals
+Removing selected cells from the mesh
+New cells size 98
+Reordering boundary faces 
+Finished reordering boundary faces
+Removing faces
+Finished removing faces
+Finished removing selected cells from the mesh
+Checking for faces with opposite normals
+Found 272 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Checking for faces with opposite normals
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 272 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 272 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 272 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Found 272 boundary faces 
+Found 272 boundary faces 
+Marked 0 faces for decomposition
+Found 272 boundary faces 
+Found 4 corners at the surface of the volume mesh
+Found 148 edge points at the surface of the volume mesh
+Smoothing mesh surface before mapping. Iteration:..
+Found 272 boundary faces 
+Found 26 corners at the surface of the volume mesh
+Found 126 edge points at the surface of the volume mesh
+Found 272 boundary faces 
+Found 26 corners at the surface of the volume mesh
+Found 126 edge points at the surface of the volume mesh
+Found 26 corners at the surface of the volume mesh
+Found 126 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 3
+Iteration 1. Number of bad faces 1
+Iteration 2. Number of bad faces 1
+Iteration 3. Number of bad faces 1
+Iteration 4. Number of bad faces 1
+Iteration 0. Number of bad faces 6
+Iteration 1. Number of bad faces 5
+Iteration 2. Number of bad faces 5
+Iteration 3. Number of bad faces 5
+Iteration 4. Number of bad faces 5
+Iteration 5. Number of bad faces 5
+Iteration 6. Number of bad faces 5
+Iteration 7. Number of bad faces 5
+Iteration 8. Number of bad faces 5
+Iteration 9. Number of bad faces 5
+Found 272 boundary faces 
+Found 26 corners at the surface of the volume mesh
+Found 126 edge points at the surface of the volume mesh
+Found 26 corners at the surface of the volume mesh
+Found 126 edge points at the surface of the volume mesh
+Starting creating layer cells
+Adding 80 cells to the mesh
+Resizing cells!
+Resizing faces!
+Finished adding cells to the mesh
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating layer cells
+Found 440 boundary faces 
+Found 26 corners at the surface of the volume mesh
+Found 142 edge points at the surface of the volume mesh
+Found 26 corners at the surface of the volume mesh
+Found 142 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 5
+Iteration 1. Number of bad faces 2
+Iteration 2. Number of bad faces 2
+Iteration 3. Number of bad faces 2
+Iteration 4. Number of bad faces 2
+Iteration 0. Number of bad faces 0
+Found 440 boundary faces 
+Found 26 corners at the surface of the volume mesh
+Found 142 edge points at the surface of the volume mesh
+Checking geometry deviation
+Found 440 boundary faces 
+Patch dieContact_4 has less than 2 faces
+Patch dieContact_6 has less than 2 faces
+Patch dieExit_9 has less than 2 faces
+Max deviation from geometry 2.13878465655e-06
+Mesh deviates more than the prescribed tolerance
+Number of internal boxes is 127
+Number of outside boxes is 224
+Number of data boxes is 73
+Number of unknown boxes is 0
+Extracting polyMesh
+Creating octree vertices
+Octree nodes 476
+Finished creating octree vertices
+Creating polyMesh from octree
+Reordering boundary faces 
+Finished reordering boundary faces
+Found 295 boundary faces 
+Finished creating polyMesh
+Mesh has :
+324 vertices 
+470 faces
+103 cells
+Finished extracting polyMesh
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 295 boundary faces 
+Found 2 problematic vertices
+Finished checking for faces with opposite normals
+Removing selected cells from the mesh
+New cells size 101
+Reordering boundary faces 
+Finished reordering boundary faces
+Removing faces
+Finished removing faces
+Finished removing selected cells from the mesh
+Checking for faces with opposite normals
+Found 285 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Checking for faces with opposite normals
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 285 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 285 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 285 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Found 285 boundary faces 
+Found 285 boundary faces 
+Marked 0 faces for decomposition
+Found 285 boundary faces 
+Found 4 corners at the surface of the volume mesh
+Found 162 edge points at the surface of the volume mesh
+Smoothing mesh surface before mapping. Iteration:..
+Found 285 boundary faces 
+Found 28 corners at the surface of the volume mesh
+Found 138 edge points at the surface of the volume mesh
+Found 285 boundary faces 
+Found 28 corners at the surface of the volume mesh
+Found 138 edge points at the surface of the volume mesh
+Found 28 corners at the surface of the volume mesh
+Found 138 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 2
+Iteration 1. Number of bad faces 0
+Iteration 0. Number of bad faces 6
+Iteration 1. Number of bad faces 5
+Iteration 2. Number of bad faces 5
+Iteration 3. Number of bad faces 5
+Iteration 4. Number of bad faces 5
+Iteration 5. Number of bad faces 5
+Iteration 6. Number of bad faces 5
+Iteration 7. Number of bad faces 5
+Iteration 8. Number of bad faces 5
+Iteration 9. Number of bad faces 5
+Found 285 boundary faces 
+Found 28 corners at the surface of the volume mesh
+Found 138 edge points at the surface of the volume mesh
+Found 28 corners at the surface of the volume mesh
+Found 138 edge points at the surface of the volume mesh
+Starting creating layer cells
+Adding 87 cells to the mesh
+Resizing cells!
+Resizing faces!
+Finished adding cells to the mesh
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating layer cells
+Found 467 boundary faces 
+Found 28 corners at the surface of the volume mesh
+Found 154 edge points at the surface of the volume mesh
+Found 28 corners at the surface of the volume mesh
+Found 154 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 0
+Iteration 0. Number of bad faces 0
+Found 467 boundary faces 
+Found 28 corners at the surface of the volume mesh
+Found 154 edge points at the surface of the volume mesh
+Checking geometry deviation
+Found 467 boundary faces 
+Patch dieContact_4 has less than 2 faces
+Patch dieContact_6 has less than 2 faces
+Max deviation from geometry 1.9274093982e-07
+Mesh deviates more than the prescribed tolerance
+Number of internal boxes is 175
+Number of outside boxes is 239
+Number of data boxes is 82
+Number of unknown boxes is 0
+Extracting polyMesh
+Creating octree vertices
+Octree nodes 620
+Finished creating octree vertices
+Creating polyMesh from octree
+Reordering boundary faces 
+Finished reordering boundary faces
+Found 404 boundary faces 
+Finished creating polyMesh
+Mesh has :
+450 vertices 
+677 faces
+151 cells
+Finished extracting polyMesh
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 404 boundary faces 
+Found 2 problematic vertices
+Finished checking for faces with opposite normals
+Removing selected cells from the mesh
+New cells size 149
+Reordering boundary faces 
+Finished reordering boundary faces
+Removing faces
+Finished removing faces
+Finished removing selected cells from the mesh
+Checking for faces with opposite normals
+Found 394 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Checking for faces with opposite normals
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 394 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 394 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 394 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Found 394 boundary faces 
+Found 394 boundary faces 
+Marked 0 faces for decomposition
+Found 394 boundary faces 
+Found 4 corners at the surface of the volume mesh
+Found 188 edge points at the surface of the volume mesh
+Smoothing mesh surface before mapping. Iteration:..
+Found 394 boundary faces 
+Found 28 corners at the surface of the volume mesh
+Found 164 edge points at the surface of the volume mesh
+Found 394 boundary faces 
+Found 28 corners at the surface of the volume mesh
+Found 164 edge points at the surface of the volume mesh
+Found 28 corners at the surface of the volume mesh
+Found 164 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 2
+Iteration 1. Number of bad faces 1
+Iteration 2. Number of bad faces 1
+Iteration 3. Number of bad faces 1
+Iteration 4. Number of bad faces 1
+Iteration 0. Number of bad faces 6
+Iteration 1. Number of bad faces 5
+Iteration 2. Number of bad faces 5
+Iteration 3. Number of bad faces 5
+Iteration 4. Number of bad faces 5
+Iteration 5. Number of bad faces 5
+Iteration 6. Number of bad faces 5
+Iteration 7. Number of bad faces 5
+Iteration 8. Number of bad faces 5
+Iteration 9. Number of bad faces 5
+Found 394 boundary faces 
+Found 28 corners at the surface of the volume mesh
+Found 164 edge points at the surface of the volume mesh
+Found 28 corners at the surface of the volume mesh
+Found 164 edge points at the surface of the volume mesh
+Starting creating layer cells
+Adding 100 cells to the mesh
+Resizing cells!
+Resizing faces!
+Finished adding cells to the mesh
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating layer cells
+Found 602 boundary faces 
+Found 28 corners at the surface of the volume mesh
+Found 180 edge points at the surface of the volume mesh
+Found 28 corners at the surface of the volume mesh
+Found 180 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 1
+Iteration 1. Number of bad faces 0
+Iteration 0. Number of bad faces 0
+Found 602 boundary faces 
+Found 28 corners at the surface of the volume mesh
+Found 180 edge points at the surface of the volume mesh
+Checking geometry deviation
+Found 602 boundary faces 
+Patch dieContact_4 has less than 2 faces
+Max deviation from geometry 1.9274093982e-07
+Mesh deviates more than the prescribed tolerance
+Number of internal boxes is 179
+Number of outside boxes is 254
+Number of data boxes is 84
+Number of unknown boxes is 0
+Extracting polyMesh
+Creating octree vertices
+Octree nodes 638
+Finished creating octree vertices
+Creating polyMesh from octree
+Reordering boundary faces 
+Finished reordering boundary faces
+Found 416 boundary faces 
+Finished creating polyMesh
+Mesh has :
+464 vertices 
+696 faces
+155 cells
+Finished extracting polyMesh
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 416 boundary faces 
+Found 2 problematic vertices
+Finished checking for faces with opposite normals
+Removing selected cells from the mesh
+New cells size 153
+Reordering boundary faces 
+Finished reordering boundary faces
+Removing faces
+Finished removing faces
+Finished removing selected cells from the mesh
+Checking for faces with opposite normals
+Found 406 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Checking for faces with opposite normals
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 406 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 406 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 406 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Found 406 boundary faces 
+Found 406 boundary faces 
+Marked 0 faces for decomposition
+Found 406 boundary faces 
+Found 4 corners at the surface of the volume mesh
+Found 196 edge points at the surface of the volume mesh
+Smoothing mesh surface before mapping. Iteration:..
+Found 406 boundary faces 
+Found 30 corners at the surface of the volume mesh
+Found 170 edge points at the surface of the volume mesh
+Found 406 boundary faces 
+Found 30 corners at the surface of the volume mesh
+Found 170 edge points at the surface of the volume mesh
+Found 30 corners at the surface of the volume mesh
+Found 170 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 2
+Iteration 1. Number of bad faces 1
+Iteration 2. Number of bad faces 1
+Iteration 3. Number of bad faces 1
+Iteration 4. Number of bad faces 1
+Iteration 0. Number of bad faces 6
+Iteration 1. Number of bad faces 5
+Iteration 2. Number of bad faces 5
+Iteration 3. Number of bad faces 5
+Iteration 4. Number of bad faces 5
+Iteration 5. Number of bad faces 5
+Iteration 6. Number of bad faces 5
+Iteration 7. Number of bad faces 5
+Iteration 8. Number of bad faces 5
+Iteration 9. Number of bad faces 5
+Found 406 boundary faces 
+Found 30 corners at the surface of the volume mesh
+Found 170 edge points at the surface of the volume mesh
+Found 30 corners at the surface of the volume mesh
+Found 170 edge points at the surface of the volume mesh
+Starting creating layer cells
+Adding 104 cells to the mesh
+Resizing cells!
+Resizing faces!
+Finished adding cells to the mesh
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating layer cells
+Found 622 boundary faces 
+Found 30 corners at the surface of the volume mesh
+Found 186 edge points at the surface of the volume mesh
+Found 30 corners at the surface of the volume mesh
+Found 186 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 1
+Iteration 1. Number of bad faces 0
+Iteration 0. Number of bad faces 0
+Found 622 boundary faces 
+Found 30 corners at the surface of the volume mesh
+Found 186 edge points at the surface of the volume mesh
+Checking geometry deviation
+Found 622 boundary faces 
+Patch dieContact_4 has less than 2 faces
+Max deviation from geometry 6.30406302729e-16
+Mesh deviates more than the prescribed tolerance
+Number of internal boxes is 179
+Number of outside boxes is 264
+Number of data boxes is 86
+Number of unknown boxes is 0
+Extracting polyMesh
+Creating octree vertices
+Octree nodes 650
+Finished creating octree vertices
+Creating polyMesh from octree
+Reordering boundary faces 
+Finished reordering boundary faces
+Found 418 boundary faces 
+Finished creating polyMesh
+Mesh has :
+468 vertices 
+698 faces
+155 cells
+Finished extracting polyMesh
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 418 boundary faces 
+Found 2 problematic vertices
+Finished checking for faces with opposite normals
+Removing selected cells from the mesh
+New cells size 153
+Reordering boundary faces 
+Finished reordering boundary faces
+Removing faces
+Finished removing faces
+Finished removing selected cells from the mesh
+Checking for faces with opposite normals
+Found 408 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Checking for faces with opposite normals
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 408 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Checking for irregular surface connections
+Checking for faces with opposite normals
+Found 408 boundary faces 
+Found 0 problematic vertices
+Finished checking for faces with opposite normals
+Checking cells connected to surface vertices
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non-manifold surface edges
+Found 0 non-manifold edges
+Finished checking for non-manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 408 boundary faces 
+Found 0 non-mappable cells
+Checking cell connections
+Finished checking cell connections
+Found 408 boundary faces 
+Found 408 boundary faces 
+Marked 0 faces for decomposition
+Found 408 boundary faces 
+Found 4 corners at the surface of the volume mesh
+Found 200 edge points at the surface of the volume mesh
+Smoothing mesh surface before mapping. Iteration:..
+Found 408 boundary faces 
+Found 30 corners at the surface of the volume mesh
+Found 174 edge points at the surface of the volume mesh
+Found 408 boundary faces 
+Found 30 corners at the surface of the volume mesh
+Found 174 edge points at the surface of the volume mesh
+Found 30 corners at the surface of the volume mesh
+Found 174 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 2
+Iteration 1. Number of bad faces 1
+Iteration 2. Number of bad faces 1
+Iteration 3. Number of bad faces 1
+Iteration 4. Number of bad faces 1
+Iteration 0. Number of bad faces 6
+Iteration 1. Number of bad faces 5
+Iteration 2. Number of bad faces 5
+Iteration 3. Number of bad faces 5
+Iteration 4. Number of bad faces 5
+Iteration 5. Number of bad faces 5
+Iteration 6. Number of bad faces 5
+Iteration 7. Number of bad faces 5
+Iteration 8. Number of bad faces 5
+Iteration 9. Number of bad faces 5
+Found 408 boundary faces 
+Found 30 corners at the surface of the volume mesh
+Found 174 edge points at the surface of the volume mesh
+Found 30 corners at the surface of the volume mesh
+Found 174 edge points at the surface of the volume mesh
+Starting creating layer cells
+Adding 106 cells to the mesh
+Resizing cells!
+Resizing faces!
+Finished adding cells to the mesh
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating layer cells
+Found 628 boundary faces 
+Found 30 corners at the surface of the volume mesh
+Found 190 edge points at the surface of the volume mesh
+Found 30 corners at the surface of the volume mesh
+Found 190 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Iteration 0. Number of bad faces 1
+Iteration 1. Number of bad faces 0
+Iteration 0. Number of bad faces 0
+Found 628 boundary faces 
+Found 30 corners at the surface of the volume mesh
+Found 190 edge points at the surface of the volume mesh
+Checking geometry deviation
+Found 628 boundary faces 
+Max deviation from geometry 1.06957170217e-15
+Mesh is within the tolerance
+Calculating new boundary
+Renaming boundary patches
+Finished renaming boundary patches
+Checking empty patches
+Udpdating symmetry planes
+Renumbering the mesh
+Finished renumbering the mesh
+Generating a 3D mesh from the cross-section mesh
+Found 628 boundary faces 
+Found 12 corners at the surface of the volume mesh
+Found 208 edge points at the surface of the volume mesh
+Found 12 corners at the surface of the volume mesh
+Found 208 edge points at the surface of the volume mesh
+Creating vertices for layer cells
+Finished creating layer vertices
+Starting creating layer cells
+Adding 259 cells to the mesh
+Resizing cells!
+Resizing faces!
+Finished adding cells to the mesh
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating layer cells
+Refining in the circumferential direction into 20 slices.
+Starting refining boundary layers
+Found 738 boundary faces 
+Found 12 corners at the surface of the volume mesh
+Found 214 edge points at the surface of the volume mesh
+Detecting layers
+Analysing mesh for bnd layer existence
+Generating hair edges
+Finished with bnd layer detection
+Finished refining boundary-layer faces 
+Number of newly generated cells 4921
+Resizing cells!
+Resizing faces!
+Finished generating new cells 
+Finished refining boundary layers
+Removing selected cells from the mesh
+New cells size 5180
+Reordering boundary faces 
+Finished reordering boundary faces
+Removing faces
+Finished removing faces
+Finished removing selected cells from the mesh
+Generating zones
+Renumbering the mesh
+Finished renumbering the mesh
+ExecutionTime = 17.79 s
+ClockTime = 1 s
+End
+

@@ -1,0 +1,109 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "";
+    object      fileModifiers;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+fileModifiers
+(
+    system/controlDict/stopAt endTime;
+    system/controlDict/endTime 0.11;
+    system/controlDict/writeInterval 10;
+    system/controlDict/autoEndTime no;
+    system/controlDict/runTimeModifiable yes;
+    system/decomposeParDict/numberOfSubdomains 4;
+    system/fvSolution/solidMechanics/nCorrectors 500;
+    system/fvSolution/solidMechanics/DU 1e-03;
+    system/fvSolution/solidMechanics/relDU 1e-03;
+    system/fvSolution/solidMechanics/material 1e-04;
+
+    // Boundary conditions
+    0/DU/boundaryField/wireContact/shadowPatch rollerContact;
+
+	// Offset to allow spring-back:
+	// If the gap between rolls is exactly based on the instruction card, where
+	// we get the final from (which is somewhere downstream of the contact
+	// region), will have a larger height than the gap, so we close the
+	// gap a bit tighter than the card, so that the spring-back gives the
+	// expected height (specified by the card).
+	// modifiersRolling2 is +0.07mm off in wire height, displacement 0.01mm
+	// Here we set the displacement 0.07mm more. 
+    0/DU/boundaryField/topRollRollerAxis/displacement "(0 -8e-5 0.000000)";
+    0/DU/boundaryField/bottomRollRollerAxis/displacement "(0 8e-5 0.000000)";
+
+	// Not for manual setup!
+    //0/DU/boundaryField/topRollRollerAxis/initialRotationOrigin "(0 0.00345 0.000000)";
+    //0/DU/boundaryField/bottomRollRollerAxis/initialRotationOrigin "(0 -0.00345 0.000000)";
+
+	// Do not remove, rolls should be aware of where to go
+    //0/DU/boundaryField/topRollRollerAxis/translationDuringPositioningFile !;
+    //0/DU/boundaryField/bottomRollRollerAxis/translationDuringPositioningFile !;
+
+    0/DU/boundaryField/topRollRollerAxis/rpm 83;
+    0/DU/boundaryField/bottomRollRollerAxis/rpm 83;
+
+    0/DU/boundaryField/topRollRollerAxis/steadyStateRotationOriginFile !;
+    0/DU/boundaryField/bottomRollRollerAxis/steadyStateRotationOriginFile !;
+
+    0/DU/boundaryField/rollerContact/standardPenaltyNormalModelDict/penaltyScale 0.1;
+    0/DU/boundaryField/rollerContact/standardPenaltyFrictionModelDict/frictionLawDict/frictionCoeff 0.25;
+
+    // Wire mesh
+    system/wire/meshDict/symmetryType posYposZ;
+    system/wire/meshDict/wireMeshDict/wireLength 0.1;
+    system/wire/meshDict/wireMeshDict/wireDiameter !; // remove this entry
+    system/wire/meshDict/wireMeshDict/axialResolution !; // remove entry
+    system/wire/meshDict/wireMeshDict/surfaceFile "\"previousPass.wire/wireProfile.fms\"";
+    system/wire/meshDict/wireMeshDict/maxCellSize 6e-4;
+                                                          // fine: 1.5e-4
+							  // coarse: 6e-4
+    system/wire/meshDict/wireMeshDict/contactCellSize 6e-4;
+
+    // Roller meshes
+    system/rollers/meshDict/symmetryType posYposZ;
+    system/rollers/meshDict/twoHighRollsDict/topRoll/innerDiameter 0.24;
+    system/rollers/meshDict/twoHighRollsDict/topRoll/outerDiameter 0.305;
+    system/rollers/meshDict/twoHighRollsDict/topRoll/type geometryFileRoller;
+    system/rollers/meshDict/twoHighRollsDict/topRoll/geometryFile
+        "\"topRoll.txt\"";
+    system/rollers/meshDict/twoHighRollsDict/topRoll/maxCellSize 4e-3;
+    // default 2e-3
+    // fine 1e-3
+    // coarse 4e-3
+    system/rollers/meshDict/twoHighRollsDict/topRoll/contactCellSize 8e-4;
+    // default 4e-4
+    // fine 2e-4
+    // coarse 8e-4
+    system/rollers/meshDict/twoHighRollsDict/topRoll/rollWidth 0.05;
+	
+    system/rollers/meshDict/twoHighRollsDict/bottomRoll/innerDiameter 0.24;
+    system/rollers/meshDict/twoHighRollsDict/bottomRoll/outerDiameter 0.305;
+    system/rollers/meshDict/twoHighRollsDict/bottomRoll/type geometryFileRoller;
+    system/rollers/meshDict/twoHighRollsDict/bottomRoll/geometryFile
+        "\"bottomRoll.txt\"";
+    system/rollers/meshDict/twoHighRollsDict/bottomRoll/maxCellSize 4e-3;
+    // default 2e-3
+    // fine 1e-3
+    // coarse 4e-3
+    system/rollers/meshDict/twoHighRollsDict/bottomRoll/contactCellSize 8e-4;
+    // default 4e-4
+    // fine 2e-4
+    // coarse 8e-4
+    system/rollers/meshDict/twoHighRollsDict/bottomRoll/rollWidth 0.05;
+    system/rollers/meshDict/rollSetup twoHighRolls;
+
+    system/rollers/meshDict/extraContactAngle 55;
+    system/controlDict/deltaT 0.001;
+	system/rollers/meshDict/contactLength 0.12;
+	);

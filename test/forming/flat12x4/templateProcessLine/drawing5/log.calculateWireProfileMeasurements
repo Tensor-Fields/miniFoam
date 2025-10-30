@@ -1,0 +1,19 @@
+Reading wire file: /mnt/raidStorage/maalik/run/forming/flatRolling/flat12x4_FI41_TK31/test/drawing5/wireProfile.txt
+
+Calculating wire profile area
+
+Scale factor: 1000.0
+
+Wire area: 13.335323900633298
+Wire area (x2): 26.670647801266597
+Wire area (x4): 53.341295602533194
+
+Wire width: 4.1265023760999995
+Wire height: 4.126502475960001
+
+Wire width (x2): 8.253004752199999
+Wire height (x2): 8.253004951920001
+
+
+Writing file: /mnt/raidStorage/maalik/run/forming/flatRolling/flat12x4_FI41_TK31/test/drawing5/wireProfileMeasurements.txt
+

@@ -1,0 +1,392 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      binary;
+    class       regIOobject;
+    location    "0.3/uniform";
+    object      profilingInfo;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+profilingInfo
+(
+
+    {
+        id              37;
+        parentId        36;
+        description     "Foam::Time::writeObject - outputTime";
+        calls           3;
+        totalTime       0.028084;
+        childTime       0;
+        onStack         1;
+    }
+
+    {
+        id              36;
+        parentId        1;
+        description     "Foam::Time::writeObject";
+        calls           3;
+        totalTime       0.028123;
+        childTime       0.028084;
+        onStack         1;
+    }
+
+    {
+        id              1;
+        description     "application::main";
+        calls           1;
+        totalTime       1736.12101;
+        childTime       241.621482;
+        onStack         1;
+    }
+
+    {
+        id              26;
+        parentId        10;
+        description     "FO::bottomRoll_0::execute";
+        calls           299;
+        totalTime       7.6e-05;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              27;
+        parentId        10;
+        description     "FO::bottomRoll_1::execute";
+        calls           299;
+        totalTime       6.8e-05;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              28;
+        parentId        10;
+        description     "FO::bottomRoll_2::execute";
+        calls           299;
+        totalTime       7.8e-05;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              21;
+        parentId        10;
+        description     "FO::die_0::execute";
+        calls           299;
+        totalTime       0.003281;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              22;
+        parentId        10;
+        description     "FO::die_1::execute";
+        calls           299;
+        totalTime       0.004315;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              29;
+        parentId        10;
+        description     "FO::leftRoll_0::execute";
+        calls           299;
+        totalTime       0.000112;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              30;
+        parentId        10;
+        description     "FO::leftRoll_1::execute";
+        calls           299;
+        totalTime       9.8e-05;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              31;
+        parentId        10;
+        description     "FO::leftRoll_2::execute";
+        calls           299;
+        totalTime       0.000109;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              35;
+        parentId        10;
+        description     "FO::principalStresses::execute";
+        calls           299;
+        totalTime       0.007146;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              32;
+        parentId        10;
+        description     "FO::rightRoll_0::execute";
+        calls           299;
+        totalTime       0.0001;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              33;
+        parentId        10;
+        description     "FO::rightRoll_1::execute";
+        calls           299;
+        totalTime       7.2e-05;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              34;
+        parentId        10;
+        description     "FO::rightRoll_2::execute";
+        calls           299;
+        totalTime       4.4e-05;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              23;
+        parentId        10;
+        description     "FO::topRoll_0::execute";
+        calls           299;
+        totalTime       0.000239;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              24;
+        parentId        10;
+        description     "FO::topRoll_1::execute";
+        calls           299;
+        totalTime       0.000101;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              25;
+        parentId        10;
+        description     "FO::topRoll_2::execute";
+        calls           299;
+        totalTime       8.4e-05;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              11;
+        parentId        10;
+        description     "FO::wire_0::execute";
+        calls           299;
+        totalTime       0.005436;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              12;
+        parentId        10;
+        description     "FO::wire_1::execute";
+        calls           299;
+        totalTime       0.002846;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              13;
+        parentId        10;
+        description     "FO::wire_2::execute";
+        calls           299;
+        totalTime       0.002602;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              14;
+        parentId        10;
+        description     "FO::wire_3::execute";
+        calls           299;
+        totalTime       0.002406;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              15;
+        parentId        10;
+        description     "FO::wire_4::execute";
+        calls           299;
+        totalTime       0.003087;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              16;
+        parentId        10;
+        description     "FO::wire_5::execute";
+        calls           299;
+        totalTime       0.003089;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              17;
+        parentId        10;
+        description     "FO::wire_6::execute";
+        calls           299;
+        totalTime       0.002618;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              18;
+        parentId        10;
+        description     "FO::wire_7::execute";
+        calls           299;
+        totalTime       0.00251;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              19;
+        parentId        10;
+        description     "FO::wire_8::execute";
+        calls           299;
+        totalTime       0.004144;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              20;
+        parentId        10;
+        description     "FO::wire_9::execute";
+        calls           299;
+        totalTime       0.003266;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              3;
+        parentId        2;
+        description     "functionObjectList::read";
+        calls           1;
+        totalTime       0.0006;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              10;
+        parentId        1;
+        description     "functionObjects_.execute()";
+        calls           299;
+        totalTime       0.050838;
+        childTime       0.047927;
+        onStack         0;
+    }
+
+    {
+        id              2;
+        parentId        1;
+        description     "functionObjects_.start()";
+        calls           1;
+        totalTime       0.000612;
+        childTime       0.0006;
+        onStack         0;
+    }
+
+    {
+        id              4;
+        parentId        1;
+        description     "fvMatrix::solve_DU";
+        calls           65210;
+        totalTime       196.126831;
+        childTime       174.666533;
+        onStack         0;
+    }
+
+    {
+        id              8;
+        parentId        1;
+        description     "fvMatrix::solve_sigmaHyd";
+        calls           65210;
+        totalTime       45.415078;
+        childTime       40.707415;
+        onStack         0;
+    }
+
+    {
+        id              5;
+        parentId        4;
+        description     "lduMatrix::solver_DUx";
+        calls           65210;
+        totalTime       56.464493;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              6;
+        parentId        4;
+        description     "lduMatrix::solver_DUy";
+        calls           65210;
+        totalTime       58.99682;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              7;
+        parentId        4;
+        description     "lduMatrix::solver_DUz";
+        calls           65210;
+        totalTime       59.20522;
+        childTime       0;
+        onStack         0;
+    }
+
+    {
+        id              9;
+        parentId        8;
+        description     "lduMatrix::solver_sigmaHyd";
+        calls           65210;
+        totalTime       40.707415;
+        childTime       0;
+        onStack         0;
+    }
+);
+
+
+// ************************************************************************* //

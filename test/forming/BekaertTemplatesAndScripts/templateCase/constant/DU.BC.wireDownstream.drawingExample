@@ -1,0 +1,18 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+// Drawing
+type            fixedDisplacementZeroShear;
+// Either displacementSeries OR velocity (in patch normal direction)
+// displacementSeries
+// {
+//     fileName        "$FOAM_CASE/constant/timeVsDisp";
+//     outOfBounds     clamp;
+// }
+velocity        0.25;
+value           uniform ( 0 0 0 );

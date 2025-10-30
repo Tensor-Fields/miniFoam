@@ -1,0 +1,89 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    "DU|diffusionT|sigmaHyd"
+    {
+        tolerance       1e-10;
+        relTol          0.1;
+        minIter         1;
+        maxIter         50;
+        solver          PCG;
+        preconditioner  FDIC;
+    }
+    convectionT
+    {
+        tolerance       1e-10;
+        relTol          0.001;
+        minIter         1;
+        maxIter         100;
+        solver          PBiCG;
+        preconditioner  DILU;
+    }
+    temperatureAcceleration
+    {
+        tolerance       1e-10;
+        relTol          0.001;
+        minIter         1;
+        maxIter         100;
+        solver          PBiCG;
+        preconditioner  DILU;
+    }
+}
+
+solidMechanics
+{
+    // Momentum max iterations and tolerances
+    nCorrectors     501;
+    DU              1e-06;
+    relDU           1e-06;
+    material        1e-04;
+
+    // Frequency to prin the residuals to the stdout
+    infoFrequency   100;
+
+    // Thermal settings
+    thermalStress   no;
+    nTCorrectors    300;
+    T               1e-05;
+    relT            0.001;
+    thermalStressStartTime 0.001;
+    accelerationInterval 0.1;
+
+    // smoothScale should no longer be set in fvSolution; instead it should be
+    // set individually for each mechanical law in mechanicalProperties as
+    // 'RhieChowScaleFactor'
+    //smoothScale    0.5;
+}
+
+relaxationFactors
+{
+    equations
+    {
+        DU              0.994;
+        T               0.996;
+    }
+    fields
+    {
+        DU              0.92;
+        sigmaHyd        0.5;
+    }
+}
+
+
+// ************************************************************************* //
