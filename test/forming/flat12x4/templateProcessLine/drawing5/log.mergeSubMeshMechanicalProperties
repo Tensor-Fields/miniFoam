@@ -1,0 +1,29 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
+\*---------------------------------------------------------------------------*/
+Build    : 4.0-268bb07d15d8
+Exec     : mergeSubMeshMechanicalProperties -case drawing5 -passItemsDict modifiersDrawing5/passItems
+Date     : Jul 20 2024
+Time     : 17:26:05
+Host     : etsmartsim
+PID      : 15246
+CtrlDict : "./drawing5/system/controlDict"
+Case     : ./drawing5
+nProcs   : 1
+SigFpe   : Enabling floating point exception trapping (FOAM_SIGFPE).
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Creating merged mechanicalProperties dict
+
+Merged mechanicalProperties for region wire
+Merged mechanicalProperties for region die
+
+Writing mechanicalProperties
+
+End

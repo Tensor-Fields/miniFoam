@@ -1,0 +1,67 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      binary;
+    class       volVectorField;
+    location    "0.401";
+    object      slaveShearTraction_wireContact;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [1 -1 -2 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    dieSymmetryY
+    {
+        type            symmetryPlane;
+        value           uniform (0 0 0);
+    }
+    dieContact
+    {
+        type            calculated;
+        value           uniform (0 0 0);
+    }
+    dieDownstream
+    {
+        type            calculated;
+        value           uniform (0 0 0);
+    }
+    dieEntrance
+    {
+        type            calculated;
+        value           uniform (0 0 0);
+    }
+    dieExit
+    {
+        type            calculated;
+        value           uniform (0 0 0);
+    }
+    dieOuter
+    {
+        type            calculated;
+        value           uniform (0 0 0);
+    }
+    dieUpstream
+    {
+        type            calculated;
+        value           uniform (0 0 0);
+    }
+    dieSymmetryZ
+    {
+        type            symmetryPlane;
+        value           uniform (0 0 0);
+    }
+}
+
+
+// ************************************************************************* //

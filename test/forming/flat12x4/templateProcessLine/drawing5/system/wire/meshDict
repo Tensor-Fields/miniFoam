@@ -1,0 +1,61 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      binary;
+    class       dictionary;
+    location    "system/wire";
+    object      meshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+rollSetup       none;
+
+symmetryType    posYposZ;
+
+wireMeshDict
+{
+    wireLength      0.1;
+    maxCellSize     0.0025;
+    contactCellSize 0.0008;
+    wireDiameter    0.014;
+}
+
+rollingMillPatchNames
+{
+    wireContactPatchName wireContact;
+    wireUpstreamPatchName wireUpstream;
+    wireDownstreamPatchName wireDownstream;
+    wireBackPatchName wedgeBack;
+    wireFrontPatchName wedgeFront;
+    wireSymmetryYPatchName wireSymmetryY;
+    wireSymmetryZPatchName wireSymmetryZ;
+    dieToWirePatchName dieContact;
+    dieToHousingPatchName dieOuter;
+    dieUpstreamPatchName dieUpstream;
+    dieDownstreamPatchName dieDownstream;
+    dieBackPatchName wedgeBack;
+    dieFrontPatchName wedgeFront;
+    dieSymmetryYPatchName dieSymmetryY;
+    dieSymmetryZPatchName dieSymmetryZ;
+    dieEntranceConePatchName dieEntrance;
+    dieExitConePatchName dieExit;
+    rollerContactPatchName rollerContact;
+    rollerAxisPatchName RollerAxis;
+    rollerBackPatchName RollerBack;
+    rollerFrontPatchName RollerFront;
+    rollerSymmetryYPatchName RollerSymmetryY;
+    rollerSymmetryZPatchName RollerSymmetryZ;
+    rollerToRollerBackPatchName RTRBack;
+    rollerToRollerFrontPatchName RTRFront;
+    rollerToAirPatchName rollerToAir;
+}
+
+
+// ************************************************************************* //

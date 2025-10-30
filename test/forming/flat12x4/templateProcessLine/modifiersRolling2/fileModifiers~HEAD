@@ -1,0 +1,88 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "";
+    object      fileModifiers;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+fileModifiers
+(
+    system/controlDict/stopAt endTime;
+    system/controlDict/endTime 0.11;
+    system/controlDict/writeInterval 10;
+    system/controlDict/autoEndTime yes;
+    system/controlDict/runTimeModifiable yes;
+    system/decomposeParDict/numberOfSubdomains 1;
+    system/fvSolution/solidMechanics/nCorrectors 500;
+    system/fvSolution/solidMechanics/DU 1e-03;
+    system/fvSolution/solidMechanics/relDU 1e-03;
+    system/fvSolution/solidMechanics/material 1e-04;
+
+    // Boundary conditions
+    0/DU/boundaryField/wireContact/shadowPatch rollerContact;
+    0/DU/boundaryField/topRollRollerAxis/displacement "(0 -0.0005 0.000000)";
+    // rolling2
+    0/DU/boundaryField/bottomRollRollerAxis/displacement "(0 0.0005 0.000000)";
+    // rolling2
+    0/DU/boundaryField/topRollRollerAxis/translationDuringPositioningFile !;
+    0/DU/boundaryField/bottomRollRollerAxis/translationDuringPositioningFile !;
+
+    0/DU/boundaryField/topRollRollerAxis/rpm 44.4;
+    0/DU/boundaryField/bottomRollRollerAxis/rpm 44.4;
+
+    0/DU/boundaryField/topRollRollerAxis/steadyStateRotationOriginFile !;
+    0/DU/boundaryField/bottomRollRollerAxis/steadyStateRotationOriginFile !;
+
+    0/DU/boundaryField/rollerContact/standardPenaltyNormalModelDict/penaltyScale 0.1;
+    0/DU/boundaryField/rollerContact/standardPenaltyFrictionModelDict/frictionLawDict/frictionCoeff 0.25;
+
+    // Wire mesh
+    system/wire/meshDict/symmetryType posYposZ;
+    system/wire/meshDict/wireMeshDict/wireLength 0.4;
+    system/wire/meshDict/wireMeshDict/wireDiameter !; // remove this entry
+    system/wire/meshDict/wireMeshDict/axialResolution !; // remove entry
+    system/wire/meshDict/wireMeshDict/surfaceFile "\"previousPass.wire/wireProfile.fms\"";
+    system/wire/meshDict/wireMeshDict/maxCellSize 0.0006; // default: 3e-4
+                                                          // fine: 1.5e-4
+							  // coarse: 6e-4
+    system/wire/meshDict/wireMeshDict/contactCellSize 0.0006;
+
+    // Roller meshes
+    system/rollers/meshDict/symmetryType posYposZ;
+    system/rollers/meshDict/twoHighRollsDict/topRoll/outerDiameter 0.32;
+    system/rollers/meshDict/twoHighRollsDict/topRoll/type geometryFileRoller;
+    system/rollers/meshDict/twoHighRollsDict/bottomRoll/type geometryFileRoller;
+    system/rollers/meshDict/twoHighRollsDict/topRoll/geometryFile
+        "\"topRoll.txt\"";
+    system/rollers/meshDict/twoHighRollsDict/bottomRoll/geometryFile
+        "\"bottomRoll.txt\"";
+    system/rollers/meshDict/twoHighRollsDict/topRoll/maxCellSize 0.004; //
+    // default 2e-3
+    // fine 1e-3
+    // coarse 4e-3
+    system/rollers/meshDict/twoHighRollsDict/topRoll/contactCellSize 0.0008;
+    // default 4e-4
+    // fine 2e-4
+    // coarse 8e-4
+    system/rollers/meshDict/twoHighRollsDict/topRoll/rollWidth 0.05;
+    system/rollers/meshDict/twoHighRollsDict/bottomRoll/maxCellSize 0.004;
+    // default 2e-3
+    // fine 1e-3
+    // coarse 4e-3
+    system/rollers/meshDict/twoHighRollsDict/bottomRoll/contactCellSize 0.0008;
+    // default 4e-4
+    // fine 2e-4
+    // coarse 8e-4
+    system/rollers/meshDict/twoHighRollsDict/bottomRoll/rollWidth 0.05;
+    system/rollers/meshDict/rollSetup twoHighRolls;
+);

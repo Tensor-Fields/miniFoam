@@ -1,0 +1,105 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
+\*---------------------------------------------------------------------------*/
+Build    : 4.0-268bb07d15d8
+Exec     : mergeMeshesAndFields . . . . -addRegion die -overwrite -noFields
+Date     : Jul 20 2024
+Time     : 17:26:04
+Host     : etsmartsim
+PID      : 15234
+CtrlDict : "/mnt/raidStorage/maalik/run/forming/flatRolling/flat12x4_FI41_TK31/test/drawing5/system/controlDict"
+Case     : /mnt/raidStorage/maalik/run/forming/flatRolling/flat12x4_FI41_TK31/test/drawing5
+nProcs   : 1
+SigFpe   : Enabling floating point exception trapping (FOAM_SIGFPE).
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Master:      "." "."  region region0
+mesh to add: "." "."  region die
+
+Create Times
+Reading master mesh from time = 0
+Create mesh
+
+Reading mesh to add for time = 0
+Create mesh
+
+
+    From function void polyMesh::initMesh()
+    in file meshes/polyMesh/polyMeshInitMesh.C at line 81
+    Truncating neighbour list at 14661 for backward compatibility
+patch names: 
+13
+(
+wireUpstream
+wireDownstream
+wireContact
+wireSymmetryY
+wireSymmetryZ
+dieSymmetryY
+dieContact
+dieDownstream
+dieEntrance
+dieExit
+dieOuter
+dieUpstream
+dieSymmetryZ
+)
+
+patch types: 
+13
+(
+patch
+patch
+patch
+symmetryPlane
+symmetryPlane
+symmetryPlane
+patch
+patch
+patch
+patch
+patch
+patch
+symmetryPlane
+)
+
+point zone names: 
+0
+(
+)
+
+face zone names: 
+4
+(
+wireInletFaces
+wireOutletFaces
+wireContact
+dieContact
+)
+
+cell zone names: 
+2
+(
+wire
+die
+)
+
+Copying old patches
+Adding new patches. 
+Updating face zones
+Updating cell zones
+
+    From function void polyMesh::initMesh()
+    in file meshes/polyMesh/polyMeshInitMesh.C at line 81
+    Truncating neighbour list at 22914 for backward compatibility
+Writing combined mesh to 0
+
+    From function void polyMesh::initMesh()
+    in file meshes/polyMesh/polyMeshInitMesh.C at line 81
+    Truncating neighbour list at 14661 for backward compatibility
+
+End

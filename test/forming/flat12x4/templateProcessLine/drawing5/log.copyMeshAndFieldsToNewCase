@@ -1,0 +1,34 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
+\*---------------------------------------------------------------------------*/
+Build    : 4.0-268bb07d15d8
+Exec     : copyMeshAndFieldsToNewCase drawing5 templateCase modifiersDrawing5/passItems
+Date     : Jul 20 2024
+Time     : 17:26:03
+Host     : etsmartsim
+PID      : 14769
+CtrlDict : "/mnt/raidStorage/maalik/run/forming/flatRolling/flat12x4_FI41_TK31/test/system/controlDict"
+Case     : /mnt/raidStorage/maalik/run/forming/flatRolling/flat12x4_FI41_TK31/test
+nProcs   : 1
+SigFpe   : Enabling floating point exception trapping (FOAM_SIGFPE).
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+There are 2 pass items
+
+
+Copying existing mesh for wire
+Copying templateCase to "drawing5/previousPass.wire"
+Copying "drawing5/system/wire/meshDict" to "drawing5/previousPass.wire/system/wire/meshDict"
+Copying "/mnt/raidStorage/maalik/run/forming/flatRolling/flat12x4_FI41_TK31/test/drawing4/0.402/wire" to "drawing5/previousPass.wire/0"
+Removing "drawing5/previousPass.wire/0"
+Copying "drawing5/previousPass.wire/0/wire/polyMesh" to "drawing5/previousPass.wire/constant/wire"
+
+Skipping die
+
+End
+

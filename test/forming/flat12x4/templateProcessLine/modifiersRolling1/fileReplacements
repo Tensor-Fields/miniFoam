@@ -1,0 +1,14 @@
+// --------------------------------*- C++ -*------------------------------------
+// This file is structured as two columes: the first column is the local
+// file to be into the template, and the second column is the location
+// (address relative to the root of the case) in the case where the file
+// should be placed.
+// Lines that begin with "//" are comments. Multi-line comments will not
+// work as this file is parsed by awk and only checks for "//" comments
+// For example, the following line
+//     meshDict system
+// will place meshDict in the case system directory
+// -----------------------------------------------------------------------------
+topRoll.txt .
+bottomRoll.txt .
+mechanicalProperties constant/wire/

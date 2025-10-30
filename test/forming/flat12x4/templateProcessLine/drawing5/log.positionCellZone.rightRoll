@@ -1,0 +1,26 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
+\*---------------------------------------------------------------------------*/
+Build    : 4.0-268bb07d15d8
+Exec     : positionCellZone -case drawing5 rightRoll rollerContact wireContact (0 0 -1) translationRightRoll.txt 1e-6 1
+Date     : Jul 20 2024
+Time     : 17:26:04
+Host     : etsmartsim
+PID      : 15241
+CtrlDict : "./drawing5/system/controlDict"
+Case     : ./drawing5
+nProcs   : 1
+SigFpe   : Enabling floating point exception trapping (FOAM_SIGFPE).
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+--> FOAM Warning : rightRoll cellZone not found: skipping
+
+End

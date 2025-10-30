@@ -1,0 +1,89 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      binary;
+    class       dictionary;
+    location    "system/die";
+    object      meshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+rollSetup       none;
+
+symmetryType    posYposZ;
+
+dieMeshDict
+{
+    type            bekaertSpecs;
+    inletDiameter   0.02;
+    outletDiameter  0.0166;
+    outerDiameter   0.03;
+    maxCellSize     0.0025;
+    numCellsInCircumferentialDirection 80;
+    rescaleOutputWireDiameter yes;
+    rescaledOutputWireDiameter 0.00825;
+    H               0.025;
+    W               0.045;
+    Con             1;
+    TC              0.001;
+    gamma2          30;
+    BC              0.002;
+    gamma1          10;
+    C_R             0.001;
+    CR_A            45;
+    EB_R            0.008;
+    EB_L            0.008;
+    EC_A            30;
+    EC_L            0.003;
+    RC_A            4.5;
+    RC_L            0.00885;
+    RC_R            0.001;
+    D               0.00825;
+    BL              0.00315;
+    BR_A            15;
+    BR_L            0.001;
+    BR_R            0.001;
+    XC_A            45;
+    XC_L            0.001;
+    XC_R            0.0005;
+}
+
+rollingMillPatchNames
+{
+    wireContactPatchName wireContact;
+    wireUpstreamPatchName wireUpstream;
+    wireDownstreamPatchName wireDownstream;
+    wireBackPatchName wedgeBack;
+    wireFrontPatchName wedgeFront;
+    wireSymmetryYPatchName wireSymmetryY;
+    wireSymmetryZPatchName wireSymmetryZ;
+    dieToWirePatchName dieContact;
+    dieToHousingPatchName dieOuter;
+    dieUpstreamPatchName dieUpstream;
+    dieDownstreamPatchName dieDownstream;
+    dieBackPatchName wedgeBack;
+    dieFrontPatchName wedgeFront;
+    dieSymmetryYPatchName dieSymmetryY;
+    dieSymmetryZPatchName dieSymmetryZ;
+    dieEntranceConePatchName dieEntrance;
+    dieExitConePatchName dieExit;
+    rollerContactPatchName rollerContact;
+    rollerAxisPatchName RollerAxis;
+    rollerBackPatchName RollerBack;
+    rollerFrontPatchName RollerFront;
+    rollerSymmetryYPatchName RollerSymmetryY;
+    rollerSymmetryZPatchName RollerSymmetryZ;
+    rollerToRollerBackPatchName RTRBack;
+    rollerToRollerFrontPatchName RTRFront;
+    rollerToAirPatchName rollerToAir;
+}
+
+
+// ************************************************************************* //

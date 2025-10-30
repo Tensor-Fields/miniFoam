@@ -1,0 +1,106 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
+\*---------------------------------------------------------------------------*/
+Build    : 4.0-268bb07d15d8
+Exec     : remeshAndSmoothWire drawing5 modifiersDrawing5/passItems -case drawing5 -noRemeshWireAndMapFields -doNotUseSubDirectory
+Date     : Jul 20 2024
+Time     : 18:03:29
+Host     : etsmartsim
+PID      : 15298
+CtrlDict : "./drawing5/system/controlDict"
+Case     : ./drawing5
+nProcs   : 1
+SigFpe   : Enabling floating point exception trapping (FOAM_SIGFPE).
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+'doNotUseSubDirectory' option found: ignoring remeshAndSmoothWireInPreviousPass in the passItems dictionary
+
+Reading the mesh and fields from 0.401 in drawing5
+
+Smoothing mesh and fields
+    with bounding box (-0.05 0 0) (0.05 0.00452653121784 0.00452653124329)
+    wireStreamlines
+    wire upstream patch: wireUpstream
+    wire downstream patch: wireDownstream
+    averagingRangeMinX, averagingRangeMaxX: 0.02, 0.03
+There are 1 cells in the field-smoothing range
+Reading wire fields from time: 0.401
+Reading fields
+    Skipping rho_0_0_0
+    Reading cellToRegion
+    Reading epsilonPEq
+    Reading sigmaHyd
+    Reading J
+    Reading materials
+    Skipping rho_0
+    Reading sigmaMax
+    Reading activeYield
+    Reading rho
+        Read old-time rho_0
+        Read old-time rho_0_0
+        Read old-time rho_0_0_0
+        Read old-time rho_0_0_0_0
+    Skipping rho_0_0
+    Reading sigmaY
+    Reading sigmaMid
+    Reading epsilonTrueEq
+    Reading areaInContact_wireContact
+    Reading sigmaCauchyEq
+    Reading sigmaMin
+Reading fields
+    Skipping DU_0_0
+    Reading sigmaMinDir
+    Skipping U_0_0
+    Reading Velocity
+    Reading sigmaMaxDir
+    Reading U
+        Read old-time U_0
+        Read old-time U_0_0
+        Read old-time U_0_0_0
+        Read old-time U_0_0_0_0
+    Skipping U_0
+    Skipping DU_0
+    Reading slaveShearTraction_wireContact
+    Reading slavePressure_wireContact
+    Skipping U_0_0_0
+    Reading sigmaMidDir
+    Reading DU
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+        Read old-time DU_0
+        Read old-time DU_0_0
+        Read old-time DU_0_0_0
+Reading fields
+Reading fields
+    Reading epsilonTrue
+    Reading bEbar
+    Reading sigmaCauchy
+Reading fields
+    Reading F
+    Reading grad(DU)
+
+Smoothing the fields
+
+Writing the fields to time = 0.402
+
+Smoothing the wire mesh
+Writing smoothed wire mesh to time = 0.402
+
+Writing wireProfile.fms to "/mnt/raidStorage/maalik/run/forming/flatRolling/flat12x4_FI41_TK31/test/drawing5"
+
+Found 1008 boundary faces 
+Edges are in the x-y plane
+
+End
+

@@ -1,0 +1,208 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  | For copyright notice see file Copyright         |
+\*---------------------------------------------------------------------------*/
+Build    : 4.0-268bb07d15d8
+Exec     : splitMeshRegionsLastTimeStep -case drawing5
+Date     : Jul 20 2024
+Time     : 18:03:29
+Host     : etsmartsim
+PID      : 15297
+CtrlDict : "./drawing5/system/controlDict"
+Case     : ./drawing5
+nProcs   : 1
+SigFpe   : Enabling floating point exception trapping (FOAM_SIGFPE).
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0.4
+
+Trying to match regions to existing cell zones.
+
+
+Number of regions:2
+
+Writing region per cell file (for manual decomposition) to "./drawing5/0.4/cellToRegion"
+
+Writing region per cell as volScalarField to "./drawing5/0.4/cellToRegion"
+
+Region	Cells
+------	-----
+0	2499
+1	5180
+
+Region	Zone	Name
+------	----	----
+0	0	wire
+1	1	die
+
+Sizes inbetween regions:
+
+Region	Region	Faces
+------	------	-----
+
+Reading volScalarField cellToRegion
+Reading volScalarField epsilonPEq
+Reading volScalarField sigmaHyd
+Reading volScalarField J
+Reading volScalarField materials
+Reading volScalarField rho_0
+Reading volScalarField sigmaMax
+Reading volScalarField activeYield
+Reading volScalarField rho
+Reading volScalarField rho_0_0
+Reading volScalarField sigmaY
+Reading volScalarField sigmaMid
+Reading volScalarField epsilonTrueEq
+Reading volScalarField areaInContact_wireContact
+Reading volScalarField sigmaCauchyEq
+Reading volScalarField sigmaMin
+Reading volVectorField sigmaMinDir
+Reading volVectorField U_0_0
+Reading volVectorField Velocity
+Reading volVectorField sigmaMaxDir
+Reading volVectorField U
+Reading volVectorField U_0
+Reading volVectorField DU_0
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Reading volVectorField slaveShearTraction_wireContact
+Reading volVectorField slavePressure_wireContact
+Reading volVectorField sigmaMidDir
+Reading volVectorField DU
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Symmetry boundary condition with non-orthogonal correction
+Reading volSymmTensorField epsilonTrue
+Reading volSymmTensorField bEbar
+Reading volSymmTensorField sigmaCauchy
+Reading volTensorField F
+Reading volTensorField grad(DU)
+
+
+Adding patches
+
+
+Adding patches
+
+
+Region 0
+-------- 
+Creating mesh for region 0 wire
+
+    From function void polyMesh::initMesh()
+    in file meshes/polyMesh/polyMeshInitMesh.C at line 81
+    Truncating neighbour list at 6993 for backward compatibility
+Deleting empty patches
+Writing new mesh
+Writing addressing to base mesh
+Writing map pointRegionAddressing from region0 points back to base mesh.
+Writing map faceRegionAddressing from region0 faces back to base mesh.
+Writing map cellRegionAddressing from region0 cells back to base mesh.
+Number of new patches: 5
+Writing map boundaryRegionAddressing from region0 faces back to base mesh.
+Mapping fields
+Mapping field rho_0_0_0
+Mapping field cellToRegion
+Mapping field epsilonPEq
+Mapping field sigmaHyd
+Mapping field J
+Mapping field materials
+Mapping field rho_0
+Mapping field sigmaMax
+Mapping field activeYield
+Mapping field rho
+Mapping field rho_0_0
+Mapping field sigmaY
+Mapping field sigmaMid
+Mapping field epsilonTrueEq
+Mapping field areaInContact_wireContact
+Mapping field sigmaCauchyEq
+Mapping field sigmaMin
+Mapping field DU_0_0
+Mapping field sigmaMinDir
+Mapping field U_0_0
+Mapping field Velocity
+Mapping field sigmaMaxDir
+Mapping field U
+Mapping field U_0
+Mapping field DU_0
+Mapping field slaveShearTraction_wireContact
+Mapping field U_0_0_0
+Mapping field slavePressure_wireContact
+Mapping field sigmaMidDir
+Mapping field DU
+Mapping field epsilonTrue
+Mapping field bEbar
+Mapping field sigmaCauchy
+Mapping field F
+Mapping field grad(DU)
+Adding cellZone wire
+Ignoring cellZone die with size zero
+
+Region 1
+-------- 
+Creating mesh for region 1 die
+
+    From function void polyMesh::initMesh()
+    in file meshes/polyMesh/polyMeshInitMesh.C at line 81
+    Truncating neighbour list at 14661 for backward compatibility
+Deleting empty patches
+Writing new mesh
+Writing addressing to base mesh
+Writing map pointRegionAddressing from region1 points back to base mesh.
+Writing map faceRegionAddressing from region1 faces back to base mesh.
+Writing map cellRegionAddressing from region1 cells back to base mesh.
+Number of new patches: 8
+Writing map boundaryRegionAddressing from region1 faces back to base mesh.
+Mapping fields
+Mapping field rho_0_0_0
+Mapping field cellToRegion
+Mapping field epsilonPEq
+Mapping field sigmaHyd
+Mapping field J
+Mapping field materials
+Mapping field rho_0
+Mapping field sigmaMax
+Mapping field activeYield
+Mapping field rho
+Mapping field rho_0_0
+Mapping field sigmaY
+Mapping field sigmaMid
+Mapping field epsilonTrueEq
+Mapping field areaInContact_wireContact
+Mapping field sigmaCauchyEq
+Mapping field sigmaMin
+Mapping field DU_0_0
+Mapping field sigmaMinDir
+Mapping field U_0_0
+Mapping field Velocity
+Mapping field sigmaMaxDir
+Mapping field U
+Mapping field U_0
+Mapping field DU_0
+Mapping field slaveShearTraction_wireContact
+Mapping field U_0_0_0
+Mapping field slavePressure_wireContact
+Mapping field sigmaMidDir
+Mapping field DU
+Mapping field epsilonTrue
+Mapping field bEbar
+Mapping field sigmaCauchy
+Mapping field F
+Mapping field grad(DU)
+Ignoring cellZone wire with size zero
+Adding cellZone die
+End
+

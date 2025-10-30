@@ -1,0 +1,180 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system/die";
+    object      meshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Required: should be set to none for die
+rollSetup       none;
+
+// Optional: specifies the symmetry, which dictates the quadrants of the
+// geometry be meshed
+// Options are none, posY, negY, posZ, negZ and axiSymmetric
+// Defaults to none (mesh entire geoemetry)
+symmetryType    none;
+
+dieMeshDict
+{
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //    Geometry
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // The die geometry should be specified using one of the following methods:
+    // 1. conical (simple) die
+    // 2. bekaertSpecs die
+    // 3. profiledBekaertSpecs due
+    // Optionally; these methods can include the casing
+
+    // Optional: defaults to no
+    // At the end of the simulation, we can optionally rescale the wire diameter
+    // to a given exact value. This can be used to force a given drawn diameter
+    // Note: it does not modify the fields
+    //rescaleOutputWireDiameter no;
+    //rescaledOutputWireDiameter 0.166;
+
+    // 1. conical die
+    type            conical;
+    inletDiameter   0.02;
+    outletDiameter  0.0166;
+    outerDiameter   0.03;
+
+    // Either the dieAngle or axialLength can be specified (checked in this
+    // order)
+    //dieAngle        12;
+    //axialLength     0.02;
+
+    // 2. bekaertSpecs die, or
+    // 3/ profiledBekaertSpecs die (must also specify bearingProfile
+    // Parameters are described in bekaertSpecs excel sheet
+    // type            bekaertSpecs;
+    // //type            profiledBekaertSpecs;
+    // //bearingProfile "bearingProfile.txt";
+    // H               0.006;
+    // W               0.009;
+    // Con             1;
+    // TC              0.0005;
+    // gamma2          45;
+    // BC              0.0005;
+    // gamma1          45;
+    // C_R             0.0002;
+    // CR_A            45;
+    // EB_R            0.0022;
+    // EB_L            0.002;
+    // EC_A            30;
+    // EC_L            0.001;
+    // RC_A            10;
+    // RC_L            0.001325;
+    // RC_R            0.0005;
+    // D               0.001;
+    // BL              0.000175;
+    // BR_A            15;
+    // BR_L            0.0005;
+    // BR_R            0.0005;
+    // XC_A            45;
+    // XC_L            0.001;
+    // XC_R            0.0001;
+
+    // Optional: if symmetryType is axiSymmetric, then a wedgeAngle can be set
+    // Defaults to 2.5 degrees
+    // Note: if a wireMeshDict exists with a wedgeAngle then the angle here
+    // takes precedence
+    // Note: this is the total wedge angle i.e. the geometry is extruded
+    // in the positive and negative directions by half of this amount
+    // wedgeAngle 2.5;
+
+    // Optional: include die casing
+    // casing          no;
+    // casingDict
+    // {
+    //     maxCellSize     0.001;
+    //     contactCellSize 0.00025;
+    //     minContactCellSize 0.000125;
+    //     nAdditionalLayers 0;
+    //     minNumFacesBetweenFeatures 1;
+    //     type            bekaertSpecs;
+    //     height          0.025;
+    //     diameter        0.025;
+    //     T_C             0.0005;
+    //     B_C             0.0005;
+    //     N_X             0.01;
+    //     N_P             0.01;
+    //     EN_OD           0.016;
+    //     EN_ID           0.009;
+    //     EX_ID           0.006;
+    //     EX_OD           0.0075;
+    // }
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //    Mesh
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Mandatory: max cell size; this allows the cell size in the interior of
+    // the wire to be set larger than at the contact surface
+    // For a conical die, this is the radial cell size
+    maxCellSize     0.001;
+
+    // Optional: cell size in the radial direction at the wire contact patch
+    // If not found, it is calculated based on the geometryTolerance below
+    //contactCellSize 0.001;
+
+    // Optional: specify number of cells in circumferential direction. If not
+    // given then the geometryTolerance is used to determine the resolution
+    numCellsInCircumferentialDirection 80;
+
+    // Optional: used to determine the circumferential resolution, if
+    // numCellsInCircumferentialDirection is not specified
+    // Defaults to 1e-04
+    // geometryTolerance 1e-04;
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //    Advanced mesh controls
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Optional: number of layers of cells of the same size between jumps in
+    // mesh density. Using greater than 0 allows for a smoother transition in
+    // mesh grading in the wire radial direction
+    // If maxCellSize and minContactCellSize are the same then this does nothing
+    // Defaults to 0
+    // nAdditionalLayers 2;
+
+    // Optional: min number of faces in a patch. This setting seems to be for
+    // controlling small patches, which is not an issue for the wire
+    // It is not clear if it is used at all by the wire
+    // Defaults to 2
+    // minNumFacesBetweenFeatures 2;
+}
+
+// Optional: split the boundary layer of cells at the contact patch into layers
+// boundaryLayers
+// {
+//     nLayers         2;
+//     thicknessRatio  1.1;
+//     optimiseLayer   1;
+//     allowDiscontinuity 1;
+//     untangleLayer   1;
+//     optimisationParameters
+//     {
+//         nSmoothNormals  10;
+//         maxNumIterations 5;
+//         featureSizeFactor 0.4;
+//         recalculateNormals 1;
+//         relThicknessTol 0.1;
+//     }
+//     symmetryPlaneLayerTopology 1;
+// }
+
+// Names of patches
+#include "${FOAM_CASE}/system/rollingMillPatchNames"
+
+// ************************************************************************* //

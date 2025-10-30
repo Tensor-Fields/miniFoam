@@ -1,0 +1,20 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant/die/polyMesh";
+    object      meshMetaDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+extraPatches    2 ( defaultFaces_1 defaultFaces );
+
+boundaryLayerAtPatches 16 ( dieDownstream_10 dieContact_7 bottomEmptyFaces dieContact_4 dieExit_9 dieUpstream_13 dieContact_5 dieEntrance_2 dieContact_6 dieExit_8 dieEntrance_0 dieUpstream_14 dieContact_3 dieDownstream_11 dieOuter_12 dieEntrance_1 );
