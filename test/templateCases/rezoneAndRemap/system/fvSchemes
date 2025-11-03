@@ -18,6 +18,7 @@ ddtSchemes
 {
     default         none;
     ddt(p)          DDT;
+    ddt(p*)          DDT;
     //default         CrankNicolson 0.9;
 }
 
@@ -26,6 +27,7 @@ gradSchemes
     default         none;
     //default         GRAD_1 GRAD_2;
     grad(p)         GRAD_1 GRAD_2;
+    grad(p*)         GRAD_1 GRAD_2;
 }
 
 divSchemes
@@ -48,6 +50,10 @@ divSchemes
     div(meshPhi,p)        MESH_PHI;
     div((-1*meshPhi),p)   MESH_PHI; // Flip flux sign
     div((1*meshPhi),p)    MESH_PHI; // Flip flux sign
+
+    div(meshPhi,p*)        MESH_PHI;
+    div((-1*meshPhi),p*)   MESH_PHI; // Flip flux sign
+    div((1*meshPhi),p*)    MESH_PHI; // Flip flux sign
 }
 
 laplacianSchemes

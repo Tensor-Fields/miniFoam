@@ -24,7 +24,7 @@ solvers
         relTol           0;
     };
 
-    "p|U"
+    "p|U|p*"
     {
         //solver           BiCGStab;
         solver           PBiCG;

@@ -70,7 +70,11 @@ class err
         /// Members
         void calcErr();
 
-        void calcErr_wrt_same_mesh(const word& sourceCase);
+        void calcErr_wrt_same_mesh
+        (
+            const word& sourceCase,
+            const fileName& sourceTime
+        );
 
         void report();
 

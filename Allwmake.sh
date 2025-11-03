@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # minifoam library
+wmakeLnInclude -f src
 wmake libso src
 
 echo
