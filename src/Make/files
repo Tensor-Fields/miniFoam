@@ -4,4 +4,7 @@ meshDance/meshDance.C
 
 err/err.C
 
+/* Boundary Conditions */
+boundaryConditions/tractionVelocity/tractionVelocityFvPatchVectorField.C
+
 LIB=$(FOAM_USER_LIBBIN)/libminiFoam
