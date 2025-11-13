@@ -25,21 +25,21 @@ scripts=/home/maalik/foam/maalik-4.0/run/miniFoam/test/forming/BekaertTemplatesA
 
 ## Actually link
 if $force; then
-    ln -rsf $scripts/templateCase $target
-    ln -rsf $scripts/scripts/createProcessLine.sh $target
-    ln -rsf $scripts/scripts/createStudy.sh $target
-    ln -rsf $scripts/scripts/ $target
-    ln -rsf $templateProcessLine $target
+    ln -sf $scripts/templateCase $target
+    ln -sf $scripts/scripts/createProcessLine.sh $target
+    ln -sf $scripts/scripts/createStudy.sh $target
+    ln -sf $scripts/scripts/ $target
+    ln -sf $templateProcessLine $target
 elif $interactive; then
-    ln -rsi $scripts/templateCase $target
-    ln -rsi $scripts/scripts/createProcessLine.sh $target
-    ln -rsi $scripts/scripts/createStudy.sh $target
-    ln -rsi $scripts/scripts/ $target
-    ln -rsi $templateProcessLine $target
+    ln -si $scripts/templateCase $target
+    ln -si $scripts/scripts/createProcessLine.sh $target
+    ln -si $scripts/scripts/createStudy.sh $target
+    ln -si $scripts/scripts/ $target
+    ln -si $templateProcessLine $target
 else
-    ln -rs $scripts/templateCase $target
-    ln -rs $scripts/scripts/createProcessLine.sh $target
-    ln -rs $scripts/scripts/createStudy.sh $target
-    ln -rs $scripts/scripts/ $target
-    ln -rs $templateProcessLine $target
+    ln -s $scripts/templateCase $target
+    ln -s $scripts/scripts/createProcessLine.sh $target
+    ln -s $scripts/scripts/createStudy.sh $target
+    ln -s $scripts/scripts/ $target
+    ln -s $templateProcessLine $target
 fi

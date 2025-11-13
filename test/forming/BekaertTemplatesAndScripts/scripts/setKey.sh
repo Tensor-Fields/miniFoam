@@ -14,14 +14,15 @@ if [[ "$1" == "-h" ]]
 then
     echo \
     "    nCPUs
+    deltaT (0.002 @ templateCase)
     endTime (0.11 @ mesh level 0)
+	writeInterval (10 default)
     wireMeshSize (6e-4 @ mesh level 0)
     wireContactCellSize (6e-4 @ mesh level 0)
     wireLength (0.2 at the baseline level 0 case)
     rollMeshSize (4e-3 @ mesh level 0)
     rollContactCellSize (8e-4 @ mesh level 0)
     contactLength (0.12 @ mesh level 0)
-    deltaT (0.002 @ templateCase)
     frictionCoeff (0.25 @ templateCase)"
     exit 1
 fi
@@ -36,26 +37,16 @@ get_field()
     cat $file | grep $pattern | awk -F" " '{print$2}'
 }
 
-#nCPUs=$1
-#endTime=$2
-#wireMeshSize=$3
-#wireContactCellSize=$4
-#wireLength=$5
-#rollMeshSize=$6
-#rollContactCellSize=$7
-#contactLength=$8
-#deltaT=$9
-#frictionCoeff="${10}"
-
 nCPUs=$(get_field nCPU $file)
+deltaT=$(get_field deltaT $file)
 endTime=$(get_field endTime $file)
+writeInterval=$(get_field writeInterval $file)
 wireMeshSize=$(get_field wireMeshSize $file)
 wireContactCellSize=$(get_field wireContactCellSize $file)
 wireLength=$(get_field wireLength $file)
 rollMeshSize=$(get_field rollMeshSize $file)
 rollContactCellSize=$(get_field rollContactCellSize $file)
 contactLength=$(get_field contactLength $file)
-deltaT=$(get_field deltaT $file)
 frictionCoeff=$(get_field frictionCoeff $file)
 
 find . -name fileModifiers | while read -r file; do \
@@ -84,6 +75,12 @@ find . -name fileModifiers | while read -r file; do \
 
 	sed -i \
 	"s/\(system\/controlDict\/deltaT\).*$/\1 $deltaT\;/g" \
+	$file
+
+	## writeInterval
+
+	sed -i \
+	"s/\(system\/controlDict\/writeInterval\).*$/\1 $writeInterval\;/g" \
 	$file
 
 	## contactLength

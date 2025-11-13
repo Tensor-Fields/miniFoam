@@ -8,6 +8,6 @@ studyName=$2
 cp -r $(readlink -f $referenceCase) $studyName
 
 ## Init scripts
-ln -rsf scripts/setKey.sh $studyName
+ln -sf scripts/setKey.sh $studyName
 
 #ln -rsf drawing5 $studyName

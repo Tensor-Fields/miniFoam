@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## Roadmap: Compare all modifier files, not input.setKey.
+
 ## Global variables
 this="createStudyReadMe.sh"
 ReadMe="ReadMe.md"
@@ -48,13 +50,13 @@ input="input.setKey"
     ## Append differences
     echo >> $ReadMe
     echo Differences: >> $ReadMe
-    echo Column 1: Base"    "Column 2: Difference >> $ReadMe
+    echo Column 1: Difference"    "Column 2: Base >> $ReadMe
 
     find . -mindepth 2 -maxdepth 2 -name $input | \
         while read -r subStudy; do
 	    echo >> $ReadMe
 	    echo $subStudy | xargs dirname | xargs basename >> $ReadMe
-	    diff $input $subStudy \
+	    diff $subStudy $input \
 	        -wybBEZ --suppress-common-lines \
 	        >> $ReadMe
 	done

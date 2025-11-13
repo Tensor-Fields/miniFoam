@@ -44,7 +44,7 @@ wireMeshDict
     // below
 
     // 1. Specify diameter of circular wire
-    //wireDiameter    0.01905;
+    wireDiameter    0.01085;
 
     // 2. DXF file
     //dxfFile     "wireProfile.DXF";
