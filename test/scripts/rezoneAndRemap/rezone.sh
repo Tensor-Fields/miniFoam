@@ -103,3 +103,9 @@ LaplacianSmoothBilletMesh -freePatches \( "front" "back" \) \
     sed -i \
         "/writeInterval/,/;/s/writeInterval\(\ *[1-9\.].*\)\;/writeInterval    $writeInterval\;/gp" \
         $Case/system/controlDict
+
+## Manual for now: Clean timeName dirs
+    ## mkdir rezone_steps
+    ## mv <rezone steps> rezone_steps, except latestTime
+    ## mv oldEndTime oldEndTime_b4Rezone
+    ## mv latestTime oldEndTime

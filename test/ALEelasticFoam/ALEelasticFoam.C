@@ -37,7 +37,14 @@ typedef GeometricField<scalar, fvPatchField, volMesh> volScalarField;
 
 typedef GeometricField<vector, fvPatchField, volMesh> volVectorField;
 
+typedef GeometricField<tensor, fvPatchField, volMesh> volTensorField;
+
+typedef GeometricField<symmTensor, fvPatchField, volMesh> volSymmTensorField;
+
 typedef GeometricField<scalar, fvsPatchField, surfaceMesh> surfaceScalarField;
+
+/// Post-solve system, obtain relaxed primary and also secondary fields
+#include "postSolve.H"
 
 ///
 /// updateMesh()
@@ -137,13 +144,25 @@ void update
 int main(int argc, char* argv[])
 {
     argList::validOptions.insert("res", "value");
-    argList::validOptions.insert("stabilizationFactor", "value");
+    argList::validOptions.insert("stabilisationFactor", "value");
     argList::validOptions.insert("convergenceFactors", "values");
-    argList::validOptions.insert("formulaA", "values");
+    //argList::validOptions.insert("formulaA", "values");
+    argList::validOptions.insert("formula", "<name>");
+    argList::validOptions.insert("formulaA", "");
     argList::validOptions.insert("formulaWave", "");
     argList::validOptions.insert("nIterMax", "value");
-    argList::validOptions.insert("underRelaxV", "value");
+    argList::validOptions.insert("relaxField", "value");
+    argList::validOptions.insert("relaxEq", "value");
     argList::validOptions.insert("Lagrangian", "");
+    argList::validOptions.insert
+        (
+            "stabilisationTerm",
+            "defaults to laplacian-divGrad. Option: divGrad-laplacian "
+        );
+
+    argList::validOptions.insert("explicitWeight", "<weight>");
+    argList::validOptions.insert("vBased", "");
+    argList::validOptions.insert("DBased", "");
 
     argList args
     (
@@ -168,14 +187,25 @@ int main(int argc, char* argv[])
             );
     }
 
-    const scalar& vCoeff = 1;
+    const scalar& fCoeff = 1;
 
-    if (args.optionFound("underRelaxV"))
+    const scalar& eqRelaxCoeff = 1;
+
+    if (args.optionFound("relaxField"))
     {
-        const_cast<scalar&>(vCoeff) =
+        const_cast<scalar&>(fCoeff) =
             readScalar
             (
-                IStringStream(args.options()["underRelaxV"])()
+                IStringStream(args.options()["relaxField"])()
+            );
+    }
+
+    if (args.optionFound("relaxEq"))
+    {
+        const_cast<scalar&>(eqRelaxCoeff) =
+            readScalar
+            (
+                IStringStream(args.options()["relaxEq"])()
             );
     }
 
@@ -309,6 +339,8 @@ int main(int argc, char* argv[])
             symmTensor::zero
         )
     );
+
+    volSymmTensorField sigmaD = sigma;
 
     volSymmTensorField sigmaDot
     (
@@ -475,12 +507,12 @@ int main(int argc, char* argv[])
 
     //while (runTime.loop()) // Only first time step is written into
                              // the endTime directory 
-    scalar stabilizationFactor = 1;
+    scalar stabilisationFactor = 1;
 
-    if (args.optionFound("stabilizationFactor"))
+    if (args.optionFound("stabilisationFactor"))
     {
-        stabilizationFactor =
-            readScalar(IStringStream(args.options()["stabilizationFactor"])());
+        stabilisationFactor =
+            readScalar(IStringStream(args.options()["stabilisationFactor"])());
     }
 
     dimensioned<scalar> convergenceFactor = 2 * muS + lambdaS;
@@ -498,8 +530,16 @@ int main(int argc, char* argv[])
 
     if (args.optionFound("formulaA"))
     {
+        if(!args.optionFound("convergenceFactors"))
+        {
+            FatalErrorIn("ALEelasticFoam.C")
+                << "formulaA goes with convergenceFactors option"
+                << abort(FatalError);
+        }
+
         List<string> convergenceFactors =
-            args.optionReadList<string>("formulaA");
+            //args.optionReadList<string>("formulaA");
+            args.optionReadList<string>("convergenceFactors");
 
         a = readScalar(IStringStream(convergenceFactors[0])());
         b = readScalar(IStringStream(convergenceFactors[1])());
@@ -574,88 +614,68 @@ int main(int argc, char* argv[])
             /// Force V allocation for V0 to be stored
             /*const scalar totalV = */gSum(mesh.V());
 
-            #include "vEq.H"
+            autoPtr<fvMatrix<vector> > vEqPtr;
+            autoPtr<fvMatrix<vector> > DEqPtr;
 
-            Info<< "vEq assembled."
-                << endl;
+            bool vBased = args.optionFound("vBased");
+            bool DBased = args.optionFound("DBased");
 
-            vEq.relax();
- 
-            //vEq.solve();
-
-            solverPerformance = vEq.solve();
-
-            // Update v, suitable in unsteady only
-            //vPrevIter = v;
-
-            // Under-relax and update v suitable for steady
-            //vPrevIter += vCoeff * (v - vPrevIter);
-            v = vPrevIter + vCoeff * (v - vPrevIter);
-            vPrevIter = v;
-
-            // Correct v BC's
-            v.correctBoundaryConditions();
-
-            /// Update copies
-            U.internalField() = v.internalField();
-            U.boundaryField() = v.boundaryField();
-
-            gradV.internalField() = fvc::grad(v)().internalField();
-            gradV.boundaryField() = fvc::grad(v)().boundaryField();
- 
-            /// Update phi
-            phi = rho * linearInterpolate(w - v) & mesh.Sf(); // phi updated; return to
-                                                        // vEq
-            Info<< "Phi corrected."
-                << endl;
- 
-            /// Update D, not Dold (old in time, not iter), trapizoidal
-            /// integration
-            D = Dold + 0.5 * (v + vOld) * runTime.deltaT();
-
-            //D.internalField() = 
-            //    (Dold + 0.5 * (v + vOld) * runTime.deltaT())()
-            //   .internalField();
-
-            //D.boundaryField() =
-            //    (Dold + 0.5 * (v + vOld) * runTime.deltaT())()
-            //    .boundaryField();
-
-            Info<< "D corrected."
-                << endl;
-
-            /// Stress, corrected in a differred manner
-            stress = mu * (fvc::grad(D) + (fvc::grad(D))().T())
-                + lambda * fvc::div(D) * I;
-
-            /// Pour stress to sigma
-            forAll(stress, cellI)
+            if (vBased && DBased)
             {
-                forAll(stress[cellI], cmpt)
-                {
-                    sigma[cellI][0] = stress[cellI][0];
-                    sigma[cellI][1] = stress[cellI][1];
-                    sigma[cellI][2] = stress[cellI][2];
-                    sigma[cellI][3] = stress[cellI][4];
-                    sigma[cellI][4] = stress[cellI][5];
-                    sigma[cellI][5] = stress[cellI][8];
-                }
+                FatalErrorIn("")
+                    << "Choose either '-vBased' or '-DBased'"
+                    << abort(FatalError);
             }
 
-            Info<< "sigma corrected."
+            if (vBased)
+            {
+                #include "vEq.H"
+            }
+            else if (DBased)
+            {
+                #include "DEq.H"
+            }
+            else
+            {
+                notImplemented("Only v-based and D-based models are"
+                " imlemented;\n"
+                "Choose one using '-vBased' or '-DBased'.");
+                 
+            }
+
+            Info<< "Eq assembled."
                 << endl;
 
-            //sigmaDot = fvc::ddt(sigma);
-            // Or
-            sigmaDot = mu * twoSymm(fvc::grad(v));
+            /// Solve and update fileds
+            postSolve
+            (
+                /// Relax equation
+                eqRelaxCoeff, args.optionFound("relaxEq"),
+                /// Relax field
+                fCoeff,
+                vEqPtr,
+                DEqPtr,
+                /// ldu solver
+                solverPerformance,
+                /// Mesh
+                mesh,
+                /// Primary fields
+                v,
+                D,
+                /// Secondary fields
+                gradV,
+                stress,
+                sigma, 
+                sigmaD, 
+                sigmaDot,
+                phi,
+                w,
+                /// Properties
+                rho,
+                mu,
+                lambda
+            );
 
-            // Error: LHS is symmTensor, RHS is Tensor
-            //sigmaDot = mu * (fvc::grad(v) + fvc::grad(v)().T())
-
-            //v.correctBoundaryConditions();
-
-            ///*lduSolverPerformance*/ solverPerformance = DEq.solve();
- 
             if
             (
                 solverPerformance.initialResidual() < max_res_to_break
@@ -677,11 +697,11 @@ int main(int argc, char* argv[])
 
         /// Update Dold
         /// 'Old' in time, not in iteration, so Dold != D.prevIter()
-        Dold = D;
-        vOld = v;
+        //Dold = D;
+        //vOld = v;
 
-        Info<< "Update old fields."
-            << endl;
+        //Info<< "Update old fields."
+        //    << endl;
  
         //
         // Update mesh velocity

@@ -2,8 +2,8 @@ meshes/meshDance/pointGenerator.C
 meshes/meshDance/meshWire.C
 meshes/meshDance/meshDance.C
 
-boundaryConditions/noForceForVelocity/noForceForVelocityFvPatchField.C
-boundaryConditions/tractionVelocity/tractionVelocityFvPatchVectorField.C
+/*boundaryConditions/noForceForVelocity/noForceForVelocityFvPatchField.C*/
+/*boundaryConditions/tractionVelocity/tractionVelocityFvPatchVectorField.C*/
 
 /* Schemes */
 /*finiteVolume/finiteVolume/d2dt2Schemes/integratedD2dt2Scheme/integratedD2dt2Scheme.C*/
@@ -12,6 +12,9 @@ finiteVolume/finiteVolume/d2dt2Schemes/integratedD2dt2Scheme/integratedD2dt2Sche
 err/err.C
 
 /* Boundary Conditions */
-boundaryConditions/tractionVelocity/tractionVelocityFvPatchVectorField.C
+/*boundaryConditions/tractionVelocity/tractionVelocityFvPatchVectorField.C*/
+
+/* FE40 */
+boundaryConditions/tractionDisplacement/tractionDisplacementFvPatchVectorField.C
 
 LIB=$(FOAM_USER_LIBBIN)/libminiFoam

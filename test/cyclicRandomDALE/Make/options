@@ -1,10 +1,11 @@
 EXE_INC = \
     -I$(FOAM_SRC)/finiteVolume/lnInclude \
     -I$(FOAM_SRC)/finiteArea/lnInclude \
-    -I$(FOAM_RUN)/miniFoam/src/lnInclude \
-    -std=c++11
+    -std=c++11 \
+    -I$(FOAM_RUN)/miniFoam/src/lnInclude
 
 EXE_LIBS = \
     -lfiniteVolume \
+    -lfiniteArea \
     -L$(FOAM_USER_LIBBIN) \
     -lminiFoam

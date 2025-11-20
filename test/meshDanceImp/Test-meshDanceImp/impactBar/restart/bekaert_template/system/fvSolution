@@ -26,7 +26,7 @@ solvers
         relTol          0.1;
     }
 
-    "grad.*|bEbar.*|F.*|epsilonP.*|sigma.*|rho.*|activeYield.*|areaInContact.*|DEpsilon.*|U.*|DD.*|D.*|slavePressure.*"
+    "grad.*|bEbar.*|F.*|epsilonP.*|sigma.*|rho.*|activeYield.*|areaInContact.*|DEpsilon.*|U.*|DD.*|D.*|slavePressure.*|.*tmp"
     {
         solver           smoothSolver;
         smoother         GaussSeidel;

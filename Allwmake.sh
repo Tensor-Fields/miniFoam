@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # minifoam library
-wmakeLnInclude -f src
+#wmakeLnInclude -f src
 wmake libso src
+wmake libso src/boundaryConditions
 
 echo
 echo See above for errors, if any.

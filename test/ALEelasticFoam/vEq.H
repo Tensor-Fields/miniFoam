@@ -1,14 +1,3 @@
-            /// DEq
-            //fvVectorMatrix DEq
-            //(
-            //    rho * fvm::d2dt2(D) // D = x - x0, so x replaced by D
-            // == fvm::laplacian(mu, D)
-            //  + fvc::div(sigma)
-            //  - fvc::laplacian(mu, D)
-            //  //+ fvm::laplacian(rho * (mesh.phi() - phi), U)
-            //  + 1/runTime.deltaT() * (fvm::div(phi, D) - fvc::div(phi, D))
-            //);
-    
             ///
             /// vEq
             ///
@@ -77,6 +66,27 @@
             /// Option 1
             ///
 
+            autoPtr<scalar> stabilisationSign(new scalar(1.0));
+
+            Info<< "Stabilisation set to laplacian - divGrad"
+                << '\n';
+
+            if (args.optionFound("stabilisationTerm"))
+            {
+                if (args.options()["stabilisationTerm"] == "divGrad-laplacian")
+                {
+                    stabilisationSign.reset(new scalar(-1.0));
+
+                    Info<< "Stabilisation re-set to divGrad - laplacian"
+                        << '\n';
+                }
+            }
+
+            GeometricField<tensor, fvPatchField, volMesh> gradD
+            (
+                fvc::grad(D)
+            );
+
             autoPtr<fvMatrix<vector> > vEqPtr
             (
                 new fvMatrix<vector>
@@ -92,6 +102,20 @@
                       /// Unsteady Implementation
                         runTime.deltaT() / 2 * fvm::laplacian(convergenceFactor, v)
                       + runTime.deltaT() / 2 * fvc::laplacian(convergenceFactor, v)
+
+                      /// See if this treatment of the terms that analytically
+                      /// cancel out fixes instability; run-time choose of which
+                      /// term to be treated laplacian, and which one div(grad)
+                      + stabilisationSign() * stabilisationFactor
+                      * (
+                            fvc::laplacian(convergenceFactor, D)
+                          - fvc::div
+                            (
+                                convergenceFactor
+                              * fvc::grad(D)() // Not possible
+                              /** gradD*/
+                            )
+                        )
 
                       /// Generalized form, for both steady and unsteady
                       //  pseudoDeltaT / 2 * fvm::laplacian(convergenceFactor, v)
@@ -115,58 +139,139 @@
                 )
             );
 
-            if (args.optionFound("formulaA"))
+            Info<< "vEq set to the default"
+                << '\n';
+
+            if (args.optionFound("formula"))
             {
-                ///
-                /// Option 2
-                ///
+                if (args.options()["formula"] == "formulaWave")
+                {
+                    vEqPtr.reset
+                    (
+                        new fvMatrix<vector>
+                        (
+                            fvm::laplacian(mu, v) == rho * fvm::d2dt2(v)
+                        )
+                    );
+                }
+                else if (args.options()["formula"] == "formulaA")
+                {
+                    ///
+                    /// Option 2
+                    ///
     
-                vEqPtr.reset
-                (
-                    new fvMatrix<vector>
+                    vEqPtr.reset
                     (
-                         fvm::ddt(rho, v) // Actually fvm::ddt(rho * v)
-                      == 
-                         /// This was the initial implementation to allow for av, av0
-                         /// and au0 to be spatially variable if necessary, for now we
-                         /// think of them fixed in space
-                         //fvm::laplacian((a * muS + b * lambdaS), av * v)
-                         fvm::laplacian((a * muS + b * lambdaS) * av, v)
-                       + fvc::div(muS * au0 * fvc::grad(Dold)().T()())
-                       + fvc::div(muS * av * fvc::grad(vPrevIter)().T()())
-                       + fvc::div(muS * av0 * fvc::grad(vOld)().T()())
-                       + fvc::grad(lambdaS * au0 * fvc::div(Dold))
-                       + fvc::laplacian((a * muS + b * lambdaS) * av, vPrevIter)
-                    // + fvc::div((a * muS + b * lambdaS), fvc::grad(av * v))
-                       + fvc::laplacian(muS * av0, vOld)
-                       + fvc::laplacian(muS * av, vPrevIter)
-                       + fvc::laplacian(muS * au0, Dold)
-                    // + fvc::div
-                    //   (
-                    //       muS,
-                    //       fvc::grad(av0 * vOld + av * v + au0 * uOld)
-                    //   )
-                       + fvm::div(phi, v) // Non-linearity
-                    )
-                );
+                        new fvMatrix<vector>
+                        (
+                             fvm::ddt(rho, v) // Actually fvm::ddt(rho * v)
+                          == 
+                             /// This was the initial implementation to allow for av,
+                             /// av0
+                             /// and au0 to be spatially variable if necessary, for
+                             /// now we
+                             /// think of them fixed in space
+                             //fvm::laplacian((a * muS + b * lambdaS), av * v)
+                             fvm::laplacian((a * muS + b * lambdaS) * av, v)
+                           + fvc::div(muS * au0 * fvc::grad(Dold)().T()())
+                           + fvc::div(muS * av * fvc::grad(vPrevIter)().T()())
+                           + fvc::div(muS * av0 * fvc::grad(vOld)().T()())
+                           + fvc::grad(lambdaS * au0 * fvc::div(Dold))
+                           + fvc::laplacian((a * muS + b * lambdaS) * av, vPrevIter)
+                        // + fvc::div((a * muS + b * lambdaS), fvc::grad(av * v))
+                           + fvc::laplacian(muS * av0, vOld)
+                           + fvc::laplacian(muS * av, vPrevIter)
+                           + fvc::laplacian(muS * au0, Dold)
+                        // + fvc::div
+                        //   (
+                        //       muS,
+                        //       fvc::grad(av0 * vOld + av * v + au0 * uOld)
+                        //   )
+                           + fvm::div(phi, v) // Non-linearity
+                        )
+                    );
+                }
+                else if (args.options()["formula"] == "explicitStress")
+                {
+                    vEqPtr.reset
+                    (
+                        new fvMatrix<vector>
+                        (
+                            /// Memory allocation error
+                            //fvc::div(sigma) /*==*/ - fvm::ddt(rho, v)
+
+                            fvc::div(stress) - fvm::ddt(rho, v)
+                        )
+                    );
+
+                    Info<< "vEq re-set to explicitStress formula"
+                        << '\n';
+                }
+                else if (args.options()["formula"] == "weightedIntegral")
+                {
+                    const scalar& s = stabilisationFactor;
+
+                    scalar p = 0;
+
+                    if (args.optionFound("explicitWeight"))
+                    {
+                        p = readScalar
+                            (IStringStream(args.options()["explicitWeight"])());
+                    }
+
+                    //const GeometricField<tensor, fvPatchField, volMesh>& gradV =
+                    //    fvc::grad(v)();
+
+                    const dimensionedScalar& dt = runTime.deltaT();
+
+                    vEqPtr.reset
+                    (
+                        new fvMatrix<vector>
+                        (
+                        //    fvm::ddt(rho, v)
+                        // == (1 - p) * dt * fvm::laplacian(convergenceFactors, v)
+                        //  - (1 - p) * dt 
+                        //  * fvc::laplacian(convergenceFactors - muS, v)
+                        //  + (p    ) * dt * fvc::laplacian(muS, v)
+                        //  + s * stabilisationSign() * dt
+                        //  * (
+                        //        fvc::laplacian(muS, v)
+                        //     -  muS * fvc::div(/*muS, */gradV/*fvc::grad(v)()*/)
+                        //    )
+                        //  + (muS + lambdaS)
+                        //            * fvc::grad(tr(gradV)) * dt
+                            fvm::ddt(rho, v)
+                         ==
+                            fvc::laplacian(mu, D.oldTime())
+                          + (1 - p) * dt * fvm::laplacian(mu, v)
+                          + (s * p) * dt * fvc::laplacian(mu, v.oldTime())
+                          + (1 - s) * p * dt 
+                          * muS * fvc::div(fvc::grad(v.oldTime())())
+                          + (lambdaS + muS) 
+                          * fvc::grad(tr(fvc::grad(D.oldTime() + dt * v.oldTime())))
+                        )
+                    );
+
+                    Info<< "vEq re-set to weightedIntegral formula"
+                        << '\n';
+                }
+                else
+                {
+                    FatalErrorIn("'-formula <model>'")
+                        << " the specified model does not exist"
+                        << endl;
+                }
             }
 
-            if (args.optionFound("formulaWave"))
+            /// Set equations; check for validity to avoid unalloc-mem error
+            if (vEqPtr.valid())
             {
-                vEqPtr.reset
-                (
-                    new fvMatrix<vector>
-                    (
-                        fvm::laplacian(mu, v) == rho * fvm::d2dt2(v)
-                    )
-                );
+                Info<< "vEq selected to be solved"
+                    << endl;
             }
-
-            if (vEqPtr.empty())
+            else
             {
                 FatalErrorIn("")
                     << "vEq not set."
                     << abort(FatalError);
             }
-
-            fvMatrix<vector> vEq = vEqPtr();
