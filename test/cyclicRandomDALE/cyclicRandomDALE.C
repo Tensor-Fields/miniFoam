@@ -87,6 +87,7 @@ int main(int argc, char* argv[])
     argList::validOptions.insert("flipFluxSign", "");
     argList::validOptions.insert("N_iter", "");
     argList::validOptions.insert("phi", "<phase difference for sinCycle>");
+    argList::validOptions.insert("illegalToAdvect", "<names>");
 
     // If you want a physicsModel to be created
     //argList::validOptions.insert("solids4foam", "");
@@ -143,13 +144,21 @@ int main(int argc, char* argv[])
     //    N_iter = (readScalar(IStringStream(args.options()["N_iter"])()));
     //} 
 
+    List<string> illegalToAdvect(0);
+
+    if (args.optionFound("illegalToAdvect"))
+    {
+        illegalToAdvect = args.optionReadList<string>("illegalToAdvect");
+    }
+
     meshDance    myMesh
     (
         runTime, 
 	label(readScalar(IStringStream(args.options()["maxIter"])())),
         fixedPatchNames,
-	args.optionFound("flipFluxSign")
-	//N_iter // 0 means dynamic calculation
+	args.optionFound("flipFluxSign"),
+	0,//N_iter // 0 means dynamic calculation
+        illegalToAdvect
     );
 
     /// Access the underlying fvMesh

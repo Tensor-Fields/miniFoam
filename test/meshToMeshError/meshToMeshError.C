@@ -1,7 +1,28 @@
 /**
- * Calculate error at cell centers, and optinoally random ponits of a given mesh
+ * Calculate error at cell centers, and optionally random ponits of a given mesh
  * compared to a reference mesh 
  *
+ * Updated usage:
+ * readlink -f <source> | xargs dirname | xargs meshToMeshError <options> \
+ *     -sourceAbsolutePath
+ *
+ * Alternative usage:
+ * meshToMeshError <options> -sourceCase <sourceCaseName>
+ *
+ * Compares all dirs of the targetDir with the first available timeDir in
+ * <source>.
+ * In the alternative usage, sourceAbsolutePath is automatically extracted.
+ *
+ * Old \note:
+ * We could have used `fileName::path()`, to use one option only:
+ * `-sourceCase ...`
+ * instead of:
+ * `-sourceCase ... -sourceAbsolutePath ...`.
+ * However, in that case, if we pass `-sourceCase foo/bar/`,
+ * `path()` fails to output the path `foo/`, instead it
+ * returns `foo/bar/`, unless user be careful to not include the last slash.
+ *
+ * Old Description:
  * The reference mesh and field(s) is read from `meshSource` subdirectory inside
  * time directories, while the final (target) mesh and fields whose error is to
  * be calculated compared to the former are simply inside time directories,
@@ -52,7 +73,8 @@ int main (int argc, char* argv[])
     argList::validOptions.insert("randomPoints","No. of random points");
 
     // Source case
-    argList::validOptions.insert("sourceCase","dir");
+    argList::validOptions.insert("sourceCase","caseName");
+    argList::validOptions.insert("sourceAbsolutePath","dir");
 
     // Whether the reference is the correct answer on meshTarget or the
     // approximate answer on meshSource
@@ -69,6 +91,9 @@ int main (int argc, char* argv[])
 
     argList::validOptions.insert("noPrescribedFields","");
 
+    argList::validOptions.insert("latestTargetTime", "");
+    argList::validOptions.insert("latestSourceTime", "");
+
     argList args(argc, argv);
 
     Time runTime
@@ -78,6 +103,61 @@ int main (int argc, char* argv[])
         args.caseName()
     );
 
+    /// Init same as runTime. Copy is not implemented.
+    autoPtr<Time> runTimeSourcePtr /*runTime;*/
+    (
+        new Time
+        (
+            "controlDict",
+            args.rootPath(),
+            args.caseName()
+        )
+    );
+
+    if
+    (
+        args.optionFound("sourceAbsolutePath")
+     && args.optionFound("sourceCase")
+    )
+    {
+        runTimeSourcePtr.reset
+        (
+            new Time
+            (
+                word("controlDict"),
+                fileName(args.options()["sourceAbsolutePath"]),
+                fileName(args.options()["sourceCase"])
+            )
+        );
+    }
+    else if
+    (
+        !args.optionFound("sourceAbsolutePath")
+     && args.optionFound("sourceCase")
+    )
+    {
+        fileName sourceCase(args.options()["sourceCase"]);
+
+        runTimeSourcePtr.reset
+        (
+            new Time
+            (
+                word("controlDict"),
+                sourceCase.path(),
+                fileName(sourceCase.name())
+            )
+        );
+    }
+    else if
+    (
+        args.optionFound("sourceAbsolutePath")
+     && !args.optionFound("sourceCase")
+    )
+    {
+        FatalErrorIn("")
+            << "-sourceAbsolutePath should go with -sourceCase"
+            << abort(FatalError);
+    }
 
     /// meshSource
     fvMesh meshSource
@@ -85,8 +165,7 @@ int main (int argc, char* argv[])
         IOobject
         (
             polyMesh::defaultRegion,
-            args.options()["sourceCase"],
-            runTime,
+            runTimeSourcePtr(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
@@ -118,10 +197,30 @@ int main (int argc, char* argv[])
     /// Workflow: 
     ///  - We set the target solution by setFields, algebraicSetFields, etc;  
 
+    /// Target times
     instantList times = runTime.times();
+    /// Source times
+    instantList sourceTimes = runTimeSourcePtr().times();
+    
+    bool latestTargetTime = args.optionFound("latestTargetTime");
+    bool latestSourceTime = args.optionFound("latestSourceTime");
 
-    /// Evaluate the error for all times, skip constant and startTime
-    for (label timeI = 2; timeI < times.size(); ++timeI)
+    label targetStartTimeIndex = 2;
+
+    if (latestTargetTime)
+    {
+        targetStartTimeIndex = times.size() - 1;
+    }
+
+    label sourceTimeIndex = 0;
+
+    if (latestSourceTime)
+    {
+        sourceTimeIndex = sourceTimes.size() - 1;
+    }
+
+    /// Evaluate the error for all target times, skip constant and startTime
+    for (label timeI = targetStartTimeIndex; timeI < times.size(); ++timeI)
     {
         /// Update runTime
         runTime.setTime(times[timeI], timeI);
@@ -151,7 +250,11 @@ int main (int argc, char* argv[])
 
         //scalarFieldError.calcErr();
         scalarFieldError
-        .calcErr_wrt_same_mesh(args.options()["sourceCase"]);
+        .calcErr_wrt_same_mesh
+        (
+            args.options()["sourceCase"],
+            sourceTimes[sourceTimeIndex].name()
+        );
 
         Info<< "meshToMeshError: Error calculated"
             << endl;

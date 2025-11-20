@@ -1,0 +1,86 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM Extend Project: Open Source CFD        |
+|  \\    /   O peration     | Version:  1.6-ext                               |
+|   \\  /    A nd           | Web:      www.extend-project.de                 |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// solids4foam library needs to be loaded for making boundary conditions like
+// solidTraction, etc.
+// That needs Libs including the necessary definitions to be loaded.
+// A guidline is loading the libraries linked to solids4foam driver.
+// Also trial and error showed a few more warnings indicating which other libs
+// to be loaded, e.g., finiteArea.
+
+libs 9
+(
+    "libfiniteVolume.so"
+    "libincompressibleTransportModels.so"
+    "libdynamicFvMesh.so"
+    "libdynamicMesh.so"
+    "libmeshTools.so"
+    "libtopoChangerFvMesh.so"
+    "libfiniteArea.so"
+    // SUPER IMPORTANT !
+    // The order of the lines below
+    "libblockCoupledSolids4FoamTools.so"
+    "libsolids4FoamModels.so"
+);
+
+application     solids4Foam;
+
+//startFrom       startTime;
+startFrom       latestTime;
+
+startTime       0;
+
+writeControl    timeStep;
+
+// s4f / bekaert solver
+deltaT          80e-9;
+endTime         80e-6;
+writeInterval   250;
+stopAt          endTime;
+
+// Smoothing time control
+//deltaT          1;
+//endTime         100;
+//writeInterval   100;
+//stopAt          endTime;
+//stopAt          writeNow;
+
+cycleWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression uncompressed;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable no;
+
+functions
+{
+//    force1
+//    {
+//        type          solidForces;
+//        historyPatch  billetContact;
+//        stressName    sigma;
+//    }
+}
+
+// ************************************************************************* //

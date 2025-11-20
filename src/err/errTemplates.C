@@ -899,7 +899,11 @@ void Foam::err<Type>::calcErr()
 }
 
 template<class Type>
-void Foam::err<Type>::calcErr_wrt_same_mesh(const word& sourceCase)
+void Foam::err<Type>::calcErr_wrt_same_mesh
+(
+    const word& sourceCase,
+    const fileName& sourceTime
+)
 {
     ///
     /// Function body actually begins
@@ -945,7 +949,7 @@ void Foam::err<Type>::calcErr_wrt_same_mesh(const word& sourceCase)
         (
             fieldTarget.name(),
             meshSource_.instance(),
-            "0",
+            sourceTime,
             meshSource_,
             IOobject::MUST_READ,
             IOobject::NO_WRITE

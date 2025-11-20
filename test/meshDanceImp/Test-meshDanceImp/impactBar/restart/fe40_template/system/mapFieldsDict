@@ -1,0 +1,21 @@
+FoamFile
+{
+    format ascii;
+    version 2.0;
+    class dictionary;
+    object mapFieldsDict;
+}
+
+patchMap
+(
+    billetContact  billetRight
+    billetContact  billetContact
+);
+
+cuttingPatches
+(
+    ///*(billetContact */ billetRight/*)*/
+    ///*(billetContact */ billetContact/*)*/
+);
+
+
