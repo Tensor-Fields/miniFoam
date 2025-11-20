@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "meshDance.C": "cpp",
+        "meshDanceTemplates.C": "cpp"
+    }
+}
