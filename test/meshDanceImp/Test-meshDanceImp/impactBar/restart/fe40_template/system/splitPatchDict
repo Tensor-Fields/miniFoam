@@ -1,0 +1,11 @@
+FoamFile
+{
+    class dictionary;
+    object splitPatchDict;
+    version 2.0;
+    format ascii;
+}
+
+patchToSplitName billetContact;
+newPatchName billetRight;
+boundBoxes ( (.032399 -10 -10) (.032401 .0032001 10));

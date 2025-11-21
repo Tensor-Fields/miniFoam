@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # minifoam library
+#wmakeLnInclude -f src
 wmake libso src
+wmake libso src/boundaryConditions
 
 echo
 echo See above for errors, if any.
@@ -17,6 +19,7 @@ wmake test/cyclicRandomDALE
 wmake test/meshToMeshError
 wmake test/meshDanceImp
 wmake test/LaplacianSmoothBilletMesh/
+wmake test/ALEelasticFoam
 
 echo
 echo See above for errors, if any.

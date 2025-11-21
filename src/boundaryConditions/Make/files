@@ -1,0 +1,10 @@
+/* Boundary Conditions */
+tractionVelocity/tractionVelocityFvPatchVectorField.C
+
+/* FE40 */
+/*tractionDisplacement/tractionDisplacementFvPatchVectorField.C*/
+
+/* solids4Foam */
+solids4FoamFixedDisplacement/solids4FoamFixedDisplacementFvPatchVectorField.C
+
+LIB=$(FOAM_USER_LIBBIN)/libminiFoamBCs
