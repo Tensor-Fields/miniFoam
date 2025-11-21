@@ -9,6 +9,10 @@ distortion;
 - Billet mesh refined one level to see if the skewed corner of the billet
 turns up smoother.
 
+### Results  
+
+The skewed corner is still a problem.
+
 ## bekaert_12  
 
 - The problem in *bekaert_11* is solved in the implementation.
