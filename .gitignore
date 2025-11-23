@@ -26,3 +26,16 @@ test/**/bin/*
 
 # large directories (and obviously their content)
 test/myBekaert-v2.0
+
+# directories with 'log.' or '.log' in their start or end
+test/**/log.*
+test/**/*.log
+test/**/log
+
+src/**/log.*
+src/**/*.log
+src/**/log
+
+# directories with 'log.' or '.log' in their start or end
+test/**/lnInclude
+src/**/lnInclude
