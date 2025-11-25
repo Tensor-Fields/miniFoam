@@ -45,7 +45,7 @@ is()
         echo "
 Usage:
 
-run.sh <foam> <stopAt> <endTime> <template> <caseName> <restart> <options>
+run.sh <foam> <stopAt> <endTime> <template> <caseName> <restart> <meshGeneratorScript> <options>
 
 Important:
 Order matters; args first, options next.
@@ -57,10 +57,12 @@ Args:
 <endTime>:  endTime value in seconds
 <template>: Template directory which will be copied as a new case.
 <caseName>: Name of the newly created case
-<restart>: "true" for restart, "false" for no restart
+<restart>: "true" for restart, "false" for no restartnCores
+<meshGeneratorScript>: Self-explanatory!
 
 Options:
 -h: Print help
+-np <nCores>, works with bekaert solver only
 "
         exit 1
     fi
@@ -79,6 +81,8 @@ Options:
     template="$(is $4)"
     caseName="$(is $5)"
     Restart="$(is $6)"
+    meshGeneratorScript="$(is $7)"
+    nCores="$(is $9)"
 
 ## Read input file
 # ...
@@ -137,8 +141,14 @@ fi
     ### fi
 
     # Create the mesh
-    m4 $Case/system/blockMeshDict.cylinder.m4 > $Case/constant/polyMesh/blockMeshDict
-    blockMesh -case $Case > $Case/log.blockMesh
+
+	## Old mesh generator
+
+    #m4 $Case/system/blockMeshDict.cylinder.m4 > $Case/constant/polyMesh/blockMeshDict
+    #blockMesh -case $Case > $Case/log.blockMesh
+
+	## New mesh generator
+	. $meshGeneratorScript $Case
     
     # Set the initial conditions
     if ! cp $Case/0.orig $Case/0 -r; then
@@ -202,11 +212,29 @@ fi
         sed -i "/stopAt/,/\;/s/stopAt.*/stopAt    writeNow\;/g" $Case/system/controlDict
 
         if [[ $foam == bekaert ]]; then
-            if ! plasticNonLinSolidFoam -case $Case > $Case/log.after_restart; then
-                echo Error
-                echo plasticNonLinSolidFoam failed to restart.
-                exit 1
-            fi
+
+            if [[ "${@}" =~ "-n" ]]; then
+			    if ! decomposePar -force -case $Case > $Case/log.decomposePar;
+				then
+                    echo Error
+				    echo decomposePar failed.
+					exit 1
+				fi
+
+				if ! mpirun -np $nCores plasticNonLinSolidFoam \
+				    -case $Case -parallel \
+				    > $Case/log.after_restart; then
+                    echo Error
+				    echo mpirun failed.
+					exit 1
+				fi
+            else
+                if ! plasticNonLinSolidFoam -case $Case > $Case/log.after_restart; then
+                    echo Error
+                    echo plasticNonLinSolidFoam failed to restart.
+                    exit 1
+                fi
+			fi
         elif [[ $foam == s4f ]]; then
             if ! solids4Foam -case $Case > $Case/log.after_restart; then
                 echo Error

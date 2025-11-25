@@ -38,6 +38,15 @@ Usage:
 
 ## Definitions
 
+	## latestTime
+	latestTime()
+	{
+	    ls -1 $1 | \
+		    grep -E \
+			'^[-]?[0-9]+[.]?[0-9]*$|[-]?[0-9]+[.]?[0-9]*[eE]+[+-]?[0-9]+$' | \
+            sort -g | tail -1
+	}
+
     ## Get keyword values, filtering comment lines, empty lines, and semicolon
     get_keywords()
     {
@@ -80,8 +89,10 @@ Usage:
             ## Get the latestTime
             #times=$(ls -1v $Case | grep -E '^[0-9]+(\.[0-9].*+)?$')
             
-            latestTime=$(ls -1v $Case | grep -E \
-            '^[0-9]+([eE][-+]?[0-9]+)?(\.[0-9]+)?$' | tail -n1)
+            #latestTime=$(ls -1v $Case | grep -E \
+            #'^[0-9]+([eE][-+]?[0-9]+)?(\.[0-9]+)?$' | tail -n1)
+
+			latestTime=$(latestTime "$Case")
 
         newEndTime=$(($latesTime + $maxIter))
         #sed -i \
@@ -181,15 +192,13 @@ if [[ $mode == "rezone" ]]; then
         -case $Case \
         -patchWithSlidingPoints "abd" \
         -noFunctionObjects \
-        -noWedge \
-        -emptyDir 2 \
         > log.LaplacianSmoothBilletMesh; then
         ## Following go together
         #-noWedge
         #-emptyDir <dir>
         echo
         echo Error
-        echo LaplacianSmoothBilletMesh not found.
+        echo LaplacianSmoothBilletMesh failed.
         echo
         exit 1;
     fi
@@ -206,14 +215,30 @@ if [[ $mode == "rezone" ]]; then
     fi
     
     mkdir $Case/source
+
+	touch $Case/source/case.foam
+
+	## reconstructParMesh creates 0/polyMesh. We must replace constant/polyMesh
+	## with this for the workflow to work.
+    if [ -d $Case/0/polyMesh ]; then
+
+	    cp -r "$Case/0/polyMesh/"* $Case/constant/polyMesh/
+
+		rm -r $Case/0/polyMesh
+	fi
+
     cp -r $Case/0 $Case/constant $Case/system $Case/source
     
     ## Get the latest time
-    latestTime=$(ls -1v $Case | grep -E \
-    '^[0-9]+([eE][-+]?[0-9]+)?(\.[0-9]+)?$' | tail -n1)
+    #latestTime=$(ls -1v $Case | grep -E \
+    #'^[0-9]+([eE][-+]?[0-9]+)?(\.[0-9]+)?$' | tail -n1)
+
+    latestTime=$(latestTime "$Case")
     
     ## Overwrite source mesh with smooth mesh
-    cp "$Case/$latestTime/polyMesh"/* $Case/source/constant/polyMesh/
+
+		## Now overwrite
+        cp "$Case/$latestTime/polyMesh"/points $Case/source/constant/polyMesh/
     
     ## The last time is a smooth mesh without fields, remove it; source is aware of
     ## that
@@ -253,49 +278,62 @@ elif [[ $mode == "remap" ]]; then
     # not appear as a fixedPatchName. Therefore, all patches except 'back' are
     # named as options.
     if ! cyclicRandomDALE \
-             -nY 1 \
-             -M 1 \
-             -alpha .125 \
-             -randomDirs \( "1" "1" "0" \) \
-             -fixedPatchNames \
-                 \( \
-                       "billetTop" \
-                       "billetContact" \
-                       "dieContact" \
-                       "billetSide" \
-                       "dieBottom" \
-                 \)           \
-             -notFixedPatchNames \( "front" \)  \
-             -writeIntermediateMeshes \
-             -case $Case \
-      	     -seed $(echo $RANDOM) \
-    	     -targetMesh "source" \
-    	     -maxIter 1 \
-             -flipFluxSign \
-             > $Case/log.cyclicRandomDALE #\ 
-      	     #-fixedTimeStep # Unnecessary, time will not be adjusted
-      	     # when controlDict.adjustTimestep is commented.
+        -nY 1 \
+        -M 1 \
+        -alpha .125 \
+        -randomDirs \( "1" "1" "0" \) \
+        -fixedPatchNames \
+        \( \
+            "billetContact" \
+            "dieContact" \
+            "loading" \
+	        "symmPlane"  \
+        \) \
+        -notFixedPatchNames \
+	    \( \
+	        "front" \
+	    \) \
+        -writeIntermediateMeshes \
+        -case $Case \
+        -seed $(echo $RANDOM) \
+        -targetMesh "source" \
+        -maxIter 1 \
+        -flipFluxSign \
+        > $Case/log.cyclicRandomDALE #\ 
+        #-fixedTimeStep # Unnecessary, time will not be adjusted
+        # when controlDict.adjustTimestep is commented.
 
-             #-illegalToAdvect \
-             #\( \
-             #     "grad(D)"                      \
-             #     "grad(DD)"                     \
-             #     "pointVelocity"                \
-             #     "grad(DU)"                     \
-             #     "U"                            \
-             #     "Velocity"                     \
-             #     "F"                            \
-             #     "sigmaCaucy"                   \
-             #     "sigmaCauchy"                  \
-             #     "rho"                          \
-             #     "globalToLocalFaceZonePointMap" \
-             #\) \
+	    ## Impact bar
+        #"billetTop" \
+        #"billetContact" \
+        #"dieContact" \
+        #"billetSide" \
+        #"dieBottom" \
+
+        #-illegalToAdvect \
+        #\( \
+        #     "grad(D)"                      \
+        #     "grad(DD)"                     \
+        #     "pointVelocity"                \
+        #     "grad(DU)"                     \
+        #     "U"                            \
+        #     "Velocity"                     \
+        #     "F"                            \
+        #     "sigmaCaucy"                   \
+        #     "sigmaCauchy"                  \
+        #     "rho"                          \
+        #     "globalToLocalFaceZonePointMap" \
+        #\) \
     then
         echo
         echo Error in $this
         echo cyclicRandomDALE failed.
-        latestTime=$(ls -1v $Case | grep -E \
-        '^[0-9]+([eE][-+]?[0-9]+)?(\.[0-9]+)?$' | tail -n1)
+		echo
+        #latestTime=$(ls -1v $Case | grep -E \
+        #'^[0-9]+([eE][-+]?[0-9]+)?(\.[0-9]+)?$' | tail -n1)
+        latestTime=$(latestTime "$Case")
+
+		echo latestTime is $latestTime
         echo Follow instructions below:
         echo - Remove timesteps created,
         echo - Rename smoothed to a number '>' latestTime,

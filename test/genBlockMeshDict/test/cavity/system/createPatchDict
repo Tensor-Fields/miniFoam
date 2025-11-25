@@ -43,7 +43,7 @@ patchInfo
         name    billetContact;
         dictionary
         {
-            type    symmetryPlane;
+            type    patch;
         }
         constructFrom patches;
         patches ("auto8");

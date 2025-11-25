@@ -47,8 +47,8 @@ define(ml, 24) // number of cells in axial direction
 define(mr, 24) // number of cells in radial direction
 
 /// Die
-//define(mr2, 24)
-define(mr2, 1)
+define(mr2, 48)
+//define(mr2, 1)
 
 // start of blockMeshDict
 

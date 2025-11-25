@@ -73,19 +73,19 @@ boundaryField
             }
         }
 
-        frictionContactModel frictionless;
+        //frictionContactModel frictionless;
 
-        //frictionContactModel standardPenalty;
-        //standardPenaltyFrictionModelDict
-        //{
-        //    relaxationFactor 0.02;
-        //    penaltyScale 2.3;
-        //    frictionLaw     coulomb;
-        //    frictionLawDict
-        //    {
-        //        frictionCoeff   0.5;
-        //    }
-        //}
+        frictionContactModel standardPenalty;
+        standardPenaltyFrictionModelDict
+        {
+            relaxationFactor 0.02;
+            penaltyScale 2.3;
+            frictionLaw     coulomb;
+            frictionLawDict
+            {
+                frictionCoeff   0.5;
+            }
+        }
 
         useNewPointDistanceMethod false;
 
