@@ -1,0 +1,71 @@
+FoamFile
+{
+    class    dictionary;
+    object   createPatchDict;
+    format   ascii;
+    version  2.0;
+}
+
+pointSync  true;
+patchInfo
+(
+    {
+        name    back;
+        dictionary
+        {
+            type    wedge;
+        }
+        constructFrom patches;
+        patches ("auto1|auto5");
+    }
+
+    {
+        name    front;
+        dictionary
+        {
+            type    wedge;
+        }
+        constructFrom patches;
+        patches ("auto2|auto6");
+    } 
+
+    {
+        name    symmPlane;
+        dictionary
+        {
+            type    symmetryPlane;
+        }
+        constructFrom patches;
+        patches ("auto7");
+    }
+
+    {
+        name    billetContact;
+        dictionary
+        {
+            type    patch;
+        }
+        constructFrom patches;
+        patches ("auto8");
+    }
+
+    {
+        name    dieContact;
+        dictionary
+        {
+            type    patch;
+        }
+        constructFrom patches;
+        patches ("auto0|auto3");
+    }
+
+    {
+        name    loading;
+        dictionary
+        {
+            type    patch;
+        }
+        constructFrom patches;
+        patches ("auto4");
+    }
+);

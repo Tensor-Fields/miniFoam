@@ -1,0 +1,32 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| solids4foam: solid mechanics and fluid-solid interaction simulations        |
+| Version:     v2.0                                                           |
+| Web:         https://solids4foam.github.io                                  |
+| Disclaimer:  This offering is not approved or endorsed by OpenCFD Limited,  |
+|              producer and distributor of the OpenFOAM software via          |
+|              www.openfoam.com, and owner of the OPENFOAM® and OpenCFD®      |
+|              trade marks.                                                   |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    note        "";
+    location    "system";
+    object      checkContactDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+masterZoneName            dieContactFaceZone;
+slaveZoneName             billetContactFaceZone;
+
+//quickReject               nSquared;
+//quickReject               distance3D;
+//quickReject               AABB;
+quickReject               bbOctree;
+
+slaveCellZoneName         billet;
+slaveTranslation          (-0.009 0 0);
+
+// ************************************************************************* //
