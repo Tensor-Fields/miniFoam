@@ -52,12 +52,12 @@ Order matters; args first, options next.
 
 Args:
 
-<foam>:     s4f or bekaert
+<foam>:     s4f, bekaert, or form
 <stopAt>:   endTime or writeNow
 <endTime>:  endTime value in seconds
 <template>: Template directory which will be copied as a new case.
 <caseName>: Name of the newly created case
-<restart>: "true" for restart, "false" for no restartnCores
+<restart>: "true" for restart, "false" for no restart
 <meshGeneratorScript>: Self-explanatory!
 
 Options:
@@ -142,13 +142,13 @@ fi
 
     # Create the mesh
 
-	## Old mesh generator
+    ## Old mesh generator
 
     #m4 $Case/system/blockMeshDict.cylinder.m4 > $Case/constant/polyMesh/blockMeshDict
     #blockMesh -case $Case > $Case/log.blockMesh
 
-	## New mesh generator
-	. $meshGeneratorScript $Case
+    ## New mesh generator
+    . $meshGeneratorScript $Case
     
     # Set the initial conditions
     if ! cp $Case/0.orig $Case/0 -r; then
@@ -211,30 +211,54 @@ fi
         ## Run for one time-step only to test the re-start
         sed -i "/stopAt/,/\;/s/stopAt.*/stopAt    writeNow\;/g" $Case/system/controlDict
 
-        if [[ $foam == bekaert ]]; then
+        if [[ $foam == form ]]; then
 
-            if [[ "${@}" =~ "-n" ]]; then
-			    if ! decomposePar -force -case $Case > $Case/log.decomposePar;
-				then
+            if [[ "${@}" =~ "-np" ]]; then
+                if ! decomposePar -force -case $Case > $Case/log.decomposePar;
+                then
                     echo Error
-				    echo decomposePar failed.
-					exit 1
-				fi
+                    echo decomposePar failed.
+                    exit 1
+                fi
 
-				if ! mpirun -np $nCores plasticNonLinSolidFoam \
-				    -case $Case -parallel \
-				    > $Case/log.after_restart; then
+                if ! mpirun -np $nCores form \
+                    -case $Case -parallel \
+                    > $Case/log.after_restart; then
                     echo Error
-				    echo mpirun failed.
-					exit 1
-				fi
+                    echo mpirun failed.
+                    exit 1
+                fi
+            else
+                if ! form -case $Case > $Case/log.after_restart; then
+                    echo Error
+                    echo plasticNonLinSolidFoam failed to restart.
+                    exit 1
+                fi
+            fi
+        elif [[ $foam == bekaert ]]; then
+
+            if [[ "${@}" =~ "-np" ]]; then
+                if ! decomposePar -force -case $Case > $Case/log.decomposePar;
+                then
+                    echo Error
+                    echo decomposePar failed.
+                    exit 1
+                fi
+
+                if ! mpirun -np $nCores plasticNonLinSolidFoam \
+                    -case $Case -parallel \
+                    > $Case/log.after_restart; then
+                    echo Error
+                    echo mpirun failed.
+                    exit 1
+                fi
             else
                 if ! plasticNonLinSolidFoam -case $Case > $Case/log.after_restart; then
                     echo Error
                     echo plasticNonLinSolidFoam failed to restart.
                     exit 1
                 fi
-			fi
+            fi
         elif [[ $foam == s4f ]]; then
             if ! solids4Foam -case $Case > $Case/log.after_restart; then
                 echo Error
