@@ -1,0 +1,119 @@
+FoamFile
+{
+    version 2.0;
+    format ascii;
+    object ALEDict;
+    class dictionary;
+}
+
+/// 0: Deactivate ALE
+rezoneFrequency 100;
+
+flipFluxSign true;
+
+remapLoopPerStep 5;
+
+nRemapSteps 50;
+
+remapWrite false;
+
+remapWriteFrequency 50;
+
+fixedPatches
+(
+    "symmPlane"
+    "dieContact"
+    "billetContact"
+    "loading"
+    //"dieBack"
+    //"dieFront"
+);
+
+illegalToAdvect
+(
+    // Basically, we rezone and remap
+    // everything, right after the iteration loop; some of
+    // the fields are being updated right after remap,
+    // (at the end of the current time), and some
+    // of them are being updated at the start of the next time.
+
+    // We do so, except for ...
+    // Non-sense to advect
+    "materials"
+
+    // Old-time fields? we need to advect them.
+
+    // Not-sure-what-it-does fields
+    //"areaInContact_billetContact"
+    //"slavePressure_billetContact"
+
+    // READ_IF_PRESENT fields
+    //"grad(DU)" // Must-advect               
+    //"grad(DD)"                     
+    //"pointVelocity"                
+    //"F"                            
+    //"globalToLocalFaceZonePointMap"
+
+    // Secondary fields (calculated from primary field(s))...
+    // ... after time loop
+    //"rho"
+    //"sigmaCauchy"
+
+    // ... at the end of the time loop
+    //"rho"                          
+    //"sigmaCauchy"                  
+    //"grad(D)"                      
+    //"grad(U)"                      
+    //"U"                            
+    //"D"                            
+    //"Velocity"                     
+
+    // ALE is done after an iteration loop.
+    // MUST-advect fields follow; because these are used to update other fields
+    // at the end of current time, before going to the next time
+    // Needed to update ...
+    // ... rho
+    // rho_0
+    // relJ
+    // ... cauchy traction
+    // tau
+    // J
+    // ... gradU
+    // DU
+    // U_0
+    // ... U
+    // DU
+    // U_0
+    // ... V
+    // DU
+
+    // At the start of the next time step, before solving for DU, these old
+    // values are used for
+    // ... surface areas 
+    // relJ
+    // relFinv
+    // ... gradDUf
+    // gradDU
+);
+
+laplacianMeshSmoother true;
+
+laplacianMeshSmootherDict
+{
+    patchWithSlidingPoints "placeHolder";
+    freePatches ("billetFront" "billetBack");
+    crossingPatches ("billetFront" "billetBack");
+    slideCrossingPoints true;
+    fixCrossingPoints false;
+    maxRezoneIter 50;
+    maxRezoneRes 1e-5;
+    wedge true;
+    wedgeDir 2;
+    radialDir 1;
+    wedgeAperture 1;
+    //emptyDir 2;
+    fixPointsInBoundBoxAnyway true;
+    // Non-axial points of the die
+    bbMin (-1e6 17.98e-3 -1e6);
+    bbMax ( 1e6 1e6       1e6);
+}
