@@ -17,40 +17,31 @@ FoamFile
 
 dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform 0;;
+internalField   uniform 0;
 
 boundaryField
 {
-    loading
+    symmPlane
     {
-        type            zeroGradient;
+        type            symmetryPlane;
+        value           uniform 0;
     }
-
-    billetContact
-    {
-        type            zeroGradient;
-    }
-
     dieContact
     {
         type            zeroGradient;
     }
-
-    symmPlane
+    billetContact
     {
-        type            symmetryPlane;
+        type            zeroGradient;
     }
-
-    back
+    loading
     {
-        type            empty;
+        type            zeroGradient;
     }
-
-    front
+    ".*Back|.*Front"
     {
-        type            empty;
+        type            wedge;
     }
-
     axis
     {
         type            empty;

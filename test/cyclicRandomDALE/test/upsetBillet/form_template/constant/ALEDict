@@ -100,7 +100,7 @@ laplacianMeshSmoother true;
 
 laplacianMeshSmootherDict
 {
-    patchWithSlidingPoints "placeHolder";
+    patchWithSlidingPoints "This_Does_Nothing";
     freePatches ("billetFront" "billetBack");
     crossingPatches ("billetFront" "billetBack");
     slideCrossingPoints true;
@@ -108,11 +108,12 @@ laplacianMeshSmootherDict
     maxRezoneIter 50;
     maxRezoneRes 1e-5;
     wedge true;
-    wedgeDir 2;
-    radialDir 1;
-    wedgeAperture 1;
-    //emptyDir 2;
-    fixPointsInBoundBoxAnyway true;
+    wedgeDir 2; // z
+    radialDir 1;// y
+    wedgeAperture 1; // degrees
+    //emptyDir 2; // When empty instead of wedge
+    fixPointsInBoundBoxAnyway false;
+	// Box bounds: 
     // Non-axial points of the die
     bbMin (-1e6 17.98e-3 -1e6);
     bbMax ( 1e6 1e6       1e6);

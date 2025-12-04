@@ -63,6 +63,7 @@ Args:
 Options:
 -h: Print help
 -np <nCores>, works with bekaert solver only
+-f: Force case re-creation if it exists. 
 "
         exit 1
     fi
@@ -89,19 +90,30 @@ Options:
 
 ## Create case
 if ! mkdir $caseName; then 
-    echo
-    echo Warning in $this
-    echo $caseName exists.
-    #read -p "Remove $caseName? [y/N] " answer
-    #if [[ $answer =~ ^[Yy]$ ]]; then
-    #    rm -r $caseName
-    #    echo $caseName removed.
-    #else
-        exit 1
-    #fi
-else
-    Case=$caseName
+    if [[ "${@}" =~ "-f" ]]; then
+	    rm -r $caseName
+		echo $caseName removed.
+		if ! mkdir $caseName; then
+		    echo Error
+			echo Could not create $caseName after removal
+			exit 1
+		fi
+	else
+        echo
+        echo Error in $this
+        echo $caseName exists.
+	    echo Pass -f to force re-creation.
+        #read -p "Remove $caseName? [y/N] " answer
+        #if [[ $answer =~ ^[Yy]$ ]]; then
+        #    rm -r $caseName
+        #    echo $caseName removed.
+        #else
+            exit 1
+        #fi
+	fi
 fi
+
+Case=$caseName
 
 if ! cp -r "$template"/* $Case/; then
     echo Error
@@ -161,7 +173,39 @@ fi
     #setFields -case $Case > $Case/log.setFields
 
     ## Run before re-start
-    if [[ $foam == bekaert ]]; then
+    if [[ $foam == form ]]; then
+
+        ## Define cell zones
+        if ! setSet -batch $Case/setSetDict -case $Case > $Case/log.setSet; then
+            echo
+            echo Error
+            echo setSet failed
+            exit 1
+        fi
+
+        if ! setsToZones -case $Case  > $Case/log.setsToZones; then
+            echo
+            echo Error
+            echo setsToZones failed
+            exit 1
+        fi
+
+        ## Define materials
+        if ! setMatFromCellZones -case $Case > $Case/log.setMatFromCellZones;
+		then
+            echo
+            echo Error
+            echo setMatFromCellZones failed
+            exit 1
+        fi
+
+        if ! form -case $Case > $Case/log.solver; then
+            echo Error
+            echo form failed.
+            exit 1
+        fi
+
+    elif [[ $foam == bekaert ]]; then
 
         ## Define cell zones ---- blockMesh already writes blocks to sets
         ### if ! setSet -batch $Case/setSetDict -case $Case > $Case/log.setSet; then
@@ -200,7 +244,7 @@ fi
 
     ## Run after re-start
 
-    if [[ "$Restart" == "true" ]]; then
+    if [[ "$Restart" == "false" ]]; then
         echo Run finished. It will not restart.
         echo End.
         exit 0

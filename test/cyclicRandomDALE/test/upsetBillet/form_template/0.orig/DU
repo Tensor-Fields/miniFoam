@@ -149,17 +149,13 @@ boundaryField
         value           uniform (0 0 0);
     }
 
-    back
+    ".*Back|.*Front"
     {
         type            solidWedge;
         patchType       wedge;
-        value           uniform (0 0 0);
-    }
-
-    front
-    {
-        type            solidWedge;
-        patchType       wedge;
+        // For now, materialModel does not work with wedge, it accepts
+        // solidWedge only.
+        //type            wedge;
         value           uniform (0 0 0);
     }
 

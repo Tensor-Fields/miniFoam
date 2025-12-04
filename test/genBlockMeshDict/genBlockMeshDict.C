@@ -600,51 +600,64 @@ int main(int argc, char* argv[])
     ofs << "patches\n"
         //<<"();"<<"\n";
         << R"(
+(
+    patch loading
     (
-        patch loading
-        (
-            (17 18 19 17)
-        )
+        (17 18 19 17)
+    )
 
-        patch billetContact
-        (
-            (8 2 7 8)
-            (12 8 7 11)
-            (10 12 11 9)
-        )
+    patch billetContact
+    (
+        (8 2 7 8)
+        (12 8 7 11)
+        (10 12 11 9)
+    )
 
-        wedge billetFront
-        (
-            (0 1 6 4)
-            (1 2 8 6)
-            (6 8 12 6)
-            (4 6 12 10)
-        //)
+    wedge billetFront
+    (
+        (0 1 6 4)
+        (1 2 8 6)
+        (6 8 12 6)
+        (4 6 12 10)
+    //)
 
-        //wedge dieFront
-        //(
-            (2 17 19 16)
-        )
+    //wedge dieFront
+    //(
+        (2 17 19 16)
+    )
 
-        wedge billetBack
-        (
-            (3 5 1 0)
-            (5 7 2 1)
-            (5 11 7 5)
-            (3 9 11 5)
-        //)
+    wedge billetBack
+    (
+        (3 5 1 0)
+        (5 7 2 1)
+        (5 11 7 5)
+        (3 9 11 5)
+    //)
 
-        //wedge dieBack
-        //(
-            (2 15 18 17)
-        )
+    //wedge dieBack
+    //(
+        (2 15 18 17)
+    )
 
-        patch dieContact
-        (
-            (16 19 18 15)
-            (2 16 15 2)
-        )
-    );
+    patch dieContact
+    (
+        (16 19 18 15)
+        (2 16 15 2)
+    )
+
+	symmetryPlane symmPlane
+	(
+	    (10 9 3 4)
+		(0 4 3 0)
+	)
+
+	empty axis
+	(
+	    (0 1 1 0)
+		(1 2 2 1)
+		(2 17 17 2)
+	)
+);
 
 mergePatchPairs ();
         )""\n";
