@@ -14,9 +14,9 @@
     #-nRT <label>: N of total radial segments
     #-nZT <label>: N of total longitudinal segments
     #-theta <scalar>: Apperture of the cylinder
-	#-Rd <scalar>: Die radii
-	#-nRd <label>: N of raial cells of die
-	#-convert <scalar>: convetToMeters
+    #-Rd <scalar>: Die radii
+    #-nRd <label>: N of raial cells of die
+    #-convert <scalar>: convetToMeters
 
 clear
 
@@ -26,15 +26,15 @@ if ! genBlockMeshDict \
     -RR       10 \
     -ZZ       15 \
     -nOL       1 \
-    -nPeriph   2 \
+    -nPeriph   1 \
     -nRT      10 \
     -nZT      10 \
     -theta     1 \
     -Rd       20 \
     -dieThickness 1 \
-    -nRd      1 \
+    -nRd      20 \
     -convert  1e-3 \
-	-case $Case > $Case/log.genBlockMeshDict
+    -case $Case > $Case/log.genBlockMeshDict
 then
     echo Error
     echo genBlockMeshDict failed
@@ -61,7 +61,7 @@ if ! blockMesh -case $Case > $Case/log.blockMesh; then
     exit 1
 fi
 
-if ! autoPatch 70 -overwrite -case $Case > $Case/log.blockMesh; then
+if ! autoPatch 70 -overwrite -case $Case > $Case/log.autoPatch; then
     echo Error
     echo autoPatch failed
     exit 1
