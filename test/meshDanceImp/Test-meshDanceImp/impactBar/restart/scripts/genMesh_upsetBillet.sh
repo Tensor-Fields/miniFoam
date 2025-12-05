@@ -61,17 +61,25 @@ if ! blockMesh -case $Case > $Case/log.blockMesh; then
     exit 1
 fi
 
+<<<<<<< Updated upstream
 if ! autoPatch 70 -overwrite -case $Case > $Case/log.autoPatch; then
     echo Error
     echo autoPatch failed
     exit 1
 fi
+=======
+#if ! autoPatch 70 -overwrite -case $Case > $Case/log.autoPatch; then
+#    echo Error
+#    echo autoPatch failed
+#    exit 1
+#fi
+>>>>>>> Stashed changes
 
-if ! createPatch -overwrite -case $Case > $Case/log.createPatch; then
-    echo Error
-    echo createPatch failed
-    exit 1
-fi
+#if ! createPatch -overwrite -case $Case > $Case/log.createPatch; then
+#    echo Error
+#    echo createPatch failed
+#    exit 1
+#fi
 
 if ! transformPoints -rotate "((1 0 0) (0 1 0))" -case $Case \
     > $Case/log.transformPoints.1; then

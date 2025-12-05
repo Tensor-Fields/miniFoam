@@ -64,6 +64,9 @@ class meshDance//: public fvMesh
 
     /*const*/ List<string> fixedPatches_;
 
+	/// To pass to remap()
+	/*const*/ bool ifForceWriteAtRemapTime_ = false;
+
     /// Run-time selected field names to not be advected
     List<string> illegalToAdvect_;
 
@@ -77,12 +80,16 @@ class meshDance//: public fvMesh
     /// Read remap settings
     label nRemapSteps_;
 
-    bool writeRemappedSteps_;
+	/// Must be initialized as used by advect()
+    bool writeRemappedSteps_ = false;
 
     label remapWriteFreq_;
 
     /// Laplacian smoother settings
     bool laplacianMeshSmoother_;
+
+	/// Now
+	word nowName_ = "";
 
     //bool smoothPatches_;
     word patchWithSlidingPoints_;

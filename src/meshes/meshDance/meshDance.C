@@ -55,6 +55,7 @@ Foam::meshDance::meshDance
 //    )
 //),
 runTime_(runTime),
+nowName_(runTime.timeName()),
 registerFields_(regFields),
 //pseudoTime_(),
 dMeshPtr_
@@ -93,6 +94,7 @@ nRemapSteps_(),
 illegalToAdvect_(),
 maxIter_(),
 fixedPatches_(),
+ifForceWriteAtRemapTime_(),
 /// General rezone settings
 startingPoints_(mesh_.points()),
 startTime_(runTime.startTime()),
@@ -147,6 +149,8 @@ boundBoxMax_()
 
     read<bool>        (aleDict, word("flipFluxSign"), flipFluxSign_);
 
+	read<bool>
+	    (aleDict, word("forceWriteAtRemapTime"), ifForceWriteAtRemapTime_);
     /// How many timeSteps per one rezone
     read<label>        (aleDict, word("rezoneFrequency"), rezoneFreq_);
 
@@ -828,6 +832,9 @@ void Foam::meshDance::remap(const bool write)
     const scalar now = runTime_.value();
     const label nowIndex = runTime_.timeIndex();
 
+	/// To be accessed inside advect()
+	nowName_ = runTime_.timeName();
+
     for (label iter = 0; iter < nRemapSteps_; ++iter)
     {
         Info<< "Remap step = "
@@ -843,20 +850,20 @@ void Foam::meshDance::remap(const bool write)
                 << endl;
 
             /// VolFields
-            this -> advect<scalar>    (/*write*/);
-            this -> advect<vector>    (/*write*/);
-            this -> advect<tensor>    (/*write*/);
-            this -> advect<symmTensor>(/*write*/);
+            this -> advect<scalar>    (writeRemappedSteps_);
+            this -> advect<vector>    (writeRemappedSteps_);
+            this -> advect<tensor>    (writeRemappedSteps_);
+            this -> advect<symmTensor>(writeRemappedSteps_);
             //this -> advect<sphericalTensor>(write);
 
             break;
         }
 
         /// Volume fields
-        this -> advect<scalar>    (/*write*/);
-        this -> advect<vector>    (/*write*/);
-        this -> advect<tensor>    (/*write*/);
-        this -> advect<symmTensor>(/*write*/);
+        this -> advect<scalar>    (writeRemappedSteps_);
+        this -> advect<vector>    (writeRemappedSteps_);
+        this -> advect<tensor>    (writeRemappedSteps_);
+        this -> advect<symmTensor>(writeRemappedSteps_);
         //this -> advect<sphericalTensor>(write);
 
         /// Move ahead; needs to be after advect()
@@ -864,14 +871,17 @@ void Foam::meshDance::remap(const bool write)
 
         /// Write -- for debugging
 
+		/// Previous design: Write remap steps in physical time dirs.
+		/// New design: Write remap steps "inside" the remap physical time
+
         /// Counting starts from 0, so iter + 1
-        if (writeRemappedSteps_ && ((iter+1) % remapWriteFreq_ < SMALL))
-        {
-            this->write();
-            Info<< "    Remapped field and rezoned mesh written to "
-                << runTime_.timeName()
-                <<"\n";
-        }
+        //if (writeRemappedSteps_ && ((iter+1) % remapWriteFreq_ < SMALL))
+        //{
+        //    this->write();
+        //    Info<< "    Remapped field and rezoned mesh written to "
+        //        << runTime_.timeName()
+        //        <<"\n";
+        //}
     }
 
     /// Restore time; physical time remains unchaged during remap
@@ -891,7 +901,8 @@ void Foam::meshDance::remap(const bool write)
 
     /// write parameter is responsible for forcing mesh and fields being
     /// written, ignoring the controlDict write controls
-    if (write)
+    //if (write)
+	if (ifForceWriteAtRemapTime_)
     {
         this->write();
 

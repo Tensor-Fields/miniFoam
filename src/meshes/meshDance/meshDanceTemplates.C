@@ -455,7 +455,10 @@ void Foam::meshDance::advect(bool writeAdvectedFields)
                 IOobject
                 (
                     field.name()+"_tmp",
-                    mesh_.time().timeName(),
+                    //mesh_.time().timeName(),
+					nowName_,
+					//"remapSteps/"+mesh_.time().timeName(),
+					fileName("remapSteps/"+runTime_.timeName()),
                     //pseudoTime_.timeName(),
                     mesh_,
                     IOobject::NO_READ,
@@ -582,11 +585,13 @@ void Foam::meshDance::advect(bool writeAdvectedFields)
             if (writeAdvectedFields)
             {
                 Info<< "    Write "
-                    << field.name()
+                    << tfield.name()
+                    //<< field.name()
                     << "\n"
                     << endl;
 
-                field.write();
+                tfield.write();
+                //field.write();
             }
         }
         else
