@@ -1,3 +1,23 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  Tensor         | miniFOAM: The Computational Continuum Playground
+   ~~~~~~~   Fields         | Website:  https://tensorfields.com
+    O   O                   | Copyright (C) 2025 Tensorfields
+      O                     |
+-------------------------------------------------------------------------------
+
+Application
+    waveFoam
+
+Description
+    Minimal wave equation solver.
+
+Author
+    Maalik (Ali Shayegh, ali@tensorfields.com), Richmond Hill, Dublin
+
+Date
+    Dec 15 2025
+\*---------------------------------------------------------------------------*/
 #include"argList.H"
 #include"Time.H"
 #include"IOobject.H"

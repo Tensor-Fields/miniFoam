@@ -1,3 +1,23 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  Tensor         | miniFOAM: The Computational Continuum Playground
+   ~~~~~~~   Fields         | Website:  https://tensorfields.com
+    O   O                   | Copyright (C) 2025 Tensorfields
+      O                     |
+-------------------------------------------------------------------------------
+
+Application
+    calcCircleArea
+
+Description
+    Defite a circle class, create a circle object, and call its area.
+
+Author
+    Maalik (Ali Shayegh, ali@tensorfields.com), Richmond Hill, Dublin
+
+Date
+    Dec 15 2025
+\*---------------------------------------------------------------------------*/
 #include<iostream>
 #include<cmath>
 
