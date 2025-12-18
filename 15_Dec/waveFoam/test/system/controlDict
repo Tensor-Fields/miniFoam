@@ -1,0 +1,14 @@
+FoamFile
+{
+    object controlDict;
+    class  dictionary;
+    format ascii;
+    version 2.0;
+}
+
+deltaT 1e-3;
+writeInterval 100;
+endTime 50;
+stopAt endTime;
+startFrom startTime;
+startTime 0;

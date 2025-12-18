@@ -1,0 +1,8 @@
+FoamFile
+{
+    object waveProperties;
+    class  dictionary;
+    format ascii;
+}
+
+c2 1e-5;

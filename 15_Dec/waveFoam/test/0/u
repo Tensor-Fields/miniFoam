@@ -1,0 +1,29 @@
+FoamFile
+{
+    object u;
+    class volScalarField;
+    format ascii;
+}
+
+dimensions [0 1 0 0 0 0 0];
+
+internalField uniform 0;
+
+boundaryField
+{
+    movingWall
+    {
+        type fixedValue;
+        value uniform 100;
+    }
+
+    fixedWalls
+    {
+        type zeroGradient;
+    }
+
+    frontAndBack
+    {
+        type            empty;
+    }
+}

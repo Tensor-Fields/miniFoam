@@ -1,0 +1,3 @@
+EXE_INC = -I$(FOAM_SRC)/finiteVolume/lnInclude
+
+EXE_LIBS = -lfiniteVolume
