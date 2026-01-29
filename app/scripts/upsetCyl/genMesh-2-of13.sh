@@ -26,3 +26,10 @@ then echo "Error in blockMeshDict die"; echo; exit 1; fi
 
 if ! mergeMeshes -addRegions \("die"\) > log.mergeMeshes
 then echo "Error in mergeMeshes"; echo; exit 1; fi
+
+#-----------------------------------------------------------------------------#
+# Make ready for solver
+#-----------------------------------------------------------------------------#
+sed -i "/FoamFile/,/}/s/}/    version     2.0\;\n}/" constant/polyMesh/*
+
+rm constant/polyMesh/cellZones
