@@ -85,6 +85,11 @@ if ! genBlockMeshDict \
     -ZZ       15 \
     -nOL       1 \
     -nPeriph   1 \
+<<<<<<< Updated upstream
+=======
+    -nRT      10 \
+    -nZT      10 \
+>>>>>>> Stashed changes
     -theta     1 \
     -Rd       20 \
     -dieThickness 1 \
