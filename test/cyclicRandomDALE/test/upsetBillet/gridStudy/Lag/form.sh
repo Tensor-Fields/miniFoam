@@ -163,12 +163,15 @@ Case=$caseName
     #. $meshGeneratorScript $Case
     
     # Set the initial conditions
-    #if ! cp $Case/0.orig $Case/0 -r; then
-    #    echo
-    #    echo Error in $this
-    #    echo $Case/0.orig not found
-    #    exit 1;
-    #fi
+	if ! rm -rf $Case/0
+	then echo Error in rm -f $Case; echo; exit 1; fi
+
+    if ! cp $Case/0.orig $Case/0 -r; then
+        echo
+        echo Error in $this
+        echo $Case/0.orig not found
+        exit 1;
+    fi
 
     #setFields -case $Case > $Case/log.setFields
 

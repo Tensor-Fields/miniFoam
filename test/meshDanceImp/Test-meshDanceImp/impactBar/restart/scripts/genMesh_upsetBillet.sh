@@ -22,17 +22,72 @@ clear
 
 Case=$1
 
+	# level -1
+    #-nRT      5 \
+    #-nZT      5 \
+
+	# level 0
+    #-nRT      10 \
+    #-nZT      10 \
+    #-nRd      20 \
+
+	# level 1 --- Failed
+    #-nRT      20 \
+    #-nZT      20 \
+    #-nRd      40 \
+
+	# level 1.1 --- Failed
+    #-nRT      21 \
+    #-nZT      21 \
+
+	# level 2
+    #-nRT      40 \
+    #-nZT      40 \
+    #-nRd      80 \
+
+	##
+	## Prime number levels
+	##
+
+	# level 0
+    #-nRT      7 \
+    #-nZT      7 \
+
+	# level 1 --- Failed
+    #-nRT      14 \
+    #-nZT      14 \
+
+	# level 2 --- Successful
+    #-nRT      28 \
+    #-nZT      28 \
+
+	##
+	## Are we out of the dangerous zone
+	##
+
+	# level 0 --- Successful
+    #-nRT      30 \
+    #-nZT      30 \
+
+	# level 1
+    #-nRT      60 \
+    #-nZT      60 \
+
+	# level 2
+    #-nRT      120 \
+    #-nZT      120 \
+
 if ! genBlockMeshDict \
+    -nRT      120 \
+    -nZT      120 \
+    -nRd      1 \
     -RR       10 \
     -ZZ       15 \
     -nOL       1 \
     -nPeriph   1 \
-    -nRT      10 \
-    -nZT      10 \
     -theta     1 \
     -Rd       20 \
     -dieThickness 1 \
-    -nRd      20 \
     -convert  1e-3 \
     -case $Case > $Case/log.genBlockMeshDict
 then
@@ -48,7 +103,7 @@ if ! mv blockMeshDict $Case; then
 fi
 
 mkdir -p $Case/constant/polyMesh
-    
+
 if ! cp $Case/blockMeshDict $Case/constant/polyMesh/ ; then
     echo Error
     echo Could not cp blockMeshDict
@@ -61,19 +116,11 @@ if ! blockMesh -case $Case > $Case/log.blockMesh; then
     exit 1
 fi
 
-<<<<<<< Updated upstream
-if ! autoPatch 70 -overwrite -case $Case > $Case/log.autoPatch; then
-    echo Error
-    echo autoPatch failed
-    exit 1
-fi
-=======
 #if ! autoPatch 70 -overwrite -case $Case > $Case/log.autoPatch; then
 #    echo Error
 #    echo autoPatch failed
 #    exit 1
 #fi
->>>>>>> Stashed changes
 
 #if ! createPatch -overwrite -case $Case > $Case/log.createPatch; then
 #    echo Error
