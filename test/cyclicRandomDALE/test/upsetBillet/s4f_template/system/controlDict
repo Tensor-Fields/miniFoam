@@ -49,12 +49,12 @@ runTimeModifiable no;
 
 functions
 {
-    force2
-    {
-        type          solidForces;
-        historyPatch  symmPlane;
-        stressName    sigma;
-    }
+    //force2
+    //{
+    //    type          solidForces;
+    //    historyPatch  symmPlane;
+    //    stressName    sigma;
+    //}
 }
 
 // ************************************************************************* //

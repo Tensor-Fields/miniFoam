@@ -23,7 +23,7 @@ d2dt2Schemes
 
 ddtSchemes
 {
-    default            steadyState;
+    default            Euler;
 }
 
 gradSchemes

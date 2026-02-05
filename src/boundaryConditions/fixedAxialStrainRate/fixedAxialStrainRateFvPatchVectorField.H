@@ -26,12 +26,19 @@ Class
     Foam::fixedAxialStrainRateFvPatchVectorField
 
 Description
-    Adapted from solids4Foam to be compatible with bekaert deformation solver.
+    Assume a cylinder which is compressed with a rigid plate. The plate moves
+    downwards (-z direction) with a velocity which is governed by
 
-    Fixed displacement boundary condition with boundary non-orthogonal
-    correction for solid solvers.
-    Essentially fixedValue with non-orthogonal correction.
-    Optionally time-varying.
+        d(velocity) / dz = constant,
+
+    This constant is "axial strain-rate in the axisymmetric coordinates".
+    The radial velocity of the cylinder in such a deformation has an analytical
+    solution.
+
+    Detailed velocity calculation can be seen in updateCoeffs().
+    Parameters specified in the dictionary can be seen in the constructor.
+
+    See Hoffman & Sachs, Introduction to the Theory of Plasticity, p. 256.
 
 SourceFiles
     fixedAxialStrainRateFvPatchVectorField.C
@@ -51,7 +58,8 @@ Date
 #define fixedAxialStrainRateFvPatchVectorField_H
 
 #include "fvPatchFields.H"
-#include "fixedValueFvPatchFields.H"
+//#include "fixedValueFvPatchFields.H"
+#include "directionMixedFvPatchFields.H"
 #include "interpolationTable.H"
 #include "primitivePatchInterpolation.H"
 
@@ -66,7 +74,8 @@ namespace Foam
 
 class fixedAxialStrainRateFvPatchVectorField
 :
-    public fixedValueFvPatchVectorField
+    public directionMixedFvPatchField<vector>
+    //public fixedValueFvPatchVectorField
 {
     // Private Data
 
@@ -80,11 +89,20 @@ class fixedAxialStrainRateFvPatchVectorField
         mutable autoPtr<primitivePatchInterpolation> interpPtr_;
 
         vector axialDir_;
-        scalar axialStrainRate_;
+        scalarField axialStrainRate_;
+        autoPtr<scalarField> axialStrainRatePtr_;
+        label  axialDirIndex_;
+
+        /// Initial face center locations to be remembered (in terms of axial
+        /// component)
+        autoPtr<vectorField> Z0Ptr_;
 
         /// End position in terms of the position component on the axial dir
-        scalar endPosition_;
-        vector endVelocity_;
+        //scalar endPosition_;
+        //vector endVelocity_;
+
+        /// When the max/min allowable displacement has happened, stop
+        label cutOff_ = 0;
 
     // Private Functions
 
@@ -93,6 +111,9 @@ class fixedAxialStrainRateFvPatchVectorField
 
         //- Return the patch interpolator
         primitivePatchInterpolation& interp();
+
+        //- Evaluate axial strain rate
+        scalarField axialStrainRate();
 
 protected:
 
@@ -183,6 +204,28 @@ public:
                 return totalDisp_;
             }
 
+        //- Read the dictionary
+            //template<class T>
+            //void readDict(const dictionary&, const word&, T&);
+
+            template<class T>
+            void readDict
+            (
+                const dictionary& dict,
+                const word& varName,
+                T& var
+            )
+            {
+                if (!dict.readIfPresent(varName, var))
+                {
+                    FatalErrorIn("readDict")
+                        << varName
+                        << " not specified in "
+                        << dict.name()
+                        << endl;
+                }
+            }
+
         // Evaluation functions
 
             //- Update the coefficients associated with the patch field
@@ -218,6 +261,8 @@ public:
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//#include "fixedAxialStrainRateFvPatchVectorFieldTemplates.C"
 
 } // End namespace Foam
 

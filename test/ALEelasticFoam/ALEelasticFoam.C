@@ -559,10 +559,14 @@ int main(int argc, char* argv[])
 
     if
     (
-        mesh.schemesDict().ddtSchemes().lookup("ddt(v)")
-     == "steadyState" 
-     || mesh.schemesDict().ddtSchemes().lookup("default")
-     == "steadyState" 
+        (
+            mesh.schemesDict().ddtSchemes().lookup("ddt(v)")
+         == "steadyState" 
+        )
+     || (
+            mesh.schemesDict().ddtSchemes().lookup("default")
+         == "steadyState" 
+        )
     )
     {
         steadyState = true;

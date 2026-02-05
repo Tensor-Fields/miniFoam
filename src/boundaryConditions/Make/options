@@ -1,6 +1,8 @@
+/*    -I -O0 -ggdb3 -DFULLDEBUG \*/
 EXE_INC = \
     -I$(FOAM_SRC)/finiteVolume/lnInclude \
     -I$(FOAM_SRC)/finiteArea/lnInclude \
     -I$(FOAM_RUN)/../solids4Foam/src/solids4FoamModels/lnInclude \
     -std=c++11 \
-    -Wno-unused-variable
+    -Wno-unused-variable \
+    -Wno-reorder

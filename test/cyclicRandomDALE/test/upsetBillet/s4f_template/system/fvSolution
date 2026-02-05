@@ -34,6 +34,18 @@ solvers
         tolerance       1e-09;
         relTol          0.1;
     }
+
+    ".*tmp"
+    {
+        solver           smoothSolver;
+        smoother         GaussSeidel;
+        nSweeps          10;
+
+        minIter          1;
+        maxIter          1000;
+        tolerance        1e-06;
+        relTol           0.01;
+    }
 }
 
 relaxationFactors

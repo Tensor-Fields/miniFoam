@@ -132,15 +132,19 @@ fixedAxialStrainRateFvPatchVectorField::fixedAxialStrainRateFvPatchVectorField
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    fixedValueFvPatchVectorField(p, iF),
-    //totalDisp_(p.size(), vector::zero),
+    directionMixedFvPatchField<vector>(p, iF),
+    totalDisp_(p.size(), vector::zero),
     //dispSeries_(),
     //interpPtr_(),
-    axialDir_(),
-    axialStrainRate_(),
-    endPosition_(),
-    endVelocity_()
-{}
+    axialDir_(vector::zero),
+    axialDirIndex_(-1),
+    axialStrainRate_(p.size(), 0),
+    //endPosition_(),
+    //endVelocity_(),
+    axialStrainRatePtr_()
+{
+    Info<< "    Constructor 1 called\n";
+}
 
 
 fixedAxialStrainRateFvPatchVectorField::fixedAxialStrainRateFvPatchVectorField
@@ -151,19 +155,23 @@ fixedAxialStrainRateFvPatchVectorField::fixedAxialStrainRateFvPatchVectorField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchVectorField(ptf, p, iF, mapper),
-//#ifdef OPENFOAMFOUNDATION
-//    totalDisp_(mapper(ptf.totalDisp_)),
-//#else
-//    totalDisp_(ptf.totalDisp_, mapper),
-//#endif
+    directionMixedFvPatchField<vector>(ptf, p, iF, mapper),
+#ifdef OPENFOAMFOUNDATION
+    totalDisp_(mapper(ptf.totalDisp_)),
+#else
+    totalDisp_(ptf.totalDisp_, mapper),
+#endif
 //    dispSeries_(ptf.dispSeries_),
 //    interpPtr_(),
     axialDir_(),
-    axialStrainRate_(),
-    endPosition_(),
-    endVelocity_()
-{}
+    axialDirIndex_(-1),
+    axialStrainRate_(ptf.axialStrainRate_, mapper),
+    //endPosition_(),
+    //endVelocity_(),
+    axialStrainRatePtr_()
+{
+    Info<< "    Constructor 2 called\n";
+}
 
 
 fixedAxialStrainRateFvPatchVectorField::fixedAxialStrainRateFvPatchVectorField
@@ -173,29 +181,85 @@ fixedAxialStrainRateFvPatchVectorField::fixedAxialStrainRateFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchVectorField(p, iF, dict),
-    //totalDisp_("value", dict, p.size()),
+    directionMixedFvPatchField<vector>(p, iF, dict),
+    /// Keep the total displacement
+    totalDisp_(p.size()),
     //dispSeries_(),
     //interpPtr_(),
     axialDir_(),
-    axialStrainRate_(),
-    endPosition_(),
-    endVelocity_()
+    axialDirIndex_(-1),
+    axialStrainRate_(p.size(), 0),
+    //Z0_(vectorField(patch().size()))
+    Z0Ptr_(new vectorField(patch().Cf())),
+    //endPosition_(),
+    //endVelocity_(),
+    axialStrainRatePtr_()
 {
     Info<< "Creating " << type() << " boundary condition" << endl;
 
-    // Check if displacement is time-varying
-    if (dict.found("displacementSeries"))
-    {
-        Info<< "    displacement is time-varying" << endl;
-        dispSeries_ =
-            interpolationTable<vector>(dict.subDict("displacementSeries"));
+    readDict<vector>(dict, "axialDir", axialDir_);
 
-        fvPatchField<vector>::operator==
-        (
-            dispSeries_(this->db().time().timeOutputValue())
-        );
+    forAll(totalDisp_, elemI)
+    {
+        totalDisp_[elemI] = axialDir_;
     }
+
+    /// Make sure axialDir_ is a unit vector
+    axialDir_ /= (SMALL + mag(axialDir_));
+
+    axialDirIndex_ = 0;
+
+    if (!axialDir_[0]) 
+    {
+        if (axialDir_[1]) 
+        {
+            axialDirIndex_ = 1;
+        }
+        else if (axialDir_[2]) 
+        {
+            axialDirIndex_ = 2;
+        }
+        else
+        {
+            FatalErrorIn("updateCoeffs")
+                << "All axialDir components are zero"
+                << abort(FatalError);
+        }
+    }
+
+    List<word> dirs(3);
+
+    dirs[0]="x";
+    dirs[1]="y";
+    dirs[2]="z";
+
+    Info<< "    Axial dir was detected to be "
+        << dirs[axialDirIndex_]
+        << endl;
+
+    //Z0_ = patch().Cf();
+    Info<< "    Z0_ size on creation = "
+        << Z0Ptr_ -> size()
+        << endl;
+
+    //readDict<scalar>(dict, "axialStrainRate", axialStrainRate_);
+    //readDict<scalar>(dict, "endPosition", endPosition_);
+    //readDict<vector>(dict, "endVelocity", endVelocity_);
+
+    // Check if displacement is time-varying
+    //if (dict.found("displacementSeries"))
+    //{
+    //    Info<< "    displacement is time-varying" << endl;
+    //    dispSeries_ =
+    //        interpolationTable<vector>(dict.subDict("displacementSeries"));
+
+    //    fvPatchField<vector>::operator==
+    //    (
+    //        dispSeries_(this->db().time().timeOutputValue())
+    //    );
+    //}
+
+    Info<< "    Constructor 3 called\n";
 }
 
 
@@ -204,15 +268,19 @@ fixedAxialStrainRateFvPatchVectorField::fixedAxialStrainRateFvPatchVectorField
     const fixedAxialStrainRateFvPatchVectorField& pivpvf
 )
 :
-    fixedValueFvPatchVectorField(pivpvf),
-    //totalDisp_(pivpvf.totalDisp_),
+    directionMixedFvPatchField<vector>(pivpvf),
+    totalDisp_(pivpvf.totalDisp_),
     //dispSeries_(pivpvf.dispSeries_),
     //interpPtr_(),
-    axialDir_(),
-    axialStrainRate_(),
-    endPosition_(),
-    endVelocity_()
-{}
+    axialDir_(pivpvf.axialDir_),
+    axialDirIndex_(pivpvf.axialDirIndex_),
+    axialStrainRate_(pivpvf.axialStrainRate_),
+    //endPosition_(),
+    //endVelocity_(),
+    axialStrainRatePtr_()
+{
+    Info<< "    Constructor 4 called\n";
+}
 
 
 fixedAxialStrainRateFvPatchVectorField::fixedAxialStrainRateFvPatchVectorField
@@ -221,25 +289,67 @@ fixedAxialStrainRateFvPatchVectorField::fixedAxialStrainRateFvPatchVectorField
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    fixedValueFvPatchVectorField(pivpvf, iF),
-    //totalDisp_(pivpvf.totalDisp_),
+    directionMixedFvPatchField<vector>(pivpvf, iF),
+    totalDisp_(pivpvf.totalDisp_),
     //dispSeries_(pivpvf.dispSeries_),
     //interpPtr_(),
-    axialDir_(),
-    axialStrainRate_(),
-    endPosition_(),
-    endVelocity_()
-{}
+    axialDir_(pivpvf.axialDir_),
+    axialDirIndex_(pivpvf.axialDirIndex_),
+    axialStrainRate_(pivpvf.axialStrainRate_),
+    Z0Ptr_(),
+    //endPosition_(),
+    //endVelocity_(),
+    axialStrainRatePtr_()
+{
+    Z0Ptr_ = autoPtr<vectorField>(new vectorField(pivpvf.Z0Ptr_()));
 
+    Info<< "    Constructor 5 called\n";
+    Info<< "    Z0Ptr_.size() = "
+        << Z0Ptr_->size()
+        << "\n";
+}
 
 // * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
-
 
 fixedAxialStrainRateFvPatchVectorField::~fixedAxialStrainRateFvPatchVectorField()
 {}
 
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+/// Why do lazy evaluation is because axial strain rate is fixed and needs to be
+/// calculated only once
+scalarField fixedAxialStrainRateFvPatchVectorField::axialStrainRate()
+{
+    vectorField I(patch().Cf().size(), vector::zero);
+
+    forAll(I, facei)
+    {
+        I[facei][axialDirIndex_] = 1;
+    }
+
+    if (axialStrainRatePtr_.empty())
+    {
+        const scalar endTime = this->db().time().endTime().value();
+
+        //vectorField I(patch().Cf().size(), vector::zero);
+
+        forAll(I, facei)
+        {
+            //I[facei][axialDirIndex_] = 1;
+
+            axialStrainRate_[facei] = - 1 / (SMALL + endTime)
+                * log
+                  (
+                      /*I[facei] */1 + (totalDisp_[facei] & I[facei])
+                          / (Z0Ptr_()[facei] & I[facei])
+                  );
+        }
+
+        axialStrainRatePtr_.set(new scalarField(axialStrainRate_));
+    }
+
+    return axialStrainRatePtr_();
+}
 
 // Map from self
 void fixedAxialStrainRateFvPatchVectorField::autoMap
@@ -247,7 +357,7 @@ void fixedAxialStrainRateFvPatchVectorField::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    fixedValueFvPatchVectorField::autoMap(m);
+    directionMixedFvPatchField<vector>::autoMap(m);
 
 #ifdef OPENFOAMFOUNDATION
     m(totalDisp_, totalDisp_);;
@@ -264,7 +374,7 @@ void fixedAxialStrainRateFvPatchVectorField::rmap
     const labelList& addr
 )
 {
-    fixedValueFvPatchVectorField::rmap(ptf, addr);
+    directionMixedFvPatchField<vector>::rmap(ptf, addr);
 
     const fixedAxialStrainRateFvPatchVectorField& dmptf =
         refCast<const fixedAxialStrainRateFvPatchVectorField>(ptf);
@@ -279,6 +389,41 @@ void fixedAxialStrainRateFvPatchVectorField::updateCoeffs()
     {
         return;
     }
+
+    const volVectorField& Dold =
+        db().lookupObject<volVectorField>("U").oldTime();
+
+    const vectorField& D_old = Dold.boundaryField()[patch().index()];
+
+    //vectorField velocity(patch().size(), vector::zero);
+    vectorField D_new(patch().size(), vector::zero);
+
+    //const scalar deltaT = this->db().time().deltaT().value();
+
+    /// Current time (from TimeState)
+    const scalar time = this->db().time().timeOutputValue();
+ 
+    D_new = Z0Ptr_() * (exp(-axialStrainRate() * time) - 1);
+
+    /// New position of each face = velocity * deltaT + old_position
+    fvPatchField<vector>::operator==
+    (
+        //this->db().time().deltaT().value() * (1 - cutOff_) * velocity + D_old
+        D_new - D_old
+    );
+
+    refGrad() = vectorField(this->size(), vector::zero);
+
+    //fixedValueFvPatchVectorField::updateCoeffs();
+    directionMixedFvPatchField<vector>::updateCoeffs();
+
+    //If the corresponding point displacement field has a fixedValue type
+    //boundary condition, then we wil update it
+    setPointDisplacement
+    (
+        //this->db().time().deltaT().value() * (1 - cutOff_) * velocity + D_old
+        D_new - D_old
+    );
 
 //#ifdef OPENFOAMESIORFOUNDATION
 //    if (internalField().name() == "DU")
@@ -300,40 +445,52 @@ void fixedAxialStrainRateFvPatchVectorField::updateCoeffs()
 //            << abort(FatalError);
 //    }
 
-    const volVectorField& Dold =
-        db().lookupObject<volVectorField>("U").oldTime();
+    //if (!cutOff_)
+    //{
+        ///*const*/ vectorField faceCenters = patch().Cf();
 
-    const vectorField& D_old = Dold.boundaryField()[patch().index()];
+        //scalar lowerBoundPosition = SMALL;
+        //scalar upperBoundPosition = GREAT;
 
-    vectorField velocity(patch().size(), vector::zero);
+        //forAll(faceCenters, faceI)
+        //{
+        //    upperBoundPosition = min(upperBoundPosition, faceCenters[faceI][axialDirIndex]);
+        //    upperBoundPosition = max(upperBoundPosition, endPosition_);
 
-    /// Make sure axialDir_ is a unit vector
-    axialDir_ /= mag(axialDir_);
+        //    lowerBoundPosition = max(lowerBoundPosition, faceCenters[faceI][axialDirIndex]);
+        //    lowerBoundPosition = min(lowerBoundPosition, endPosition_);
+        //}
 
-    const vectorField& faceCenters = patch().Cf();
+        //forAll(faceCenters, faceI)
+        //{
+        //    /// velocity = a z + b, where
+        //    /// a: fixed strain rate in axial (say z) direction
+        //    /// b: a constant, determined from end position and end velocity, i.e.,
+        //    /// b = velocity_end - a z_end
+        //    velocity[faceI]
+        //  = axialStrainRate_ * (faceCenters[faceI] & axialDir_) * axialDir_
+        //  + (endVelocity_ - axialStrainRate_ * endPosition_ * axialDir_);
+        //}
 
-    forAll(faceCenters, faceI)
-    {
-        /// velocity = a z + b, where
-        /// a: fixed strain rate in axial (say z) direction
-        /// b: a constant, determined from end position and end velocity, i.e.,
-        /// b = velocity_end - a z_end
-        velocity[faceI]
-      = axialStrainRate_ * (faceCenters[faceI] & axialDir_) * axialDir_
-      + (endVelocity_ - axialStrainRate_ * endPosition_ * axialDir_);
-    }
+        //vectorField trialNewPositions = this->db().time().deltaT().value()
+        //    * velocity + D_old;
 
-    /// New position of each face = velocity * deltaT + old_position
-    fvPatchField<vector>::operator==
-    (
-        this->db().time().deltaT().value() * velocity + D_old
-    );
-
-    fixedValueFvPatchVectorField::updateCoeffs();
-
-    // If the corresponding point displacement field has a fixedValue type
-    // boundary condition, then we wil update it
-    //setPointDisplacement(disp);
+        //forAll(trialNewPositions, vectorI)
+        // Check one face only
+        //label vectorI = 0;
+        //{
+        //    if
+        //    (
+        //        (trialNewPositions[vectorI][axialDirIndex] > upperBoundPosition)
+        //     || (trialNewPositions[vectorI][axialDirIndex] < lowerBoundPosition)
+        //    )
+        //    {
+        //        /// Do not move the patch anymore
+        //        cutOff_ = 1;
+        //        //break;
+        //    }
+        //}
+    //}
 }
 
 
@@ -408,9 +565,10 @@ void fixedAxialStrainRateFvPatchVectorField::write(Ostream& os) const
         os << token::END_BLOCK << nl;
     }
 
-    fixedValueFvPatchVectorField::write(os);
-}
+    axialStrainRate_.writeEntry("negAxialStrainRate", os);
 
+    directionMixedFvPatchField<vector>::write(os);
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
