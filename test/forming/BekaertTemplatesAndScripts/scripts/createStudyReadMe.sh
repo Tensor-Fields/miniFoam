@@ -6,6 +6,14 @@
 this="createStudyReadMe.sh"
 ReadMe="ReadMe.md"
 input="input.setKey"
+compareMe=$1
+
+## First things
+    #if [ -z $compareMe ]; then
+	#    echo Error
+	#	echo Usage: ./$this "file(s)/to/be/compared"
+	#	exit 1
+    #fi
 
 ## Parse
     ## Force overwritting existing ReadMe
@@ -52,6 +60,7 @@ input="input.setKey"
     echo Differences: >> $ReadMe
     echo Column 1: Difference"    "Column 2: Base >> $ReadMe
 
+    #find . -mindepth 2 -maxdepth 2 -name $compareMe | \
     find . -mindepth 2 -maxdepth 2 -name $input | \
         while read -r subStudy; do
 	    echo >> $ReadMe

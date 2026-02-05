@@ -1,0 +1,43 @@
+## How to use *form.sh*
+
+Many parameters are just place-holders left from a previous script,
+
+```sh
+./form.sh form a a a level_0_1/ false a a
+```
+
+# Runs
+
+## *level_0_1*
+
+- Following *level_0* proposal, I want to create a polygonal mesh;
+
+- `pMesh` falls into an endless loop for small `maxCellSize`;
+- Large `maxCellSize` does not generate a mesh at all
+- `gmsh` does not produce a mesh to be later used by `polyDualMesh`; that
+  is because of the existing contact patch.
+- Re-try `gmsh` for billet mesh *only*, **results:**  
+Edges are missed.  
+<img
+    src="level_0_1/figures/polyDual_of13_illEdges.png"
+    style="width:75%; height:auto;"
+/>
+
+### Next
+
+- Produce a proper 2D mesh and cylindrically extrude it.
+
+## *level_0*
+
+- 24 $\times$ 24 mesh, according to the frictionless mesh study
+- It is a copy of *bekaert_15* with `wedge` and `symmetryPlane`, rather than
+  their `solid` counterparts.
+- Ran by `form`
+
+### Results
+
+- The very corner cell does not deform; it finally causes mesh entangling,
+  and the run to crash.
+
+### Next
+- Proposal: Use polygonal meshes.

@@ -45,22 +45,25 @@ is()
         echo "
 Usage:
 
-run.sh <foam> <stopAt> <endTime> <template> <caseName> <restart> <options>
+run.sh <foam> <stopAt> <endTime> <template> <caseName> <restart> <meshGeneratorScript> <options>
 
 Important:
 Order matters; args first, options next.
 
 Args:
 
-<foam>:     s4f or bekaert
+<foam>:     s4f, bekaert, or form
 <stopAt>:   endTime or writeNow
 <endTime>:  endTime value in seconds
 <template>: Template directory which will be copied as a new case.
 <caseName>: Name of the newly created case
 <restart>: "true" for restart, "false" for no restart
+<meshGeneratorScript>: Self-explanatory!
 
 Options:
 -h: Print help
+-np <nCores>, works with bekaert solver only
+-f: Force case re-creation if it exists. 
 "
         exit 1
     fi
@@ -79,25 +82,38 @@ Options:
     template="$(is $4)"
     caseName="$(is $5)"
     Restart="$(is $6)"
+    meshGeneratorScript="$(is $7)"
+    nCores="$(is $9)"
 
 ## Read input file
 # ...
 
 ## Create case
 if ! mkdir $caseName; then 
-    echo
-    echo Warning in $this
-    echo $caseName exists.
-    #read -p "Remove $caseName? [y/N] " answer
-    #if [[ $answer =~ ^[Yy]$ ]]; then
-    #    rm -r $caseName
-    #    echo $caseName removed.
-    #else
-        exit 1
-    #fi
-else
-    Case=$caseName
+    if [[ "${@}" =~ "-f" ]]; then
+	    rm -r $caseName
+		echo $caseName removed.
+		if ! mkdir $caseName; then
+		    echo Error
+			echo Could not create $caseName after removal
+			exit 1
+		fi
+	else
+        echo
+        echo Error in $this
+        echo $caseName exists.
+	    echo Pass -f to force re-creation.
+        #read -p "Remove $caseName? [y/N] " answer
+        #if [[ $answer =~ ^[Yy]$ ]]; then
+        #    rm -r $caseName
+        #    echo $caseName removed.
+        #else
+            exit 1
+        #fi
+	fi
 fi
+
+Case=$caseName
 
 if ! cp -r "$template"/* $Case/; then
     echo Error
@@ -137,8 +153,14 @@ fi
     ### fi
 
     # Create the mesh
-    m4 $Case/system/blockMeshDict.cylinder.m4 > $Case/constant/polyMesh/blockMeshDict
-    blockMesh -case $Case > $Case/log.blockMesh
+
+    ## Old mesh generator
+
+    #m4 $Case/system/blockMeshDict.cylinder.m4 > $Case/constant/polyMesh/blockMeshDict
+    #blockMesh -case $Case > $Case/log.blockMesh
+
+    ## New mesh generator
+    . $meshGeneratorScript $Case
     
     # Set the initial conditions
     if ! cp $Case/0.orig $Case/0 -r; then
@@ -151,7 +173,39 @@ fi
     #setFields -case $Case > $Case/log.setFields
 
     ## Run before re-start
-    if [[ $foam == bekaert ]]; then
+    if [[ $foam == form ]]; then
+
+        ## Define cell zones
+        if ! setSet -batch $Case/setSetDict -case $Case > $Case/log.setSet; then
+            echo
+            echo Error
+            echo setSet failed
+            exit 1
+        fi
+
+        if ! setsToZones -case $Case  > $Case/log.setsToZones; then
+            echo
+            echo Error
+            echo setsToZones failed
+            exit 1
+        fi
+
+        ## Define materials
+        if ! setMatFromCellZones -case $Case > $Case/log.setMatFromCellZones;
+		then
+            echo
+            echo Error
+            echo setMatFromCellZones failed
+            exit 1
+        fi
+
+        if ! form -case $Case > $Case/log.solver; then
+            echo Error
+            echo form failed.
+            exit 1
+        fi
+
+    elif [[ $foam == bekaert ]]; then
 
         ## Define cell zones ---- blockMesh already writes blocks to sets
         ### if ! setSet -batch $Case/setSetDict -case $Case > $Case/log.setSet; then
@@ -190,7 +244,7 @@ fi
 
     ## Run after re-start
 
-    if [[ "$Restart" == "true" ]]; then
+    if [[ "$Restart" == "false" ]]; then
         echo Run finished. It will not restart.
         echo End.
         exit 0
@@ -201,11 +255,53 @@ fi
         ## Run for one time-step only to test the re-start
         sed -i "/stopAt/,/\;/s/stopAt.*/stopAt    writeNow\;/g" $Case/system/controlDict
 
-        if [[ $foam == bekaert ]]; then
-            if ! plasticNonLinSolidFoam -case $Case > $Case/log.after_restart; then
-                echo Error
-                echo plasticNonLinSolidFoam failed to restart.
-                exit 1
+        if [[ $foam == form ]]; then
+
+            if [[ "${@}" =~ "-np" ]]; then
+                if ! decomposePar -force -case $Case > $Case/log.decomposePar;
+                then
+                    echo Error
+                    echo decomposePar failed.
+                    exit 1
+                fi
+
+                if ! mpirun -np $nCores form \
+                    -case $Case -parallel \
+                    > $Case/log.after_restart; then
+                    echo Error
+                    echo mpirun failed.
+                    exit 1
+                fi
+            else
+                if ! form -case $Case > $Case/log.after_restart; then
+                    echo Error
+                    echo plasticNonLinSolidFoam failed to restart.
+                    exit 1
+                fi
+            fi
+        elif [[ $foam == bekaert ]]; then
+
+            if [[ "${@}" =~ "-np" ]]; then
+                if ! decomposePar -force -case $Case > $Case/log.decomposePar;
+                then
+                    echo Error
+                    echo decomposePar failed.
+                    exit 1
+                fi
+
+                if ! mpirun -np $nCores plasticNonLinSolidFoam \
+                    -case $Case -parallel \
+                    > $Case/log.after_restart; then
+                    echo Error
+                    echo mpirun failed.
+                    exit 1
+                fi
+            else
+                if ! plasticNonLinSolidFoam -case $Case > $Case/log.after_restart; then
+                    echo Error
+                    echo plasticNonLinSolidFoam failed to restart.
+                    exit 1
+                fi
             fi
         elif [[ $foam == s4f ]]; then
             if ! solids4Foam -case $Case > $Case/log.after_restart; then

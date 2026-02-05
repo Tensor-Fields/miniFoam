@@ -1,2 +1,0 @@
-cellSet billet add  boxToCell (-1000 -1000 -1000) (15.001e-3 1000 1000)
-cellSet die add  boxToCell (14.999e-3 1000 1000) (1000 1000 1000)
