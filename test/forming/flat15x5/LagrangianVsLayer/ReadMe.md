@@ -34,9 +34,44 @@
   `libsolidModelsBekaert.so` not compiled in the debug mode, so not clear  
   whether it is that or in openfoam libraries.)
 
+<!-- 
+060226 {
+-->
+### l0_lag and l0_lag_p
+
+- Wire and roll positions were corrected using  
+  *postGenLagrangianMesh.sh*.
+- Ran in serial and parallel.
+
+<img
+    src="processLine1/l0_lag_p/figures/test_0/frames.gif"
+    style="width:75%; height:auto;"
+/>
+
 ### l0_long
 
 - Increased wire length by a factor of 3.
+
+#### Results
+
+- The wire should initially be positioned so that we have more wire at the  
+  upstream;
+- The roll should be properly positioned so that it does not interfere with  
+  the wire.
+
+<img
+    src="processLine1/l0_long/figures/test_0/frames.gif"
+    style="width:75%; height:auto;"
+/>
+
+<img
+    src="processLine1/l0_long/figures/wrongPosition.png"
+    style="width:75%; height:auto;"
+/>
+
+<!-- 
+060226 }
+-->
 
 ### rolling1_level-1
 
