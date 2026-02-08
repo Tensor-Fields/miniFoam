@@ -57,8 +57,4 @@
 #### Results
 
 - `form`: `Incompatible fields` in size, see *log.form*.
-<<<<<<< Updated upstream
 - `plasticNonLinSolidFoam`: Same error.
-=======
-- `plasticNonLinSolidFoam`: same.
->>>>>>> Stashed changes

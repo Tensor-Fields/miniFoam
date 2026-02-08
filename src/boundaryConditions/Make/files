@@ -1,11 +1,4 @@
-/* Boundary Conditions */
-tractionVelocity/tractionVelocityFvPatchVectorField.C
-fixedAxialStrainRate/fixedAxialStrainRateFvPatchVectorField.C
-displacementFvPatchField/displacementFvPatchField.C
-displacementNeumann/scenario.C
-displacementNeumann/displacementNeumannFvPatchField.C
-extrapolateFvPatchField/extrapolateFvPatchField.C
-/*axisymmetricFvPatchField/axisymmetricFvPatchField.C*/
+tractionVelocity_OF13/tractionVelocityFvPatchVectorField.C
 
 /* FE40 */
 /*tractionDisplacement/tractionDisplacementFvPatchVectorField.C*/

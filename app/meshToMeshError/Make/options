@@ -1,0 +1,14 @@
+EXE_INC = \
+    -I$(FOAM_SRC)/finiteVolume/lnInclude \
+    -I$(FOAM_SRC)/dynamicMesh/dynamicMesh/lnInclude \
+    -I$(FOAM_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
+    -I$(FOAM_RUN)/miniFoam-extend-4.0/src/lnInclude \
+    -I$(FOAM_RUN)/miniFoam/src/lnInclude \
+    -std=c++11
+
+EXE_LIBS = \
+    -lfiniteVolume \
+    -ldynamicMesh \
+    -ldynamicFvMesh \
+    -L$(FOAM_USER_LIBBIN) \
+    -lminiFoam
