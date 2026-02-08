@@ -61,6 +61,11 @@ L1ErrPtr_(NULL)
 template<class Type>
 void Foam::err<Type>::errStats()
 {
+    /// Re-set errors
+    minErr_ = VGREAT;
+    maxErr_ = VSMALL;
+    avgErr_ = VSMALL;
+
     /// Calculate  error statistics
     forAll(errPtr_(), cellI)
     {
@@ -268,7 +273,8 @@ void Foam::err<Type>::calcErr()
             fieldTarget.name(),
             meshSource.instance(),
             //runTime.timeName(),
-            "0",
+            //"0",
+            meshSource.time().timeName(),
             meshSource,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
@@ -279,9 +285,9 @@ void Foam::err<Type>::calcErr()
             Type, fvPatchField, volMesh
         > fieldSource(fieldSourceIO, meshSource);
 
-        Info<< "meshSource.instance(): "
-            << meshSource.instance()
-            << endl;
+        //Info<< "meshSource.instance(): "
+        //    << meshSource.instance()
+        //    << endl;
 
         Info<< "Source field "
             << fieldSource.name()
@@ -767,7 +773,7 @@ void Foam::err<Type>::calcErr()
                     fieldSource
                 );
 
-                /// At cellI in meshTarget
+                /// At cellI in meshSource
                 forAll(sourceCellCenter, cellI)
                 {
                     const point& pointI = sourceCellCenter[cellI];
@@ -777,7 +783,7 @@ void Foam::err<Type>::calcErr()
                     ///    - encloses meshTarget.C()[cellI]
                     ///      label findCell(const point& location) const
                     //const label& sourceCellEnclosingThisPoint = 
-                        //meshSource.findCell(pointI);
+                    //    meshSource.findCell(pointI);
 
                     ///    - OR is closest to meshTarget.C()[cellI]
                     const label& targetCellNearestToThisPoint = 
@@ -794,14 +800,13 @@ void Foam::err<Type>::calcErr()
                     /// targetCellNearestTo pointI is compared to the correct
                     /// value, which is the sourceCell value.
                     fieldRef[cellI] = 
-                        fieldTarget[targetCellNearestToThisPoint] +
-                            (gradFieldTarget[targetCellNearestToThisPoint] & 
-                                (pointI - 
-                                    cellCenter
-                                    [targetCellNearestToThisPoint]
-                                )
-                            );
+                        fieldTarget[targetCellNearestToThisPoint]
+                      + (
+                            gradFieldTarget[targetCellNearestToThisPoint]
+                          & (pointI - cellCenter[targetCellNearestToThisPoint])
+                        );
 
+                    /// If `unbounded' NOT specified, cut-off out-of-bound
                     if(!args.optionFound("unbounded"))
                     {
                         /// Cut-off the lower out of bound
@@ -887,14 +892,15 @@ void Foam::err<Type>::calcErr()
                 )
             );
 
-            errPtr_().rename(fieldTarget.name()+"_err");
-
-            Info<< "Error calculated."
-                << endl;
 
             /// Report errors
             //report();
         }
+
+        errPtr_().rename(fieldTarget.name()+"_err");
+        this->report();
+        Info<< "Error calculated.\n"
+            << endl;
     }
 }
 

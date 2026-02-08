@@ -38,14 +38,14 @@ Usage:
 
 ## Definitions
 
-	## latestTime
-	latestTime()
-	{
-	    ls -1 $1 | \
-		    grep -E \
-			'^[-]?[0-9]+[.]?[0-9]*$|[-]?[0-9]+[.]?[0-9]*[eE]+[+-]?[0-9]+$' | \
+    ## latestTime
+    latestTime()
+    {
+        ls -1 $1 | \
+            grep -E \
+            '^[-]?[0-9]+[.]?[0-9]*$|[-]?[0-9]+[.]?[0-9]*[eE]+[+-]?[0-9]+$' | \
             sort -g | tail -1
-	}
+    }
 
     ## Get keyword values, filtering comment lines, empty lines, and semicolon
     get_keywords()
@@ -92,7 +92,7 @@ Usage:
             #latestTime=$(ls -1v $Case | grep -E \
             #'^[0-9]+([eE][-+]?[0-9]+)?(\.[0-9]+)?$' | tail -n1)
 
-			latestTime=$(latestTime "$Case")
+            latestTime=$(latestTime "$Case")
 
         newEndTime=$(($latesTime + $maxIter))
         #sed -i \
@@ -216,16 +216,16 @@ if [[ $mode == "rezone" ]]; then
     
     mkdir $Case/source
 
-	touch $Case/source/case.foam
+    touch $Case/source/case.foam
 
-	## reconstructParMesh creates 0/polyMesh. We must replace constant/polyMesh
-	## with this for the workflow to work.
+    ## reconstructParMesh creates 0/polyMesh. We must replace constant/polyMesh
+    ## with this for the workflow to work.
     if [ -d $Case/0/polyMesh ]; then
 
-	    cp -r "$Case/0/polyMesh/"* $Case/constant/polyMesh/
+        cp -r "$Case/0/polyMesh/"* $Case/constant/polyMesh/
 
-		rm -r $Case/0/polyMesh
-	fi
+        rm -r $Case/0/polyMesh
+    fi
 
     cp -r $Case/0 $Case/constant $Case/system $Case/source
     
@@ -237,7 +237,7 @@ if [[ $mode == "rezone" ]]; then
     
     ## Overwrite source mesh with smooth mesh
 
-		## Now overwrite
+        ## Now overwrite
         cp "$Case/$latestTime/polyMesh"/points $Case/source/constant/polyMesh/
     
     ## The last time is a smooth mesh without fields, remove it; source is aware of
@@ -287,12 +287,12 @@ elif [[ $mode == "remap" ]]; then
             "billetContact" \
             "dieContact" \
             "loading" \
-	        "symmPlane"  \
+            "symmPlane"  \
         \) \
         -notFixedPatchNames \
-	    \( \
-	        "front" \
-	    \) \
+        \( \
+            "front" \
+        \) \
         -writeIntermediateMeshes \
         -case $Case \
         -seed $(echo $RANDOM) \
@@ -303,7 +303,7 @@ elif [[ $mode == "remap" ]]; then
         #-fixedTimeStep # Unnecessary, time will not be adjusted
         # when controlDict.adjustTimestep is commented.
 
-	    ## Impact bar
+        ## Impact bar
         #"billetTop" \
         #"billetContact" \
         #"dieContact" \
@@ -328,12 +328,12 @@ elif [[ $mode == "remap" ]]; then
         echo
         echo Error in $this
         echo cyclicRandomDALE failed.
-		echo
+        echo
         #latestTime=$(ls -1v $Case | grep -E \
         #'^[0-9]+([eE][-+]?[0-9]+)?(\.[0-9]+)?$' | tail -n1)
         latestTime=$(latestTime "$Case")
 
-		echo latestTime is $latestTime
+        echo latestTime is $latestTime
         echo Follow instructions below:
         echo - Remove timesteps created,
         echo - Rename smoothed to a number '>' latestTime,

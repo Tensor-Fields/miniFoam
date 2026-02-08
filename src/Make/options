@@ -2,6 +2,7 @@ EXE_INC = \
     -I$(FOAM_SRC)/finiteVolume/lnInclude \
     -I$(FOAM_SRC)/finiteArea/lnInclude \
     -I$(FOAM_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
+    -I$(FOAM_SRC)/dynamicMesh/dynamicMesh/lnInclude \
     -std=c++11 \
     -Wno-unused-variable \
     -Wno-reorder

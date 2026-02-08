@@ -166,6 +166,19 @@ int main (int argc, char* argv[])
         mesh
     );
 
+    volTensorField T
+    (
+        IOobject
+        (
+            "T",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
     //createGrad<scalar>(mesh, "p");
     //createGrad<vector>(mesh, "U");
     //createGrad<tensor>(mesh);
@@ -183,6 +196,13 @@ int main (int argc, char* argv[])
         fvPatchField,
         volMesh
     > gradU = fvc::grad(U);
+
+    GeometricField
+    <
+        typename outerProduct<vector, tensor>::type,
+        fvPatchField,
+        volMesh
+    > gradT = fvc::grad(T);
 
     //tmp
     //<
@@ -205,9 +225,12 @@ int main (int argc, char* argv[])
 
     // Does not work
     //runTime.write();
-    gradP.write();
-    gradU.write();
+    //gradP.write();
+    //gradU.write();
+    //gradT.write();
     //gGradU.write();
+
+    mesh.write();
 
     Info<< "End"
         << endl;

@@ -15,6 +15,6 @@ err/err.C
 /*boundaryConditions/tractionVelocity/tractionVelocityFvPatchVectorField.C*/
 
 /* FE40 */
-boundaryConditions/tractionDisplacement/tractionDisplacementFvPatchVectorField.C
+/*boundaryConditions/tractionDisplacement/tractionDisplacementFvPatchVectorField.C*/
 
 LIB=$(FOAM_USER_LIBBIN)/libminiFoam

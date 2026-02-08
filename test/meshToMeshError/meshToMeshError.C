@@ -2,11 +2,11 @@
  * Calculate error at cell centers, and optionally random ponits of a given mesh
  * compared to a reference mesh 
  *
- * Updated usage:
+ * Usage 1:
  * readlink -f <source> | xargs dirname | xargs meshToMeshError <options> \
  *     -sourceAbsolutePath
  *
- * Alternative usage:
+ * Usage 2:
  * meshToMeshError <options> -sourceCase <sourceCaseName>
  *
  * Compares all dirs of the targetDir with the first available timeDir in
@@ -93,6 +93,9 @@ int main (int argc, char* argv[])
 
     argList::validOptions.insert("latestTargetTime", "");
     argList::validOptions.insert("latestSourceTime", "");
+
+    /// Call error calculation between same meshes
+    argList::validOptions.insert("consistent", "");
 
     argList args(argc, argv);
 
@@ -192,6 +195,13 @@ int main (int argc, char* argv[])
         meshTarget
     );
 
+    //err<vector> vectorFieldError
+    //(
+    //    args,
+    //    meshSource,
+    //    meshTarget
+    //);
+
     /// fieldName at startTime is regarded as the target solution, i.e., a
     /// reference in error calculation.
     /// Workflow: 
@@ -221,9 +231,11 @@ int main (int argc, char* argv[])
 
     /// Evaluate the error for all target times, skip constant and startTime
     for (label timeI = targetStartTimeIndex; timeI < times.size(); ++timeI)
+    //while (runTime.loop())
     {
-        /// Update runTime
+        /// Update runTime (targetTime) and sourceTime
         runTime.setTime(times[timeI], timeI);
+        runTimeSourcePtr().setTime(times[timeI], timeI);
 
         Info<< "Time: "
             << runTime.value()
@@ -232,6 +244,7 @@ int main (int argc, char* argv[])
         /// Update mesh, if it has changed
         //meshTarget.readUpdate();
         scalarFieldError.updateMeshTarget();
+        //vectorFieldError.updateMeshTarget();
 
         Info<< "Mesh updated"
             << endl;
@@ -248,19 +261,27 @@ int main (int argc, char* argv[])
         //    args
         //);
 
-        //scalarFieldError.calcErr();
-        scalarFieldError
-        .calcErr_wrt_same_mesh
-        (
-            args.options()["sourceCase"],
-            sourceTimes[sourceTimeIndex].name()
-        );
+        if (args.optionFound("consistent"))
+        {
+            scalarFieldError
+            .calcErr_wrt_same_mesh
+            (
+                args.options()["sourceCase"],
+                sourceTimes[sourceTimeIndex].name()
+            );
+        }
+        else
+        {
+            scalarFieldError.calcErr();
+            //vectorFieldError.calcErr();
+        }
 
         Info<< "meshToMeshError: Error calculated"
             << endl;
 
         /// Report error
         scalarFieldError.report();
+        //vectorFieldError.report();
 
         //Info<< "Error reported."
         //    << endl;

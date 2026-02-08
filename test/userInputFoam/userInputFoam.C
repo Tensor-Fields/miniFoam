@@ -24,11 +24,17 @@ int main(int argc, char* argv[])
                                                     // stringList
 
     argList::validOptions.insert("patchNames","list of patchNames");
+    argList::validOptions.insert("label","<label>");
 
     // Important: should be after args and options setting
     argList args(argc, argv);
 
     const word patchName = args.additionalArgs()[0];
+    const label dummyLabel = readLabel(IStringStream(args.options()["label"])());
+
+    Info<< "label = "
+        << dummyLabel
+        << '\n';
 
     //const stringList patchNames = args.additionalArgs();
 
