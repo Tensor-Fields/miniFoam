@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 /* Boundary Conditions */
 tractionVelocity/tractionVelocityFvPatchVectorField.C
 
@@ -8,3 +9,8 @@ tractionVelocity/tractionVelocityFvPatchVectorField.C
 solids4FoamFixedDisplacement/solids4FoamFixedDisplacementFvPatchVectorField.C
 
 LIB=$(FOAM_USER_LIBBIN)/libminiFoamBCs
+=======
+tractionVelocity_OF13/tractionVelocityFvPatchVectorField.C
+
+LIB=$(FOAM_USER_LIBBIN)/libminiFoamBCs_debug
+>>>>>>> Stashed changes
