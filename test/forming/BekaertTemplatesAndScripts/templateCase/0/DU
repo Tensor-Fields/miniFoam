@@ -54,15 +54,17 @@ boundaryField
 
     wireSymmetryY
     {
-        type         solidSymmetry;
-        patchType    symmetryPlane;
+        //type         solidSymmetry;
+        //patchType    symmetryPlane;
+        type         symmetryPlane;
         value        uniform (0 0 0);
     }
 
     wireSymmetryZ
     {
-        type         solidSymmetry;
-        patchType    symmetryPlane;
+        //type         solidSymmetry;
+        //patchType    symmetryPlane;
+        type         symmetryPlane;
         value        uniform (0 0 0);
     }
 
@@ -297,57 +299,65 @@ boundaryField
 
     topRollRollerSymmetryY
     {
-        type         solidSymmetry;
-        patchType    symmetryPlane;
+        //type         solidSymmetry;
+        //patchType    symmetryPlane;
+        type         symmetryPlane;
         value        uniform (0 0 0);
     }
 
     topRollRollerSymmetryZ
     {
-        type         solidSymmetry;
-        patchType    symmetryPlane;
+        //type         solidSymmetry;
+        //patchType    symmetryPlane;
+        type         symmetryPlane;
         value        uniform (0 0 0);
     }
 
     bottomRollRollerSymmetryY
     {
-        type         solidSymmetry;
-        patchType    symmetryPlane;
+        //type         solidSymmetry;
+        //patchType    symmetryPlane;
+        type         symmetryPlane;
         value        uniform (0 0 0);
     }
 
     bottomRollRollerSymmetryZ
     {
-        type         solidSymmetry;
-        patchType    symmetryPlane;
+        //type         solidSymmetry;
+        //patchType    symmetryPlane;
+        type         symmetryPlane;
         value        uniform (0 0 0);
     }
 
     rightRollRollerSymmetryY
     {
-        type         solidSymmetry;
-        patchType    symmetryPlane;
+        //type         solidSymmetry;
+        //patchType    symmetryPlane;
+        type         symmetryPlane;
         value        uniform (0 0 0);
     }
 
     rightRollRollerSymmetryZ
     {
-        type         solidSymmetry;
-        patchType    symmetryPlane;
+        //type         solidSymmetry;
+        //patchType    symmetryPlane;
+        type         symmetryPlane;
         value        uniform (0 0 0);
     }
 
     leftRollRollerSymmetryY
     {
-        type         solidSymmetry;
-        patchType    symmetryPlane;
+        //type         solidSymmetry;
+        //patchType    symmetryPlane;
+        type         symmetryPlane;
         value        uniform (0 0 0);
     }
 
     leftRollRollerSymmetryZ
     {
-        type         solidSymmetry;
-        patchType    symmetryPlane;
+        //type         solidSymmetry;
+        //patchType    symmetryPlane;
+        type         symmetryPlane;
         value        uniform (0 0 0);
     }
 
@@ -434,15 +444,17 @@ boundaryField
 
     dieSymmetryY
     {
-        type         solidSymmetry;
-        patchType    symmetryPlane;
+        //type         solidSymmetry;
+        //patchType    symmetryPlane;
+        type         symmetryPlane;
         value        uniform (0 0 0);
     }
 
     dieSymmetryZ
     {
-        type         solidSymmetry;
-        patchType    symmetryPlane;
+        //type         solidSymmetry;
+        //patchType    symmetryPlane;
+        type         symmetryPlane;
         value        uniform (0 0 0);
     }
 
@@ -452,15 +464,17 @@ boundaryField
 
     wedgeBack
     {
-        type         solidWedge;
-        patchType    wedge;
+        //type         solidWedge;
+        //patchType    wedge;
+        type         wedge;
         value        uniform (0 0 0);
     }
 
     wedgeFront
     {
-        type         solidWedge;
-        patchType    wedge;
+        //type         solidWedge;
+        //patchType    wedge;
+        type         wedge;
         value        uniform (0 0 0);
     }
 }

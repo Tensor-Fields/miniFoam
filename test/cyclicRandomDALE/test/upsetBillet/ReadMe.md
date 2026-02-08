@@ -691,7 +691,11 @@ turns up smoother.
 
 ### Results  
 
+<<<<<<< HEAD
+The skewed corner is still a problem.
+=======
 Skewed corner is still a problem.
+>>>>>>> 72b1cbb7d709eeaf4c8018334edf800880513c6f
 
 ## bekaert_12  
 
