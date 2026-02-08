@@ -37,7 +37,14 @@ typedef GeometricField<scalar, fvPatchField, volMesh> volScalarField;
 
 typedef GeometricField<vector, fvPatchField, volMesh> volVectorField;
 
+typedef GeometricField<tensor, fvPatchField, volMesh> volTensorField;
+
+typedef GeometricField<symmTensor, fvPatchField, volMesh> volSymmTensorField;
+
 typedef GeometricField<scalar, fvsPatchField, surfaceMesh> surfaceScalarField;
+
+/// Post-solve system, obtain relaxed primary and also secondary fields
+#include "postSolve.H"
 
 ///
 /// updateMesh()
@@ -137,6 +144,25 @@ void update
 int main(int argc, char* argv[])
 {
     argList::validOptions.insert("res", "value");
+    argList::validOptions.insert("stabilisationFactor", "value");
+    argList::validOptions.insert("convergenceFactors", "values");
+    //argList::validOptions.insert("formulaA", "values");
+    argList::validOptions.insert("formula", "<name>");
+    argList::validOptions.insert("formulaA", "");
+    argList::validOptions.insert("formulaWave", "");
+    argList::validOptions.insert("nIterMax", "value");
+    argList::validOptions.insert("relaxField", "value");
+    argList::validOptions.insert("relaxEq", "value");
+    argList::validOptions.insert("Lagrangian", "");
+    argList::validOptions.insert
+        (
+            "stabilisationTerm",
+            "defaults to laplacian-divGrad. Option: divGrad-laplacian "
+        );
+
+    argList::validOptions.insert("explicitWeight", "<weight>");
+    argList::validOptions.insert("vBased", "");
+    argList::validOptions.insert("DBased", "");
 
     argList args
     (
@@ -146,6 +172,42 @@ int main(int argc, char* argv[])
 
     scalar max_res_to_break = readScalar
     (IStringStream(args.options()["res"])());
+
+    const label& nIterMax = 1000;
+
+    if (args.optionFound("nIterMax"))
+    {
+        const_cast<label&>(nIterMax) =
+            label
+            (
+                readScalar
+                (
+                    IStringStream(args.options()["nIterMax"])()
+                )
+            );
+    }
+
+    const scalar& fCoeff = 1;
+
+    const scalar& eqRelaxCoeff = 1;
+
+    if (args.optionFound("relaxField"))
+    {
+        const_cast<scalar&>(fCoeff) =
+            readScalar
+            (
+                IStringStream(args.options()["relaxField"])()
+            );
+    }
+
+    if (args.optionFound("relaxEq"))
+    {
+        const_cast<scalar&>(eqRelaxCoeff) =
+            readScalar
+            (
+                IStringStream(args.options()["relaxEq"])()
+            );
+    }
 
     /// Create time
     Time runTime
@@ -278,6 +340,27 @@ int main(int argc, char* argv[])
         )
     );
 
+    volSymmTensorField sigmaD = sigma;
+
+    volSymmTensorField sigmaDot
+    (
+        IOobject
+        (
+            "sigmaDot",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensioned<symmTensor>
+        (
+            "zero", 
+            dimMass / (pow(dimTime,3) * dimLength),
+            symmTensor::zero
+        )
+    );
+
     /// Identity matrix (also Kronecker delta)
     //volTensorField I
     //(
@@ -306,7 +389,8 @@ int main(int argc, char* argv[])
     (
         IOobject
         (
-            "physicalProperties",
+            //"physicalProperties",
+            "mechanicalProperties",
             runTime.constant(),
             mesh,
             IOobject::MUST_READ,
@@ -316,19 +400,53 @@ int main(int argc, char* argv[])
  
     //dimensionedScalar rho("rho", dimMass/dimVolume, );
     dimensionedScalar rho(physicalProperties.lookup("rho"));
- 
-    dimensionedScalar muS(physicalProperties.lookup("mu"));
 
     dimensionedScalar ES(physicalProperties.lookup("E"));
 
-    dimensionedScalar lambdaS(physicalProperties.lookup("lambda"));
+    // From Demirdzic and Martinovic, p.333, Eq.(9), we use nu for lambda and mu
+    // calculation
+    dimensionedScalar nuS(physicalProperties.lookup("nu"));
 
-    //dimensionedScalar lambda = mu * (2 * mu - E) / (E - 3 * mu); // Gives
-                                                                   // negative
+    ///
+    /// Plane stress check
+    ///
+
+    // No plane stress
+    dimensionedScalar lambdaS = nuS * ES / ((1 + nuS) * (1 - 2 * nuS));
+
+    // Plane stress
+    if (physicalProperties.lookupOrDefault<bool>("planeStress", false))
+    {
+        lambdaS = nuS * ES / ((1 + nuS) * (1 - nuS));
+
+        /// Registerd as a field with the mesh,
+        /// to be accessed by db() in boundary condition codes
+        /// Create it as a pointer, so it lives out of this scope
+        Field<bool>* planeStress = new Field<bool>(mesh.C().size(), true);
+    }
 
     Info<< "lambda = "
         << lambdaS
         << endl;
+
+    /// Wrong!
+    //dimensionedScalar muS = ES / (nuS * (1 + nuS));
+
+    /// Jasak and Weller 2000, and Wikipedia, and Saad, Table 4.1
+    dimensionedScalar muS = ES / (2 * (1 + nuS));
+
+    Info<< "mu = "
+        << muS
+        << endl;
+
+    //dimensionedScalar muS(physicalProperties.lookup("mu"));
+
+    //dimensionedScalar lambdaS(physicalProperties.lookup("lambda"));
+
+    //dimensionedScalar lambda = mu * (2 * mu - E) / (E - 3 * mu); // Gives
+
+                                                                   // negative
+                                                                   // negative
 
     volScalarField mu
     (
@@ -385,16 +503,100 @@ int main(int argc, char* argv[])
 
     pimpleControl pimple(mesh);
 
-    const label nIterMax = 1000;
+    //const label nIterMax = 1000;
 
     //while (runTime.loop()) // Only first time step is written into
                              // the endTime directory 
+    scalar stabilisationFactor = 1;
+
+    if (args.optionFound("stabilisationFactor"))
+    {
+        stabilisationFactor =
+            readScalar(IStringStream(args.options()["stabilisationFactor"])());
+    }
+
+    dimensioned<scalar> convergenceFactor = 2 * muS + lambdaS;
+    if (args.optionFound("convergenceFactors"))
+    {
+        List<string> convergenceFactors =
+            args.optionReadList<string>("convergenceFactors");
+
+        convergenceFactor =
+            readScalar(IStringStream(convergenceFactors[0])()) * muS
+         +  readScalar(IStringStream(convergenceFactors[1])()) * lambdaS;
+    }
+
+    scalar a=1, b=0;
+
+    if (args.optionFound("formulaA"))
+    {
+        if(!args.optionFound("convergenceFactors"))
+        {
+            FatalErrorIn("ALEelasticFoam.C")
+                << "formulaA goes with convergenceFactors option"
+                << abort(FatalError);
+        }
+
+        List<string> convergenceFactors =
+            //args.optionReadList<string>("formulaA");
+            args.optionReadList<string>("convergenceFactors");
+
+        a = readScalar(IStringStream(convergenceFactors[0])());
+        b = readScalar(IStringStream(convergenceFactors[1])());
+
+        Info<< "a = " 
+            << a  << "\nb = "
+            << b  << endl;
+    }
+
+    volVectorField vPrevIter = v;
+
+    /// Reference to automatically get updated. Wrong! Does not update!
+    //scalar& pseudoDeltaT = runTime.deltaT();
+
+    bool steadyState = false;
+    bool steadyStateConverged = false;
+
+    if
+    (
+        mesh.schemesDict().ddtSchemes().lookup("ddt(v)")
+     == "steadyState" 
+     || mesh.schemesDict().ddtSchemes().lookup("default")
+     == "steadyState" 
+    )
+    {
+        steadyState = true;
+
+        /// From the trapizoidal rule
+        //pseudoDeltaT = /*min (*/2 * (D - Dold) / (SMALL + v + vOld)/*, 0)*/
+    }
+
+    lduSolverPerformance solverPerformance;
+
     while (runTime.run())
     {
-        Info<< "Time = "
+        Info<< nl << "Time = "
             << runTime.timeName()
             << endl;
 
+        /// We put this coeffs here for them to be able to change with time if
+        /// needed
+        dimensioned<scalar> au0("au0", dimless, 1);
+        //dimensioned<scalar> av0("av0", dimTime, 0.5 * runTime.deltaT());
+        dimensioned<scalar> av0 = 0.5 * runTime.deltaT();
+        dimensioned<scalar> av = av0;
+
+        if (args.optionFound("formulaA"))
+        {
+            au0 = 1;
+            av0 = 0.5 * runTime.deltaT();
+            av = av0;
+
+            //Info<< "au0 = "
+            //    << au0<< "av0 = "
+            //    << av0<< "av = "
+            //    << av << endl;
+        }
         ///
         /// Differred correction loop
         /// Alternatives:
@@ -409,114 +611,80 @@ int main(int argc, char* argv[])
                                 // what time marching setting is.
         //while (pimple.loop())
         {
-            /// DEq
-            //fvVectorMatrix DEq
-            //(
-            //    rho * fvm::d2dt2(D) // D = x - x0, so x replaced by D
-            // == fvm::laplacian(mu, D)
-            //  + fvc::div(sigma)
-            //  - fvc::laplacian(mu, D)
-            //  //+ fvm::laplacian(rho * (mesh.phi() - phi), U)
-            //  + 1/runTime.deltaT() * (fvm::div(phi, D) - fvc::div(phi, D))
-            //);
-    
             /// Force V allocation for V0 to be stored
             /*const scalar totalV = */gSum(mesh.V());
 
-            ///
-            /// vEq
-            ///
+            autoPtr<fvMatrix<vector> > vEqPtr;
+            autoPtr<fvMatrix<vector> > DEqPtr;
 
-            /// For now, the only spatially-implicit contribution comes from the
-            /// convection term. 
-            /// v = (D_new - D_old)/deltaT, for a single particle;
-            /// This is the definition of v.
-            /// If you are calculating
-            /// (D_new - D_old)/deltaT at the same point of space, then
-            /// (D_new - D_old)/deltaT = 0! (It is \partial_t x in Chadwick,
-            /// p.52, eq. 12). 
-            /// From
-            /// Chadwich, p.52, eq. 12, the above formula is set in the Eulerian
-            /// description for v, and alternatively can be written as
-            /// v = x_dot, which in turn means that for Eulerian v,
-            /// velocity at each points is the velocity of the particle
-            /// occupying that point.
-            /// Note that v in our formulation is not the material velocity,
-            /// because we decided that \int_R \rho v dV is the momentum of the
-            /// ARBITRARY region R.
+            bool vBased = args.optionFound("vBased");
+            bool DBased = args.optionFound("DBased");
 
-            /// So, still not clear how to calculate D from v, and later, how to
-            /// implicitely contribute sigma to the system.
-            fvVectorMatrix vEq
-            (
-                rho * fvm::ddt(v) // Actually fvm::ddt(rho * v)
-             == 
-              //fvm::laplacian(mu, D) // consider ortho and non-ortho terms
-                runTime.deltaT() / 2 * fvm::laplacian(muS, v)
-              + runTime.deltaT() / 2 * fvc::laplacian(muS, v)
-              + fvc::div(sigma)
-              //- fvc::laplacian(muS, D)
-              + fvm::div(phi, v) // Non-linearity
-            );
-
-            Info<< "vEq assembled."
-                << endl;
-
-            vEq.relax();
- 
-            //vEq.solve();
-
-            lduSolverPerformance solverPerformance = vEq.solve();
-
-            v.correctBoundaryConditions();
-
-            /// Update copies
-            U.internalField() = v.internalField();
-            U.boundaryField() = v.boundaryField();
-
-            gradV.internalField() = fvc::grad(v)().internalField();
-            gradV.boundaryField() = fvc::grad(v)().boundaryField();
- 
-            /// Update phi
-            phi = rho * linearInterpolate(w - v) & mesh.Sf(); // phi updated; return to
-                                                        // vEq
-            Info<< "Phi corrected."
-                << endl;
- 
-            /// Update D, not Dold (old in time, not iter)
-            D = Dold + 0.5 * (v + vOld) * runTime.deltaT();
-
-            Info<< "D corrected."
-                << endl;
-
-            /// Stress, corrected in a differred manner
-            stress = mu * (fvc::grad(D) + (fvc::grad(D))().T())
-                + lambda * fvc::div(D) * I;
-
-            /// Pour stress to sigma
-            forAll(stress, cellI)
+            if (vBased && DBased)
             {
-                forAll(stress[cellI], cmpt)
-                {
-                    sigma[cellI][0] = stress[cellI][0];
-                    sigma[cellI][1] = stress[cellI][1];
-                    sigma[cellI][2] = stress[cellI][2];
-                    sigma[cellI][3] = stress[cellI][4];
-                    sigma[cellI][4] = stress[cellI][5];
-                    sigma[cellI][5] = stress[cellI][8];
-                }
+                FatalErrorIn("")
+                    << "Choose either '-vBased' or '-DBased'"
+                    << abort(FatalError);
             }
 
-            Info<< "sigma corrected."
+            if (vBased)
+            {
+                #include "vEq.H"
+            }
+            else if (DBased)
+            {
+                #include "DEq.H"
+            }
+            else
+            {
+                notImplemented("Only v-based and D-based models are"
+                " imlemented;\n"
+                "Choose one using '-vBased' or '-DBased'.");
+                 
+            }
+
+            Info<< "Eq assembled."
                 << endl;
 
-            ///*lduSolverPerformance*/ solverPerformance = DEq.solve();
- 
+            /// Solve and update fileds
+            postSolve
+            (
+                /// Relax equation
+                eqRelaxCoeff, args.optionFound("relaxEq"),
+                /// Relax field
+                fCoeff,
+                vEqPtr,
+                DEqPtr,
+                /// ldu solver
+                solverPerformance,
+                /// Mesh
+                mesh,
+                /// Primary fields
+                v,
+                D,
+                /// Secondary fields
+                gradV,
+                stress,
+                sigma, 
+                sigmaD, 
+                sigmaDot,
+                phi,
+                w,
+                /// Properties
+                rho,
+                mu,
+                lambda
+            );
+
             if
             (
                 solverPerformance.initialResidual() < max_res_to_break
                 //mesh.solutionDict().solverPerformanceDict()
-            ) {break;}
+            )
+            {
+                steadyStateConverged = true;
+                break;
+            }
  
             // Update material velocity
             //u = fvc::ddt(D); // ?
@@ -529,18 +697,27 @@ int main(int argc, char* argv[])
 
         /// Update Dold
         /// 'Old' in time, not in iteration, so Dold != D.prevIter()
-        Dold = D;
-        vOld = v;
+        //Dold = D;
+        //vOld = v;
 
-        Info<< "Update old fields."
-            << endl;
+        //Info<< "Update old fields."
+        //    << endl;
  
         //
         // Update mesh velocity
         //
  
-        // Move points according to some arbitrary rule
-        update(mesh, v, w, D); // mesh.update()?
+        if (args.optionFound("Lagrangian"))
+        {
+            /// Lagrangian
+            w = v;
+        }
+        else
+        {
+            /// ALE
+            // Move points according to some arbitrary rule
+            update(mesh, v, w, D); // mesh.update()?
+        }
  
         runTime++; // When runTime.run() is used instead of .loop()
 
@@ -549,6 +726,19 @@ int main(int argc, char* argv[])
         {
             //runTime.write(); // Writes 'uniform' dir only
             mesh.write();
+        }
+
+        /// Stop in steady-state, when the max residual is hit
+        if
+        (
+            steadyState
+         && steadyStateConverged
+        )
+        {
+            Info<< nl << "Converged to the steady state solution"
+                << endl;
+
+            break;
         }
     }
 }
