@@ -56,6 +56,14 @@ L1ErrPtr_(NULL)
 {
     /// Set fieldExactPtr_ and initialize 
     //fieldExact();
+
+	Info<< "    meshSource size: "
+	    << meshSource.C().size()
+		<< endl;
+
+	Info<< "    meshTarget size: "
+	    << meshSource.C().size()
+		<< endl;
 }
 
 template<class Type>
@@ -105,20 +113,20 @@ void Foam::err<Type>::report()
 template <class type>
 Foam::scalar Foam::err<type>::int_over_whole_mesh
 (
-    GeometricField<type, fvPatchField, volMesh> integrandField
+    const GeometricField<type, fvPatchField, volMesh>& integrandField
 )
 {
     scalar intValue = VSMALL;
 
     /// Call fvMesh::V()
     const DimensionedField<scalar, volMesh>& meshVol = meshTarget_.V();
-        //const_cast<fvMesh&>(meshTarget_).V();
+    //const_cast<fvMesh&>(meshTarget_).V();
 
     forAll(integrandField, cellI)
     {
         // Operator precedence: [] > *
         // see: https://en.cppreference.com/w/c/language/
-	// operator_precedence.html
+	    // operator_precedence.html
         intValue += ( integrandField[cellI] * meshVol[cellI] );
     }
 
@@ -218,7 +226,7 @@ Foam::err<Type>::fieldExact
 }
 
 template<class Type>
-void Foam::err<Type>::calcErr()
+void Foam::err<Type>::calcErr(bool writeErrField)
 {
     /// Unnecessary references to member data, replace them with actual member
     /// data in the function body below
@@ -294,6 +302,14 @@ void Foam::err<Type>::calcErr()
             << " found at "
             << fieldSource.objectPath()
             << endl;
+
+	    Info<< "fieldTarget size: "
+		    << fieldTarget.size()
+			<< endl;
+
+	    Info<< "fieldSource size: "
+		    << fieldSource.size()
+			<< endl;
 
         ///
         /// Calc err wrt a given source mesh and field
@@ -899,8 +915,19 @@ void Foam::err<Type>::calcErr()
 
         errPtr_().rename(fieldTarget.name()+"_err");
         this->report();
-        Info<< "Error calculated.\n"
+
+        Info<< "Error calculated."
             << endl;
+
+		if (writeErrField)
+		{
+		    errPtr_().write();
+
+            Info<< errPtr_().name()
+			    << " written to "
+				<< meshTarget.time().timeName()
+                <<"\n"<< endl;
+		}
     }
 }
 
@@ -1011,4 +1038,11 @@ template<class T>
 void Foam::err<T>::updateMeshTarget()
 {
     const_cast<fvMesh&>(meshTarget_).readUpdate();
+}
+
+template<class T>
+Foam::GeometricField<T, Foam::fvPatchField, Foam::volMesh>
+Foam::err<T>::errField()
+{
+    return errPtr_();
 }
