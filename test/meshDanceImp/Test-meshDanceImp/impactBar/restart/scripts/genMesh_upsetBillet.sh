@@ -86,7 +86,10 @@ if ! genBlockMeshDict \
     -nOL       1 \
     -nPeriph   1 \
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
     -nRT      10 \
     -nZT      10 \
 >>>>>>> Stashed changes

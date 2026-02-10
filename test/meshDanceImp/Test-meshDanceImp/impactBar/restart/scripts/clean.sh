@@ -1,7 +1,10 @@
 #!/bin/bash
+<<<<<<< Updated upstream
 rm [0-9].[0-9]* [1-9] -r
 rm log*
 rm processor* -r
+=======
+>>>>>>> Stashed changes
 
 ## Integet time dirs
 rm -rf [1-9]
@@ -91,6 +94,7 @@ rm -rf [0-9].[0-9][0-9]*E-[0-9][0-9]*
 rm -rf [0-9].[0-9][0-9]*
 rm -rf [1-9][0-9].[0-9][0-9]*
 rm -rf [1-9][0-9][0-9].[0-9]*
+<<<<<<< Updated upstream
 
 ## logs and figures
 rm log.* *.log
@@ -98,3 +102,5 @@ rm log.* *.log
 
 ## data files
 #rm *.dat
+=======
+>>>>>>> Stashed changes
