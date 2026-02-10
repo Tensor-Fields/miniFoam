@@ -46,7 +46,7 @@ class err
         /// Private member functions
         scalar int_over_whole_mesh
         (
-            GeometricField<T, fvPatchField, volMesh> integrandField
+            const GeometricField<T, fvPatchField, volMesh>& integrandField
         );
 
         GeometricField<T, fvPatchField, volMesh>& fieldExact
@@ -68,7 +68,7 @@ class err
         );
 
         /// Members
-        void calcErr();
+        void calcErr(bool writeErrorField = false);
 
         void calcErr_wrt_same_mesh
         (
@@ -79,6 +79,9 @@ class err
         void report();
 
         void updateMeshTarget();
+
+        GeometricField<T, fvPatchField, volMesh>
+        errField();
 };
 }
 

@@ -16,10 +16,12 @@ echo
 #    done
 
 wmake test/cyclicRandomDALE
-wmake test/meshToMeshError
 wmake test/meshDanceImp
 wmake test/LaplacianSmoothBilletMesh/
 wmake test/ALEelasticFoam
+
+wmake app/meshToMeshError
+wmake app/mag
 
 echo
 echo See above for errors, if any.

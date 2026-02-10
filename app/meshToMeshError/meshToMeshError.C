@@ -272,7 +272,9 @@ int main (int argc, char* argv[])
         }
         else
         {
-            scalarFieldError.calcErr();
+			/// true: Write error field at meshTarget time dirs
+			/// Default to false
+            scalarFieldError.calcErr(true);
             //vectorFieldError.calcErr();
         }
 
@@ -280,11 +282,16 @@ int main (int argc, char* argv[])
             << endl;
 
         /// Report error
-        scalarFieldError.report();
+        //scalarFieldError.report();
         //vectorFieldError.report();
 
         //Info<< "Error reported."
         //    << endl;
+
+		//if (runTime.write())
+		//{
+		//  scalarFieldError.errField().write();
+		//}
     }
 
     Info<< nl << "End."

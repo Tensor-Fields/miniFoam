@@ -78,8 +78,8 @@ Case=$1
     #-nZT      120 \
 
 if ! genBlockMeshDict \
-    -nRT      15 \
-    -nZT      15 \
+    -nRT      10 \
+    -nZT      10 \
     -nRd      1 \
     -RR       10 \
     -ZZ       15 \
@@ -96,11 +96,11 @@ then
     exit 1
 fi
 
-#if ! mv blockMeshDict $Case; then
-#    echo Error
-#    echo mv blockMeshDict to $Case failed
-#    exit 1
-#fi
+if ! mv blockMeshDict $Case; then
+    echo Error
+    echo mv blockMeshDict to $Case failed
+    exit 1
+fi
 
 mkdir -p $Case/constant/polyMesh
 
