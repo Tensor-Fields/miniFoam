@@ -12,41 +12,8 @@ Foam::err<T>::err
 )
 :
 args_(args),
-//fieldTarget_(),
-//fieldSource_(),
-//fieldExact_(),
-fieldExactPtr_(/*NULL*/),
-//(
-//    new GeometricField<T, fvPatchField, volMesh>
-//    (
-//        IOobject
-//        (
-//            "fieldExact",
-//            meshSource.time().timeName(),
-//            meshTarget,
-//            IOobject::NO_READ,
-//            IOobject::NO_WRITE
-//        ),
-//        meshTarget,
-//        dimensioned<T>("0", dimless, pTraits<T>::zero)
-//    )
-//),
-errPtr_(/*NULL*/),
-//(
-//    new GeometricField<T, fvPatchField, volMesh>
-//    (
-//        IOobject
-//        (
-//            "err",
-//            meshSource.time().timeName(),
-//            meshTarget,
-//            IOobject::NO_READ,
-//            IOobject::NO_WRITE
-//        ),
-//        meshTarget,
-//        dimensioned<T>("0", dimless, pTraits<T>::zero)
-//    )
-//),
+fieldExactPtr_(),
+errPtr_(),
 meshSource_(meshSource),
 meshTarget_(meshTarget),
 minErr_(VGREAT),
@@ -54,9 +21,6 @@ maxErr_(VSMALL),
 avgErr_(VSMALL),
 L1ErrPtr_(NULL)
 {
-    /// Set fieldExactPtr_ and initialize 
-    //fieldExact();
-
 	Info<< "    meshSource size: "
 	    << meshSource.C().size()
 		<< endl;
@@ -126,7 +90,7 @@ Foam::scalar Foam::err<type>::int_over_whole_mesh
     {
         // Operator precedence: [] > *
         // see: https://en.cppreference.com/w/c/language/
-	    // operator_precedence.html
+        // operator_precedence.html
         intValue += ( integrandField[cellI] * meshVol[cellI] );
     }
 
@@ -252,10 +216,6 @@ void Foam::err<Type>::calcErr(bool writeErrField)
         Type, fvPatchField, volMesh
     > fieldType;
 
-    /// Error
-    //IOobjectList objects = fields.lookupClass(word(typename fieldType));
-
-    //IOobjectList objectsSource = fieldsSource.lookupClass(word(fieldType::typeName));
     IOobjectList objectsTarget = fieldsTarget.lookupClass(word(fieldType::typeName));
 
     for 
@@ -293,23 +253,19 @@ void Foam::err<Type>::calcErr(bool writeErrField)
             Type, fvPatchField, volMesh
         > fieldSource(fieldSourceIO, meshSource);
 
-        //Info<< "meshSource.instance(): "
-        //    << meshSource.instance()
-        //    << endl;
-
         Info<< "Source field "
             << fieldSource.name()
             << " found at "
             << fieldSource.objectPath()
             << endl;
 
-	    Info<< "fieldTarget size: "
-		    << fieldTarget.size()
-			<< endl;
+        Info<< "fieldTarget size: "
+            << fieldTarget.size()
+            << endl;
 
-	    Info<< "fieldSource size: "
-		    << fieldSource.size()
-			<< endl;
+        Info<< "fieldSource size: "
+            << fieldSource.size()
+            << endl;
 
         ///
         /// Calc err wrt a given source mesh and field
@@ -726,10 +682,10 @@ void Foam::err<Type>::calcErr(bool writeErrField)
                     /// Particularly when doing cyclic study, when meshSource
                     /// and meshTarget coincide
                     /// 
-                    Err[cellI] = 
-                        //-fieldSource[sourceCellEnclosingThisPoint]
-                        -fieldSource[sourceCellNearestToThisPoint] 
-                            + fieldTarget[cellI];
+                    //Err[cellI] = 
+                    //    //-fieldSource[sourceCellEnclosingThisPoint]
+                    //    -fieldSource[sourceCellNearestToThisPoint] 
+                    //        + fieldTarget[cellI];
 
                     ///
                     /// Criterion:
@@ -738,17 +694,16 @@ void Foam::err<Type>::calcErr(bool writeErrField)
                     /// Taylor expansion of the fieldSource at this point based on
                     /// sourceCellNearestTo cellI center is considered the
                     /// reference(aka correct) value
-                    //fieldRef[cellI] = 
-                    //    fieldSource[sourceCellNearestToThisPoint] +
-                    //        (gradFieldSource[sourceCellNearestToThisPoint] & 
-                    //            (
-                    //                cellCenter[cellI] -
-                    //                    sourceCellCenter
-                    //                    [
-                    //                        sourceCellNearestToThisPoint
-                    //                    ]
-                    //            )
-                    //        );
+                    fieldRef[cellI] = 
+                        fieldSource[sourceCellNearestToThisPoint]
+                      + (
+                            gradFieldSource[sourceCellNearestToThisPoint]
+                          & (
+                                cellCenter[cellI]
+                              - sourceCellCenter
+                                    [sourceCellNearestToThisPoint]
+                            )
+                        );
 
                     //if(!args.optionFound("unbounded"))
                     //{
@@ -822,24 +777,28 @@ void Foam::err<Type>::calcErr(bool writeErrField)
                           & (pointI - cellCenter[targetCellNearestToThisPoint])
                         );
 
-                    /// If `unbounded' NOT specified, cut-off out-of-bound
-                    if(!args.optionFound("unbounded"))
-                    {
-                        /// Cut-off the lower out of bound
-                        fieldRef[cellI] = 
-                            max(min(fieldSource).value(), fieldRef[cellI]);
-
-                        /// Cut-off the upper out of bound
-                        fieldRef[cellI] = 
-                            min(max(fieldSource).value(), fieldRef[cellI]);
-                    }
-
-                    Err[cellI] = fieldRef[cellI] - fieldSource[cellI];
                         //(
                         //    fieldSource[sourceCellNearestToThisPoint] 
                         //  + (gradFieldSource[cellI] & (cellCenter[cellI] -
                         //        sourceCellCenter[cellI]))
                         //);
+
+                }
+            }
+
+            /// `bounded' is the default behaviour
+            /// If `unbounded' NOT specified, cut-off out-of-bound
+            if(!args.optionFound("unbounded"))
+            {
+                forAll(fieldRef, cellI)
+                {
+                    /// Cut-off the lower out of bound
+                    fieldRef[cellI] = 
+                        max(min(fieldSource).value(), fieldRef[cellI]);
+
+                    /// Cut-off the upper out of bound
+                    fieldRef[cellI] = 
+                        min(max(fieldSource).value(), fieldRef[cellI]);
                 }
             }
 
@@ -847,6 +806,17 @@ void Foam::err<Type>::calcErr(bool writeErrField)
             /// explicitly write Err 
             //fieldRef.write();
             //Err.write();
+
+            /// If error evaluation at Target Cells
+            if (!args.optionFound("atSourceCellCenters"))
+            {
+                Err = fieldTarget - fieldRef;
+            }
+            else
+            {
+                Err = fieldRef - fieldSource;
+            }
+
             errPtr_.reset
             (
                 new GeometricField<Type, fvPatchField, volMesh>
