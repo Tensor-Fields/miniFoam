@@ -1,3 +1,31 @@
+## Test
+
+- Edit mesh generator script, mainly these two lines for the mesh size,
+```sh
+-nRT      40 \
+-nZT      40 \
+```
+- Run
+
+```sh
+./run.sh -h
+```
+
+For example,
+
+```sh
+./run.sh form endTime 1 template/ "false" dale_60_1/ \
+    place_holder genMesh_upsetBillet.sh
+```
+
+- Then, inside a *DALE* case,
+
+```sh
+./calcError.sh U ../<Lagrangian_counterpart>
+```
+
+calculates both the magnitude of `U` which is a `vectorField`, and then, the  
+error for *all* `scalarField`s (not `mag(U)` only). 
 
 ## Runs
 
@@ -40,14 +68,6 @@ meshToMeshError -sourceCase $Ref -latestTargetTime -latestSourceTime \
     src="figures/dale_vs_lag_error.png"
     style="width:75%; height:auto;"
 />
-
-## Test
-
-- Edit mesh generator script
-- Run
-```sh
-./run.sh form endTime 1 template/ dale_60_1/ place_holder genMesh_upsetBillet.sh
-```
 
 *dale_30_1*: Copy of *dale_30*, using original `wedge` and `symmetry`.  
 *Lag_30_1*: Counterpart of *dale_30_1*, without ALE.

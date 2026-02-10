@@ -523,8 +523,6 @@ void Foam::err<Type>::calcErr(bool writeErrField)
             );
         }
 
-        //errPtr_().rename(fieldTarget.name()+"_err");
-
         this->report();
 
         Info<< "Error calculated."
@@ -532,6 +530,10 @@ void Foam::err<Type>::calcErr(bool writeErrField)
 
         if (writeErrField)
         {
+            /// Rename is necessary; names are overwritten by '=' operator.
+            errPtr_().rename(fieldTarget.name()+"_err");
+            fieldExactPtr_().rename(fieldTarget.name()+"_Ref");
+
             errPtr_().write();
             fieldExactPtr_().write();
 
@@ -640,16 +642,18 @@ template<class T>
 Foam::scalar
 Foam::err<T>::L1Err()
 {
-    if (!L1ErrPtr_.valid())
-    {
-        L1ErrPtr_.set(new scalar(int_over_whole_mesh(mag(errPtr_()))));
-    }
-    else
-    {
-        FatalErrorIn("    L1Err()")
-            << "    L1ErrPtr_ is not empty."
-            << abort(FatalError);
-    }
+    //if (!L1ErrPtr_.valid())
+    //{
+
+        /// Re-set is required; it is called in the field loop for all fields
+        L1ErrPtr_.reset(new scalar(int_over_whole_mesh(mag(errPtr_()))));
+    //}
+    //else
+    //{
+    //    FatalErrorIn("    L1Err()")
+    //        << "    L1ErrPtr_ is not empty."
+    //        << abort(FatalError);
+    //}
 
     return L1ErrPtr_();
 }
