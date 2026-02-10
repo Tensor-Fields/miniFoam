@@ -1,0 +1,16 @@
+tractionVelocity_OF13/tractionVelocityFvPatchVectorField.C
+
+<<<<<<< HEAD
+/* FE40 */
+/*tractionDisplacement/tractionDisplacementFvPatchVectorField.C*/
+
+/* solids4Foam */
+solids4FoamFixedDisplacement/solids4FoamFixedDisplacementFvPatchVectorField.C
+
+tractionVelocity_OF13/tractionVelocityFvPatchVectorField.C
+
+LIB=$(FOAM_USER_LIBBIN)/libminiFoamBCs_debug
+/*LIB=$(FOAM_USER_LIBBIN)/libminiFoamBCs*/
+=======
+LIB=$(FOAM_USER_LIBBIN)/libminiFoamBCs_debug
+>>>>>>> 69f05cf80f1ff99432286cedaa5d268ea3f1c033
