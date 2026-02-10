@@ -48,10 +48,13 @@
     style="width:75%; height:auto;"
 />
 
+=======
+>>>>>>> c1bb963 (clean tree)
 ### l0_long
 
 - Increased wire length by a factor of 3.
 
+<<<<<<< HEAD
 #### Results
 
 - The wire should initially be positioned so that we have more wire at the  
