@@ -1,4 +1,4 @@
-## Usage
+## Test
 
 ```sh
 ./run.sh -h    # Prints help
@@ -10,10 +10,6 @@
 ./run.sh form endTime 1 template/ dale_60_1/ place_holder genMesh_upsetBillet.sh
 
 ## Test
-
-```sh
-./run.sh -h
-```
 
 ## Runs
 
