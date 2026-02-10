@@ -188,11 +188,15 @@ int main (int argc, char* argv[])
 
     /// Create the error object
     /// Make sure every argument recognised by err<> is passed to it
+    const bool bounded = args.optionFound("unbounded");
+
     err<scalar> scalarFieldError
     (
-        args,
+        //args,
         meshSource,
-        meshTarget
+        meshTarget,
+        args.optionFound("atSourceCellCenters"),
+        bounded
     );
 
     //err<vector> vectorFieldError

@@ -29,7 +29,7 @@ class err
     /// Private
         
         /// Private data
-        const argList& args_;
+        //const argList& args_;
 
         autoPtr<GeometricField<T, fvPatchField, volMesh> > fieldExactPtr_;
 
@@ -42,6 +42,12 @@ class err
         scalar maxErr_;
         scalar avgErr_;
         autoPtr<scalar> L1ErrPtr_;
+
+        /// The default is error calculation at target mesh cell centers
+        bool atSourceCellCenters_;
+
+        /// True by default
+        bool bounded_;
 
         /// Private member functions
         scalar int_over_whole_mesh
@@ -62,9 +68,11 @@ class err
         /// Constructors
         err
         (
-            const argList& args,
+            //const argList& args,
             const fvMesh& meshSource,
-            const fvMesh& meshTarget
+            const fvMesh& meshTarget,
+            bool atSourceCellCenters = false,
+            bool bounded = true
         );
 
         /// Members

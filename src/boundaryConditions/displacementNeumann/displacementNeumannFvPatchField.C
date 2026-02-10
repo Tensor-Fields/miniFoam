@@ -1636,6 +1636,8 @@ displacementNeumannFvPatchField::conjugateN(const Field<vector>& psi) const
         }
     }
 
+    Info<< "    Successful end of conjugateN\n";
+ 
     return tT();
 }
 

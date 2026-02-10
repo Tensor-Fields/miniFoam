@@ -1,17 +1,16 @@
-## Test
-
-```sh
-./run.sh -h    # Prints help
-
-## - Edit mesh generator script
-
-## - Run
-
-./run.sh form endTime 1 template/ dale_60_1/ place_holder genMesh_upsetBillet.sh
-
-## Test
 
 ## Runs
+
+### doc/dale_10_3
+
+- Corrected behaviour now. When `-atSourceCellCenters` is passed, error and  
+  reference fields are written at the *source* directory; when not passed,  
+  results are written at the target. A complete comparison is shown below
+
+<img
+    src="figures/dale_vs_lag_10_errors.png"
+    style="width:75%; height:auto;"
+/>
 
 ### dale_10_2
 
@@ -41,6 +40,14 @@ meshToMeshError -sourceCase $Ref -latestTargetTime -latestSourceTime \
     src="figures/dale_vs_lag_error.png"
     style="width:75%; height:auto;"
 />
+
+## Test
+
+- Edit mesh generator script
+- Run
+```sh
+./run.sh form endTime 1 template/ dale_60_1/ place_holder genMesh_upsetBillet.sh
+```
 
 *dale_30_1*: Copy of *dale_30*, using original `wedge` and `symmetry`.  
 *Lag_30_1*: Counterpart of *dale_30_1*, without ALE.
