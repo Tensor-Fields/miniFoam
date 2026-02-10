@@ -278,8 +278,8 @@ int main (int argc, char* argv[])
             //vectorFieldError.calcErr();
         }
 
-        Info<< "meshToMeshError: Error calculated"
-            << endl;
+        //Info<< "meshToMeshError: Error calculated"
+        //    << endl;
 
         /// Report error
         //scalarFieldError.report();
