@@ -1,3 +1,0 @@
-tractionVelocity_OF13/tractionVelocityFvPatchVectorField.C
-
-LIB=$(FOAM_USER_LIBBIN)/libminiFoamBCs_debug
