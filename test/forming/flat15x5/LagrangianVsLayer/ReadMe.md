@@ -34,6 +34,7 @@
   `libsolidModelsBekaert.so` not compiled in the debug mode, so not clear  
   whether it is that or in openfoam libraries.)
 
+<<<<<<< Updated upstream
 <!-- 
 060226 {
 -->
@@ -48,10 +49,13 @@
     style="width:75%; height:auto;"
 />
 
+=======
+>>>>>>> Stashed changes
 ### l0_long
 
 - Increased wire length by a factor of 3.
 
+<<<<<<< Updated upstream
 #### Results
 
 - The wire should initially be positioned so that we have more wire at the  
@@ -73,6 +77,8 @@
 060226 }
 -->
 
+=======
+>>>>>>> Stashed changes
 ### rolling1_level-1
 
 - Same as *rolling1_level0*, `contactCellSize` increased to produce a rougher
@@ -92,8 +98,4 @@
 #### Results
 
 - `form`: `Incompatible fields` in size, see *log.form*.
-<<<<<<< Updated upstream
 - `plasticNonLinSolidFoam`: Same error.
-=======
-- `plasticNonLinSolidFoam`: same.
->>>>>>> Stashed changes
