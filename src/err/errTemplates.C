@@ -16,10 +16,12 @@ Foam::err<T>::err
 //args_(args),
 fieldExactPtr_(),
 errPtr_(),
+relErrPtr_(),
 meshSource_(meshSource),
 meshTarget_(meshTarget),
 minErr_(VGREAT),
 maxErr_(VSMALL),
+maxRelErr_(VSMALL),
 avgErr_(VSMALL),
 L1ErrPtr_(NULL),
 atSourceCellCenters_(atSourceCellCenters),
@@ -40,6 +42,7 @@ void Foam::err<Type>::errStats()
     /// Re-set errors
     minErr_ = VGREAT;
     maxErr_ = VSMALL;
+    maxRelErr_ = VSMALL;
     avgErr_ = VSMALL;
 
     /// Calculate  error statistics
@@ -48,6 +51,9 @@ void Foam::err<Type>::errStats()
         avgErr_ += errPtr_()[cellI];
         minErr_ = min(mag(errPtr_()[cellI]), minErr_);
         maxErr_ = max(mag(errPtr_()[cellI]), maxErr_);
+
+        // Max relative error [%]
+        maxRelErr_ = max(mag(100 * relErrPtr_()[cellI]), maxRelErr_);
     }
   
     avgErr_ /= errPtr_().size();
@@ -68,6 +74,10 @@ void Foam::err<Type>::report()
 
     Info<< "Max absolute error: "
         << maxErr_
+        << endl;
+
+    Info<< "Max relative error [%]: "
+        << maxRelErr_
         << endl;
 
     //Info<< "Median is not implemented."
@@ -513,6 +523,15 @@ void Foam::err<Type>::calcErr(bool writeErrField)
                 new GeometricField<Type, fvPatchField, volMesh>
                 (fieldRef - fieldSource)
             );
+
+            relErrPtr_.reset
+            (
+                new Field<Type>
+                (
+                    (fieldRef - fieldSource)().internalField()
+                    / (VSMALL + fieldRef.internalField())
+                )
+            );
         }
         else
         {
@@ -520,6 +539,15 @@ void Foam::err<Type>::calcErr(bool writeErrField)
             (
                 new GeometricField<Type, fvPatchField, volMesh>
                 (fieldTarget - fieldRef)
+            );
+
+            relErrPtr_.reset
+            (
+                new Field<Type>
+                (
+                    (fieldTarget - fieldRef)().internalField()
+                    / (VSMALL + fieldRef.internalField())
+                )
             );
         }
 
@@ -550,8 +578,9 @@ void Foam::err<Type>::calcErr(bool writeErrField)
 template<class Type>
 void Foam::err<Type>::calcErr_wrt_same_mesh
 (
-    const word& sourceCase,
-    const fileName& sourceTime
+    //const word& sourceCase,
+    //const fileName& sourceTime
+    const bool& writeErrField
 )
 {
     ///
@@ -598,7 +627,7 @@ void Foam::err<Type>::calcErr_wrt_same_mesh
         (
             fieldTarget.name(),
             meshSource_.instance(),
-            sourceTime,
+            meshSource_.time().timeName(),
             meshSource_,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
@@ -631,10 +660,43 @@ void Foam::err<Type>::calcErr_wrt_same_mesh
             (fieldTarget - fieldSource)
         );
 
-        errPtr_().rename(fieldTarget.name()+"_err");
+        relErrPtr_.reset
+        (
+            new Field<Type>
+            (
+                (fieldTarget - fieldSource)().internalField()
+                /(VSMALL + fieldSource.internalField())
+            )
+        );
 
-        Info<< "Error calculated."
-            << endl;
+        this->report();
+
+        if (writeErrField)
+        {
+            /// Rename is necessary; names are overwritten by '=' operator.
+            errPtr_().rename(fieldTarget.name()+"_err");
+
+            /// Set the exact field to be the fieldSource
+            fieldExactPtr_.reset
+            (
+                fieldSource.clone().ptr()
+            );
+
+            fieldExactPtr_().rename(fieldTarget.name()+"_Ref");
+
+            errPtr_().write();
+            fieldExactPtr_().write();
+
+            Info<< fieldExactPtr_().name()
+                << " and "
+                << errPtr_().name()
+                << " written to "
+                << meshTarget_.time().timeName()
+                <<"\n"<< endl;
+        }
+
+        //Info<< "Error calculated."
+        //    << endl;
     }
 }
 

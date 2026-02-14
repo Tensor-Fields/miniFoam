@@ -96,6 +96,7 @@ int main (int argc, char* argv[])
 
     /// Call error calculation between same meshes
     argList::validOptions.insert("consistent", "");
+    argList::validOptions.insert("writeErrAndRefFields", "");
 
     argList args(argc, argv);
 
@@ -270,15 +271,19 @@ int main (int argc, char* argv[])
             scalarFieldError
             .calcErr_wrt_same_mesh
             (
-                args.options()["sourceCase"],
-                sourceTimes[sourceTimeIndex].name()
+                //args.options()["sourceCase"],
+                //sourceTimes[sourceTimeIndex].name()
+                args.optionFound("writeErrAndRefFields")
             );
         }
         else
         {
 			/// true: Write error field at meshTarget time dirs
 			/// Default to false
-            scalarFieldError.calcErr(true);
+            scalarFieldError.calcErr
+            (
+                args.optionFound("writeErrAndRefFields")
+            );
             //vectorFieldError.calcErr();
         }
 

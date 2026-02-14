@@ -35,11 +35,14 @@ class err
 
         autoPtr<GeometricField<T, fvPatchField, volMesh> > errPtr_; 
 
+        autoPtr<Field<T> > relErrPtr_; 
+
         const fvMesh& meshSource_;
         const fvMesh& meshTarget_;
 
         scalar minErr_;
         scalar maxErr_;
+        scalar maxRelErr_;
         scalar avgErr_;
         autoPtr<scalar> L1ErrPtr_;
 
@@ -80,8 +83,9 @@ class err
 
         void calcErr_wrt_same_mesh
         (
-            const word& sourceCase,
-            const fileName& sourceTime
+            //const word& sourceCase,
+            //const fileName& sourceTime
+            const bool& writeErrField
         );
 
         void report();
