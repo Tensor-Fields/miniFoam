@@ -16,7 +16,7 @@ printHelp()
     echo "    Only execute from within <targetCase>"
     echo
     echo Usage:
-    echo "    ./<script>    <vectorFieldName>    <targetCase>  <referenceCase>"
+    echo "    ./<script>  <vectorFieldName>  <targetCase>  <referenceCase>"
 }
 
 if [[ "${@}" =~ "-h" ]]
@@ -102,7 +102,7 @@ then
 fi
 
 ## Create mag fields here and in the reference case
-if ! mag -field $vf -case $Case
+if ! mag -field $vf -case $Case > $Case/log.mag
 then
     echo
     echo Error
@@ -110,7 +110,9 @@ then
     exit 1
 fi
 
-if ! mag -field $vf -case $Ref
+echo mag -case $Case done.
+
+if ! mag -field $vf -case $Ref > $Ref/log.mag
 then
     echo
     echo Error
@@ -118,12 +120,14 @@ then
     exit 1
 fi
 
+echo mag -case $Ref done.
+
 ## Create Mapped reference case
 if ! mkdir $Case/$mappedRef; then
     echo
     echo Error
     echo mkdir $Case/$mappedRef failed
-    echo Remove it if it exists.
+    echo Remove if exists.
     exit 1
 fi
 
@@ -145,14 +149,19 @@ then
     exit 1
 fi
 
+echo $Case/$mappedRef created.
+
 ## Actually map
-if ! miniMapAllFields map -sourceMesh $Ref -targetMesh $Case/$mappedRef
+if ! miniMapAllFields map -sourceMesh $Ref -targetMesh $Case/$mappedRef > \
+    $Case/log.miniMapAllFields
 then
     echo
     echo Error
     echo "miniMapAllFields failed"
     exit 1
 fi
+
+echo miniMapAllFields done.
 
 ## Calc error at the latest time step wrt the given case
 # -atSourceCellCenters -unbounded
@@ -165,6 +174,8 @@ then
     echo in meshToMeshError
     exit 1
 fi
+
+echo meshTomeshError done.
 
 ## Remove time controls for the target case
 if ! sed -i "/{$sss/,/$eee}/d" $Case/system/controlDict
@@ -183,3 +194,5 @@ then
     echo in sed
     exit 1
 fi
+
+echo End.
