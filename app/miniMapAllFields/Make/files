@@ -1,0 +1,4 @@
+patchManipulationFunctions.C
+miniMapAllFields.C
+
+EXE = $(FOAM_USER_APPBIN)/miniMapAllFields
