@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
 
 Application
-    calcCircleArea
+    mag
 
 Description
     Calculate magnitude of a vector field.
@@ -54,6 +54,13 @@ int main(int argc, char* argv[])
 
     argList args(argc, argv);
 
+	if(!args.optionFound("field"))
+	{
+	    FatalErrorIn("main()")
+		    << "-field option is mandatory."
+			<< abort(FatalError);
+	}
+
     Time runTime("controlDict", args.rootPath(), args.caseName());
 
     fvMesh mesh
@@ -65,6 +72,8 @@ int main(int argc, char* argv[])
             IOobject::MUST_READ
         )
     );
+
+	Info<< "Mesh created.\n";
 
     GeometricField<vector, fvPatchField, volMesh>
     vf
@@ -80,32 +89,45 @@ int main(int argc, char* argv[])
         mesh
     );
 
+	Info<< "Field created.\n";
+
     GeometricField<scalar, fvPatchField, volMesh> mgvf = mag(vf);
     
-    while (runTime.loop())
-    {
-        /// Re-read field
-        GeometricField<vector, fvPatchField, volMesh>
-        vf
-        (
-            IOobject
-            (
-                args.options()["field"],
-                runTime.timeName(),
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh
-        );
+    //while (runTime.loop())
+    //{
+		Info<< "Time: "
+		    << runTime.timeName()
+			<< endl;
+
+        /// Re-read field --- When in loop
+        //GeometricField<vector, fvPatchField, volMesh>
+        //vf
+        //(
+        //    IOobject
+        //    (
+        //        args.options()["field"],
+        //        runTime.timeName(),
+        //        mesh,
+        //        IOobject::MUST_READ,
+        //        IOobject::AUTO_WRITE
+        //    ),
+        //    mesh
+        //);
 
         mgvf = mag(vf);
 
-        if (runTime.write())
-        {
+        //if (runTime.write())
+        //{
             mgvf.write();
-        }
-    }
+
+			Info<< mgvf.name()
+			    << " written in "
+				<< runTime.timeName()
+				<< "\n";
+        //}
+    //}
+
+	Info<< "End.\n";
 
     return 0;
 }

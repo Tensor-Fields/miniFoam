@@ -1,6 +1,0 @@
-EXE_INC = \
-    -I$(FOAM_SRC)/finiteVolume/lnInclude \
-    -std=c++11
-
-EXE_LIBS = \
-    -lfiniteVolume

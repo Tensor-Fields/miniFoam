@@ -16,7 +16,7 @@ printHelp()
     echo "    Only execute from within <targetCase>"
     echo
     echo Usage:
-    echo "    ./<script>  <vectorFieldName>  <targetCase>  <referenceCase>"
+    echo "    ./<script>  <vectorFieldName>  <scale>  <targetCase>  <referenceCase>"
 }
 
 if [[ "${@}" =~ "-h" ]]
@@ -25,7 +25,7 @@ then
     exit 1
 fi
 
-if [[ $# -ne 3 ]]
+if [[ $# -ne 4 ]]
 then
     echo
     echo Error
@@ -39,11 +39,14 @@ fi
 ## Vector field name
 vf=$1
 
+## Scale factor
+scale=$2
+
 ## Case for which error is going to be calculated, target case
-Case=$2
+Case=$3
 
 ## Reference case
-Ref=$3
+Ref=$4
 
 ## Mapped reference case
 mappedRef=mapped_"${Case}"
@@ -101,26 +104,22 @@ then
     exit 1
 fi
 
-## Create mag fields here and in the reference case
-if ! mag -field $vf -case $Case > $Case/log.mag
+## Create Scaled field, in $Case and $Ref
+if ! scale -field $vf -scale $scale -case $Case > $Case/log.scale
 then
     echo
     echo Error
-    echo in mag
+    echo scale $Case/ failed
     exit 1
 fi
 
-echo mag -case $Case done.
-
-if ! mag -field $vf -case $Ref > $Ref/log.mag
+if ! scale -field $vf -scale $scale -case $Ref > $Ref/log.scale
 then
     echo
     echo Error
-    echo in mag -case $Ref
+    echo scale $Ref/ failed
     exit 1
 fi
-
-echo mag -case $Ref done.
 
 ## Create Mapped reference case
 if ! mkdir $Case/$mappedRef; then
@@ -151,8 +150,46 @@ fi
 
 echo $Case/$mappedRef created.
 
+echo miniMapAllFields done.
+
+## Create mag fields here and in the reference case
+#if ! mag -field $vf -case $Case > $Case/log.mag
+if ! mag -field "$vf*$scale" -case $Case > $Case/log.mag
+then
+    echo
+    echo Error
+    echo in mag -case $Case
+    exit 1
+fi
+
+echo mag -case $Case done.
+
+#if ! mag -field $vf -case $Ref > $Ref/log.mag
+if ! mag -field "$vf*$scale" -case $Ref > $Ref/log.mag
+then
+    echo
+    echo Error
+    echo in mag -case $Ref
+    exit 1
+fi
+
+echo mag -case $Ref done.
+
+## mag of $mappedRef fields is obtained by map
+
+#if ! mag -field $vf -case $Case/$mappedRef > $Case/$mappedRef/log.mag
+#then
+#    echo
+#    echo Error
+#    echo in mag -case $Case/$mappedRef
+#    exit 1
+#fi
+#
+#echo mag -case $Case/$mappedRef done.
+
 ## Actually map
-if ! miniMapAllFields map -sourceMesh $Ref -targetMesh $Case/$mappedRef > \
+#if ! miniMapAllFields map -sourceMesh $Ref -targetMesh $Case/$mappedRef > \
+if ! miniMapAllFields interpolate -sourceMesh $Ref -targetMesh $Case/$mappedRef > \
     $Case/log.miniMapAllFields
 then
     echo
@@ -160,8 +197,6 @@ then
     echo "miniMapAllFields failed"
     exit 1
 fi
-
-echo miniMapAllFields done.
 
 ## Calc error at the latest time step wrt the given case
 # -atSourceCellCenters -unbounded

@@ -18,7 +18,7 @@ fi
 Case=$1
 mappedDir=$2
 
-if ! find $Case -name \*err -o -name \*Ref | xargs rm
+if ! find $Case -name \*err -o -name \*Ref -o -name "mag(*" | xargs rm
 then
     echo Error
     echo "Removing *err *Ref files failed."

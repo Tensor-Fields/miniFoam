@@ -22,6 +22,7 @@ wmake test/ALEelasticFoam
 
 wmake app/meshToMeshError
 wmake app/mag
+wmake app/miniMapAllFields
 
 echo
 echo See above for errors, if any.

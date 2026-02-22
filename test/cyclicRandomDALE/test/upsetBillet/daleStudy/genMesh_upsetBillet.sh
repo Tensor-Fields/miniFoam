@@ -78,13 +78,13 @@ Case=$1
     #-nZT      120 \
 
 if ! genBlockMeshDict \
-    -nRT      40 \
-    -nZT      40 \
+    -nRT      11 \
+    -nZT      11 \
     -nRd      1 \
     -RR       10 \
     -ZZ       15 \
     -nOL       1 \
-    -nPeriph   1 \
+    -nPeriph   2 \
     -theta     1 \
     -Rd       20 \
     -dieThickness 1 \

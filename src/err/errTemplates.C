@@ -623,7 +623,7 @@ void Foam::err<Type>::calcErr_wrt_same_mesh
             << fieldTarget.objectPath()
             << endl;
 
-        const IOobject fieldSourceIO
+        /*const*/ IOobject fieldSourceIO
         (
             fieldTarget.name(),
             meshSource_.instance(),
@@ -633,70 +633,82 @@ void Foam::err<Type>::calcErr_wrt_same_mesh
             IOobject::NO_WRITE
         );
 
-        GeometricField
-        <
-            Type, fvPatchField, volMesh
-        > fieldSource(fieldSourceIO, meshSource_);
+		if (fieldSourceIO.headerOk())
+		{
+            GeometricField
+            <
+                Type, fvPatchField, volMesh
+            > fieldSource(fieldSourceIO, meshSource_);
 
-        Info<< "meshSource.instance(): "
-            << meshSource_.instance()
-            << endl;
+            Info<< "meshSource.instance(): "
+                << meshSource_.instance()
+                << endl;
 
-        Info<< "Source field "
-            << fieldSource.name()
-            << " found at "
-            << fieldSource.objectPath()
-            << endl;
+            Info<< "Source field "
+                << fieldSource.name()
+                << " found at "
+                << fieldSource.objectPath()
+                << endl;
 
-        ///
-        /// Calc err wrt a given source mesh and field
-        ///
+            ///
+            /// Calc err wrt a given source mesh and field
+            ///
 
-        /// Error at the cell centers of the target mesh, wrt the source
-        /// mesh
-        errPtr_.reset
-        (
-            new GeometricField<Type, fvPatchField, volMesh>
-            (fieldTarget - fieldSource)
-        );
-
-        relErrPtr_.reset
-        (
-            new Field<Type>
+            /// Error at the cell centers of the target mesh, wrt the source
+            /// mesh
+            errPtr_.reset
             (
-                (fieldTarget - fieldSource)().internalField()
-                /(VSMALL + fieldSource.internalField())
-            )
-        );
-
-        this->report();
-
-        if (writeErrField)
-        {
-            /// Rename is necessary; names are overwritten by '=' operator.
-            errPtr_().rename(fieldTarget.name()+"_err");
-
-            /// Set the exact field to be the fieldSource
-            fieldExactPtr_.reset
-            (
-                fieldSource.clone().ptr()
+                new GeometricField<Type, fvPatchField, volMesh>
+                (fieldTarget - fieldSource)
             );
 
-            fieldExactPtr_().rename(fieldTarget.name()+"_Ref");
+            relErrPtr_.reset
+            (
+                new Field<Type>
+                (
+                    (fieldTarget - fieldSource)().internalField()
+                    /(VSMALL + fieldSource.internalField())
+                )
+            );
 
-            errPtr_().write();
-            fieldExactPtr_().write();
+            this->report();
 
-            Info<< fieldExactPtr_().name()
-                << " and "
-                << errPtr_().name()
-                << " written to "
-                << meshTarget_.time().timeName()
-                <<"\n"<< endl;
-        }
+            if (writeErrField)
+            {
+                /// Rename is necessary; names are overwritten by '=' operator.
+                errPtr_().rename(fieldTarget.name()+"_err");
 
-        //Info<< "Error calculated."
-        //    << endl;
+                /// Set the exact field to be the fieldSource
+                fieldExactPtr_.reset
+                (
+                    fieldSource.clone().ptr()
+                );
+
+                fieldExactPtr_().rename(fieldTarget.name()+"_Ref");
+
+                errPtr_().write();
+                fieldExactPtr_().write();
+
+                Info<< fieldExactPtr_().name()
+                    << " and "
+                    << errPtr_().name()
+                    << " written to "
+                    << meshTarget_.time().timeName()
+                    <<"\n"<< endl;
+            }
+
+            //Info<< "Error calculated."
+            //    << endl;
+		}
+		else
+		{
+		    WarningIn("Foam::err<Type>::calcErr_wrt_same_mesh")
+			    << fieldTarget.name()
+				<< " not found in "
+                << meshSource_.instance()
+				<< "/"<< meshSource_.time().timeName()
+				<< "; skipped.\n";
+		}
     }
 }
 
