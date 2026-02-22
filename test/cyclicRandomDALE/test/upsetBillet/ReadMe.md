@@ -1,6 +1,58 @@
 # First trials
 <!---
 --->
+## *s4f_106*, *s4f_107*
+
+*106*: Inspired by *bekaert_12*, `frictionless` contact was used instead of
+`standardPenalty`, `frictional`.  
+*107*: `maxPenaltyScale 1`  
+
+## *s4f_103, 104, 105*
+
+*103*: `maxPenaltyScale 1`  
+*104*: `maxPenaltyScale 0.1`  
+*105*: `maxPenaltyScale 10`  
+
+### Results
+
+All three suffer from  
+- Corner jumping
+- Contact interference  
+<img
+    src="s4f_105/figures/contact/frames.gif"
+    style="width:75%; height:auto;"
+/>
+
+## *bekaert_101*
+
+According to Cardiff 2017, the tangential contact force's formula depends on
+the provided friction coefficient. If that coefficient is selected to be a very
+large number, we are forcing the formula below to be used:
+$$
+\text{Tangential traction} = -k \gamma,
+$$
+where $k$ is the penalty factor, and $\gamma$ is the slip magnitude, i.e., the
+difference between the tangential location of two corresponding points on two
+contact patches.
+
+By setting a large $k$, we force a large tangential force.
+
+### Results
+
+Diverged.
+
+## *bekaert_100*
+
+Large friction coefficient for the tangential friction, to simulate fully rough
+contact. However, the billet slips. 
+
+Image: Violet: Contact line; Black: Mesh lines. After deformation, billet mesh
+lines do not align with the die mesh lines.
+<img
+    src="bekaert_100/figures/tex/roughContactSlips.png"
+    size="width=75%; height=auto;"
+/>
+
 ## local: *form_48*
 
 `displacementNeumann`, `value`-grad method; complex eigenvalues at

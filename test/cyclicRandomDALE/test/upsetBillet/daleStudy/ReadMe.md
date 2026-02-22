@@ -29,6 +29,34 @@ error for *all* `scalarField`s (not `mag(U)` only).
 
 ## Runs
 
+### dale_11x11, s4f_11x11
+
+This case, like all $N\times N$ cases, where roughly $10<N<20$, was run twice;
+once with $nIterPerRezone=100$ and $0$, where in the latter, DALE is
+essentially off. Also in the former, the run aborts way before any rezone
+happens.
+
+### Results
+
+`form` and `wedge`  
+It is obvious that *contact* is the source of the problem. Contact does not see
+the billet, or billetContact does not see the die.
+<img
+    src="doc/dale_11x11/figures/contact/frames.gif"
+    style="width=75%; height=auto;"
+/>
+
+[`plasticNonLinGeomSolid` and `solidWedge`] or [`form` and `solidWedge`]  
+No abort anymore; seems okay, manually stopped.
+<img
+    src="doc/plastic_solidWedge_11x11/figures/frames.gif"
+    style="width=75%; height=auto;"
+/>
+
+[`s4f` and `wedge`]  
+No problem.
+
+
 ### doc/dale_10_3
 
 - Corrected behaviour now. When `-atSourceCellCenters` is passed, error and  
