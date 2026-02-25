@@ -20,9 +20,11 @@ wmake test/meshDanceImp
 wmake test/LaplacianSmoothBilletMesh/
 wmake test/ALEelasticFoam
 
-wmake app/meshToMeshError
-wmake app/mag
-wmake app/miniMapAllFields
+wmake app/interpolateCellToPoint/
+wmake app/mag/
+wmake app/meshToMeshError/
+wmake app/miniMapAllFields/
+wmake app/scale/
 
 echo
 echo See above for errors, if any.

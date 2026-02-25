@@ -105,7 +105,8 @@ then
 fi
 
 ## Create Scaled field, in $Case and $Ref
-if ! scale -field $vf -scale $scale -case $Case > $Case/log.scale
+if ! scale -field $vf -scale $scale -case $Case -noFunctionObjects > \
+    $Case/log.scale
 then
     echo
     echo Error
@@ -113,7 +114,8 @@ then
     exit 1
 fi
 
-if ! scale -field $vf -scale $scale -case $Ref > $Ref/log.scale
+if ! scale -field $vf -scale $scale -case $Ref -noFunctionObjects > \
+    $Ref/log.scale
 then
     echo
     echo Error
@@ -150,11 +152,9 @@ fi
 
 echo $Case/$mappedRef created.
 
-echo miniMapAllFields done.
-
 ## Create mag fields here and in the reference case
 #if ! mag -field $vf -case $Case > $Case/log.mag
-if ! mag -field "$vf*$scale" -case $Case > $Case/log.mag
+if ! mag -field "$vf*$scale" -case $Case -noFunctionObjects > $Case/log.mag
 then
     echo
     echo Error
@@ -165,7 +165,7 @@ fi
 echo mag -case $Case done.
 
 #if ! mag -field $vf -case $Ref > $Ref/log.mag
-if ! mag -field "$vf*$scale" -case $Ref > $Ref/log.mag
+if ! mag -field "$vf*$scale" -case $Ref -noFunctionObjects > $Ref/log.mag
 then
     echo
     echo Error
@@ -189,8 +189,8 @@ echo mag -case $Ref done.
 
 ## Actually map
 #if ! miniMapAllFields interpolate -sourceMesh $Ref -targetMesh $Case/$mappedRef > \
-if ! miniMapAllFields map -sourceMesh $Ref -targetMesh $Case/$mappedRef > \
-    $Case/log.miniMapAllFields
+if ! miniMapAllFields map -noFunctionObjects -sourceMesh $Ref \
+    -targetMesh $Case/$mappedRef > $Case/log.miniMapAllFields
 then
     echo
     echo Error
@@ -198,10 +198,12 @@ then
     exit 1
 fi
 
+echo miniMapAllFields done.
+
 ## Calc error at the latest time step wrt the given case
 # -atSourceCellCenters -unbounded
 if ! meshToMeshError -case $Case -sourceCase $Case/$mappedRef -latestTargetTime \
-    -latestSourceTime -consistent -writeErrAndRefFields \
+    -latestSourceTime -consistent -writeErrAndRefFields -noFunctionObjects \
     > $Case/log.meshToMeshError
 then
     echo
