@@ -1,11 +1,53 @@
 # First trials
 <!---
 --->
+## Contact study
+
+s4f on docker: `solids4foam`, official,
+`commit 414aa52691f3932ba1efcd1e1e29c02b1dfc5f1f`  
+s4f on bahar: `solids4foam`, `alishayegh/dale`,
+`commit 52a657a69fc841db63b3e7338a9fc33bd4ee6f6a`  
+fe40: foam-extend-40  
+fe41: foam-extend-41, `commit 70b064d0f32604f4ce76c9c72cbdf643015a3250`  
+
+<table>
+    <tr>
+        <th> Case </th>
+        <th> Key </th>
+    </tr>
+    <tr>
+        <th> fe41_109_smartsimet </th>
+        <th> fe41, s4f, smartsimet </th>
+    </tr>
+    <tr>
+        <th> fe41:$FOAM_RUN/upsetBillet </th>
+        <th> fe41, s4f, bahar </th>
+    </tr>
+    <tr>
+        <th> upsetBillet_orig </th>
+        <th> fe40, s4f, docker </th>
+    </tr>
+    <tr>
+        <th> fe41_110 </th>
+        <th> fe41, s4f as of bahar, on smartsimet </th>
+    </tr>
+</table>
+<img
+    src="figures_and_states/contactStudy/anim/frames.gif"
+    style="width:75%; height:auto;"
+/>
+
 ## *s4f_106*, *s4f_107*
 
 *106*: Inspired by *bekaert_12*, `frictionless` contact was used instead of
 `standardPenalty`, `frictional`.  
 *107*: `maxPenaltyScale 1`  
+
+Left: 106; Right: 107  
+<img
+    src="figures_and_states/s4f_106_107/frames.gif"
+    style="width:75%; height:auto;"
+/>
 
 ## *s4f_103, 104, 105*
 

@@ -188,8 +188,8 @@ echo mag -case $Ref done.
 #echo mag -case $Case/$mappedRef done.
 
 ## Actually map
-#if ! miniMapAllFields map -sourceMesh $Ref -targetMesh $Case/$mappedRef > \
-if ! miniMapAllFields interpolate -sourceMesh $Ref -targetMesh $Case/$mappedRef > \
+#if ! miniMapAllFields interpolate -sourceMesh $Ref -targetMesh $Case/$mappedRef > \
+if ! miniMapAllFields map -sourceMesh $Ref -targetMesh $Case/$mappedRef > \
     $Case/log.miniMapAllFields
 then
     echo
