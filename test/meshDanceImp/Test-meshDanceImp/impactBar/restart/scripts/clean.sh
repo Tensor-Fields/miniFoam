@@ -1,7 +1,7 @@
 #!/bin/bash
-rm [0-9].[0-9]* [1-9] -r
-rm log*
-rm processor* -r
+rm [0-9].[0-9]* [1-9] -rf
+rm -f log*
+rm processor* -rf
 
 ## Integet time dirs
 rm -rf [1-9]
@@ -93,7 +93,7 @@ rm -rf [1-9][0-9].[0-9][0-9]*
 rm -rf [1-9][0-9][0-9].[0-9]*
 
 ## logs and figures
-rm log.* *.log
+rm -f log.* *.log
 #rm figures -r
 
 ## data files
