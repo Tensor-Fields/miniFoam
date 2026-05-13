@@ -47,6 +47,7 @@ using namespace Foam;
 /// Driver
 int main (int argc, char* argv[])
 {
+    argList::validOptions.insert("amp","<value>");
     argList args(argc, argv);
 
     Time runTime
@@ -381,6 +382,11 @@ int main (int argc, char* argv[])
         
         /// Access internal points through their indices
         scalar amp = .2;
+
+        if (args.optionFound("amp"))
+        {
+            amp = readScalar(IStringStream(args.options()["amp"])());
+        }
 
         pf[internal_point[index]] += (amp * move);
 
