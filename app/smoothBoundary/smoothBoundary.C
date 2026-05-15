@@ -51,38 +51,6 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-/// N of dims
-//label nDim(const polyMesh& mesh)
-//{
-//    // Check directions
-//    //{
-//    Vector<label> dirs = mesh.solutionD();
-//
-//    label nValidDirs = 0;
-//
-//    for (direction cmpt = 0; cmpt < Vector<label>::nComponents; cmpt++)
-//    {
-//        if (dirs[cmpt] > 0)
-//        {
-//            nValidDirs++;
-//        }
-//    }
-//
-//    if (nValidDirs == 0)
-//    {
-//        Info<< " This mesh has no valid solving directions.  dirs = "
-//            << dirs << ".  Please check mesh definition for empty patches."
-//            << endl;
-//
-//        //noFailedChecks++;
-//    }
-//
-//    Info << "    This is a " << nValidDirs << "-D mesh" << endl;
-//    //}
-//
-//    return nValidDirs;
-//}
-
 /// Return true if mesh is bad
 bool badMesh
 (
@@ -200,6 +168,7 @@ bool badMesh
     return false;
 }
 
+/// Force axis points to remain on axis
 void correctAxisPoints
 (
     polyMeshGen& pmg,
@@ -207,9 +176,6 @@ void correctAxisPoints
     const List<string>& wedgePatchNames
 )
 {
-    //Info<< wedgePatchNames
-    //    << endl;
-
     if
     (
         wedgePatchNames.size() - 2 > SMALL
@@ -466,12 +432,6 @@ int main(int argc, char *argv[])
 
     //- Optimize boundary mesh of a 2-D mesh
 
-    //- load the mesh from disk
-    /// Reads points and faces from constant
-    //polyMeshGen pmg(runTime);
-    /// Reads sets from constant
-    //pmg.read();
-
     Info<< "Time: "
         << runTime.timeName()
         << endl;
@@ -555,39 +515,13 @@ int main(int argc, char *argv[])
         //- Actually lock points
         sOpt.lockBoundaryPoints<labelList>(lockedPointLabels);
 
-    //if( !constrainedCellSet.empty() )
-    //{
-    //    //- lock cells in constrainedCellSet
-    //    mOpt.lockCellsInSubset(constrainedCellSet);
-
-    //    //- find boundary faces which shall be locked
-    //    labelLongList lockedBndFaces, selectedCells;
-
-    //    const label sId = pmg.cellSubsetIndex(constrainedCellSet);
-    //    pmg.cellsInSubset(sId, selectedCells);
-
-    //    boolList activeCell(pmg.cells().size(), false);
-    //    forAll(selectedCells, i)
-    //        activeCell[selectedCells[i]] = true;
-    //}
-
     //- clear geometry information before volume smoothing
     pmg.clearAddressingData();
 
-    //- perform optimisation using the laplace smoother and
-    //mOpt.optimizeMeshFV
-    //(
-    //    nLoops,
-    //    nLoops,
-    //    nIterations,
-    //    nSurfaceIterations
-    //);
-
-    /// Suitable for non-wedge 2-D
-    //sOpt.optimizeSurface2D(nIterations);
-
     pointField oldPoints =  mesh.points();
     pointField oldOldPoints =  mesh.points();
+
+    scalar characteristicLength = min(Foam::pow(mesh.cellVolumes(), 1./3.));
 
     /// Mesh optimization loop
     for (label iter = 0; iter < nIterations; ++iter)
@@ -615,7 +549,6 @@ int main(int argc, char *argv[])
             sOpt.untangleSurface();
 
             /// If 3-D
-            //if (nDim(mesh) == 3)
             if (mesh.nGeometricD() == 3)
             {
                 Info<< "    Mesh is 3-D.\n    Optimize non-boundary faces."
@@ -644,18 +577,27 @@ int main(int argc, char *argv[])
             break;
         }
 
+        scalar changeMeasure =
+
         /// Stop if mesh is not changing anymore
         /// maxCurrentMotion / maxPrevMotion;
-        scalar changeMeasure =
-                /*cmptDivide*/
-                max(mag(mesh.points() - oldPoints))
-                /max(SMALL + mag(oldPoints - oldOldPoints));
+        /// Note: Not the best measure; when mesh motion is very slow per
+        /// iteration, the sudden drop in this measure never occurs.
+
+            //max(mag(mesh.points() - oldPoints))
+            ///max(SMALL + mag(oldPoints - oldOldPoints));
+
+            //average(mag(mesh.points() - oldPoints))
+            ///average(SMALL + mag(oldPoints - oldOldPoints));
+
+        /// Stop when maximum mesh motion is below a threshold
+        max(mag(mesh.points() - oldPoints)) / characteristicLength;
 
         Info<< "    Relative mesh motion: "
             << changeMeasure
             << endl;
 
-        if (changeMeasure < /*meshMotionRes*/qualityThreshold)
+        if (changeMeasure < qualityThreshold)
         {
             Info<< "\n    Mesh did not change within the threshold of "
                 << qualityThreshold
@@ -665,31 +607,8 @@ int main(int argc, char *argv[])
             break;
         }
 
-        //if (meshQualityOK())
-        //{
-            //polyMeshGenChecks::checkFaceDotProduct
-            //(
-            //    const polyMeshGen&,
-            //    const bool report = false,
-            //    const scalar nonOrthWarn = 70.0,
-            //    labelHashSet* setPtr = NULL,
-            //    const boolList* changedFacePtr = NULL
-            //);
-
-            //polyMeshGenChecks::checkFaceSkewness
-            //(
-            //    const polyMeshGen&,
-            //    scalarField&,
-            //    const boolList* changedFacePtr = NULL
-            //);
- 
-            //break;
-        //}
-
         oldOldPoints = oldPoints;
     }
-
-    //sOpt.untangleSurface2D();
 
     //- perform optimisation of worst quality faces
     //mOpt.optimizeMeshFVBestQuality(nLoops, qualityThreshold);

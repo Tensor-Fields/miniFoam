@@ -5,6 +5,7 @@ EXE_INC = \
     -I$(FOAM_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
     -I$(FOAM_SRC)/dynamicMesh/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/mesh/cfMesh/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
     -std=c++11 \
     -Wno-unused-variable \
     -Wno-reorder
