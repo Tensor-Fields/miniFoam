@@ -1,6 +1,9 @@
 # First trials
 <!---
 --->
+## gridStudy/playGround/l0_s4f
+
+
 ## Contact study
 
 s4f on docker: `solids4foam`, official,
