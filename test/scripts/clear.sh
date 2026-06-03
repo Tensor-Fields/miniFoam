@@ -6,3 +6,4 @@ rm -r [0-9].[0-9]*
 rm -r VTK
 rm log* *.log
 rm -ir figures/*
+rm -rf processor[0-9]*
