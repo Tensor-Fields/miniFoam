@@ -1,6 +1,22 @@
 # First trials
 <!---
 --->
+## daleStudy: dale_8x8 vs dale_8x8_form vs dale_8x8_s4f
+
+Left: `upstream/DALE`, as of commit  
+`6575d9e5847c971222b747471e090d5fcbf9dc72`
+Right: correct, previous implementation;  
+<img
+    src="daleStudy/figures/anim/8x8_vs_8x8form/frames.gif"
+    style="width:75%; height:auto;"
+/>
+
+### Analysis
+
+One sees that after every remap, there is a jump in field values, which is
+back to normal at the time after the remap time, but causes the case to crash
+very near the final time, $0.9515s$.
+
 ## gridStudy/playGround/l0_s4f
 
 
