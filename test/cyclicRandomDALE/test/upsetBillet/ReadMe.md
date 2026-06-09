@@ -1,7 +1,36 @@
 # First trials
 <!---
 --->
-## daleStudy: dale_8x8 vs dale_8x8_form vs dale_8x8_s4f
+## daleStudy: form_1, 3, 10
+
+`upstream/DALE` as of  
+`44a4f743d679e9d4ac4e40d6cb5e371aa9793a5b`  
+- See if `nRemapSteps` causes the *field value jump* after remap?
+
+### Results
+
+Right to left (also saved state):  
+*dale_8x8_s4f*, `D` contour, `nRemapSteps=1`  
+*dale_8x8_form_3*, `Velocity` contour, `nRemapSteps=1`  
+*form_2*, `D` contour, `nRemapSteps=2`  
+*form_3*, `D` contour, `nRemapSteps=3`  
+*form_10*, `D` contour, `nRemapSteps=10`  
+<img
+    src="daleStudy/figures/anim/compare_nRemapSteps/frames.gif"
+    style="width:75%; height:auto;"
+/>
+
+Fast  
+<img
+    src="daleStudy/figures/anim/compare_nRemapSteps/frames_7.gif"
+    style="width:75%; height:auto;"
+/>
+
+The more the `nRemapSteps`, the worse the *field value jump*.
+
+## daleStudy: dale_8x8 vs dale_8x8_form_3 vs dale_8x8_s4f
+
+## daleStudy: dale_8x8 vs dale_8x8_form
 
 Left: `upstream/DALE`, as of commit  
 `6575d9e5847c971222b747471e090d5fcbf9dc72`
