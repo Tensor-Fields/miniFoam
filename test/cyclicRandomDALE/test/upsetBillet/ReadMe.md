@@ -1,6 +1,20 @@
 # First trials
 <!---
 --->
+## daleStudy: form_10, form_10_2
+
+The problem of field values jumping was due to the location of the remap phase
+in the solver which was after `writeFields`; This corrected in commit  
+`upstream/DALE -> afa8b1140d208e0488ad1ec799009a7e4a726012`
+
+### Results
+
+Right: *form_10*, Left: *form_10_2*  
+<img
+    src="daleStudy/doc/form_10_vs_10_2/frames_7.gif"
+    style="width:75%; height:auto;"
+/>
+
 ## daleStudy: form_1, 3, 10
 
 `upstream/DALE` as of  
