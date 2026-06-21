@@ -1,17 +1,17 @@
 /* Boundary Conditions */
-tractionVelocity/tractionVelocityFvPatchVectorField.C
-fixedAxialStrainRate/fixedAxialStrainRateFvPatchVectorField.C
 displacementFvPatchField/displacementFvPatchField.C
-displacementNeumann/scenario.C
-displacementNeumann/displacementNeumannFvPatchField.C
-extrapolateFvPatchField/extrapolateFvPatchField.C
+/*tractionVelocity/tractionVelocityFvPatchVectorField.C*/
+/*fixedAxialStrainRate/fixedAxialStrainRateFvPatchVectorField.C*/
+/*displacementNeumann/scenario.C*/
+/*displacementNeumann/displacementNeumannFvPatchField.C*/
+/*extrapolateFvPatchField/extrapolateFvPatchField.C*/
 /*axisymmetricFvPatchField/axisymmetricFvPatchField.C*/
 
 /* FE40 */
 /*tractionDisplacement/tractionDisplacementFvPatchVectorField.C*/
 
 /* solids4Foam */
-solids4FoamFixedDisplacement/solids4FoamFixedDisplacementFvPatchVectorField.C
+/*solids4FoamFixedDisplacement/solids4FoamFixedDisplacementFvPatchVectorField.C*/
 
 
 LIB=$(FOAM_USER_LIBBIN)/libminiFoamBCs_debug

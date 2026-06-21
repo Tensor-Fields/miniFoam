@@ -1,7 +1,65 @@
 # First trials
 <!---
 --->
+## daleStudy: form_10_9..10
+
+`timeIndex` must change in the remap loop. This is because, the assumption  
+behind having multiple remap steps is that every loop iter treats previous  
+*time* as `oldTime`; when you loop over fiels and keep mapping, without  
+changing `timeIndex`, `oldTime()` in `advect()` always refers to the same
+field, **WRONG**!
+
+### Results
+
+Only remap time steps,
+and the immediately-two-after time steps are shown.  
+
+Right: *form_10_Lag*, Left: *form_10_10*, where the former is Lagrangian,  
+and the latter is DALE with changing `timeIndex`.  
+<img
+    src="daleStudy/figures/anim/changeTimeIndex_vs_Lag/frames_7.gif"
+    style="width:75%; height:auto;"
+/>
+
+Right: *form_10_Lag*, Left: *form_10_9*, where the former is Lagrangian,  
+and the latter is DALE with fixed `timeIndex`.  
+<img
+    src="daleStudy/figures/anim/fixedTimeIndex_vs_Lag/frames_7.gif"
+    style="width:75%; height:auto;"
+/>
+
+Right: *form_10_9* with fixed `timeIndex`; Left: *form_10_10*, 
+with changing `timeIndex`.  
+It is clearly observable that fixed `timeIndex` leads to the   
+two time steps after remap to considerabley differ from the expected  
+solution, the solution that should show a smooth field change.  
+In the contratry, with changing `timeIndex`, only the remap time slightly  
+differs from the Lagrangian solution (i.e., the smoothly-changed solution),    
+as shown in the first figure.  
+<img
+    src="daleStudy/figures/anim/fixed_vs_changing_timeIndex/frames_7.gif"
+    style="width:75%; height:auto;"
+/>
+
+## daleStudy: form_10_3..8
+
+### Results
+
+*form_10_3*, writes every time step, rezone every five time step.  
+*form_10_4*, same, but `forceAtRemapTime`  
+Again field jump is observed in both.  
+  
+*form_10_5*, rezone & remap moved to the end of the time loop
+*form_10_6*, `update after remap' is now a run-time option; selected here.
+*form_10_7* vs *8*, where the latter has the option of  
+`update fields after remap', and the former does not.  
+*8* (with updates), has obvious wrong jumps, and *7* is much more acceptable,  
+especially, after a bunch of time steps, jumps between timesteps become really  
+small.  
+Note that the Lagrangian simulation also has small jumps between time steps.
+
 ## daleStudy: form_10, form_10_2
+
 
 The problem of field values jumping was due to the location of the remap phase
 in the solver which was after `writeFields`; This corrected in commit  

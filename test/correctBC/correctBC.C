@@ -216,7 +216,12 @@ int main(int argc, char* argv[])
         patchTypes[patchI] = p.boundaryField()[patchI].type(); 
 
         Info<< "patchTypes[patchI] = "
-            << patchTypes[patchI] << endl;
+            << patchTypes[patchI]
+            << endl;
+
+        Info<< "patchType = "
+            << p.boundaryField()[patchI].patchType()
+            << endl;
     }
 
 IOobject fieldTargetIO

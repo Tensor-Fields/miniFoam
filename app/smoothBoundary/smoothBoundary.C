@@ -168,6 +168,47 @@ bool badMesh
     return false;
 }
 
+/// Return non-orthogonal faceSet
+faceSet nonOrthoFaceSet
+(
+    polyMesh& mesh,
+    /*const debug::tolerancesSwitch*/ scalar nonOrthThreshold = -1
+)
+{
+    const_cast<debug::tolerancesSwitch&>(mesh.nonOrthThreshold_) = nonOrthThreshold;
+
+    tmp<faceSet> tfacesNonOrtho(mesh, "nonOrthoFaces", mesh.nFaces()/100 + 1);
+
+    if (nonOrthThreshold != -1)
+    {
+        if (mesh.checkFaceOrthogonality(true, &(facesNonOrtho())))
+        {
+            //noFailedChecks++;
+        }
+
+        label nFaces = returnReduce(facesNonOrtho.size(), sumOp<label>());
+
+        if (nFaces > 0)
+        {
+            Info<< "  Writing " << nFaces
+                << " non-orthogonal faces to set " << faces.name() << endl;
+            faces.write();
+
+            /// Mesh is bad
+            //return true;
+        }
+    }
+    else
+    {
+        Info<< "    Non-orthogonality will not be checked ..."
+            << endl;
+    }
+
+    /// Mesh is OK
+    //return false;
+    return tfacesNonOrtho();
+}
+
 /// Force axis points to remain on axis
 void correctAxisPoints
 (
