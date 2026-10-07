@@ -1,10 +1,3 @@
-/**
- * A pointGenerator object can produce a randomized pointField from a given
- * pointField
- *
- * \author: Maalik (Ali Shayegh, ali@tensorfields.com)
- * \date: Summer 2025
- */
 /// pointGenerator class
 
 #ifndef pointGenerator_H

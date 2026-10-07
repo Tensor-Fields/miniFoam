@@ -1,3 +1,11 @@
+/*-------------------------------   C++   -----------------------------------*\
+  =========                 |
+  \\      /  Tensor         | miniFOAM: The Computational Continuum Playground
+   ~~~~~~~   Fields         | Website:  https://tensorfields.com
+    O   O                   | Copyright (C) 2023-2026 TensorFields
+      O                     |
+-------------------------------------------------------------------------------
+\*---------------------------------------------------------------------------*/
 #include "meshDance.H"
 #include "GeometricField.H"
 #include "fvPatchField.H"
@@ -34,6 +42,7 @@
 Foam::meshDance::meshDance
 (
     const Time& runTime,
+    const dictionary& dict,
     const bool regFields
 )
 /// \note: Initializing mesh_
@@ -73,29 +82,32 @@ dMeshAutoPtr_
 /// mesh_ remained from the previous design; ideally we need dMeshPtr_ only.
 //mesh_(dMeshAutoPtr_()),
 mesh_(*dMeshPtr_),
+meshFlux_(mesh_.setPhi()),
+meshFluxPtr_(new surfaceScalarField(mesh_.setPhi())),
 fields_(mesh_, runTime.timeName()),
 
 /// ALEDict
 ALEDict_
 (
-    IOdictionary
-    (
-        IOobject
-        (
-            word("ALEDict"),
-            runTime.constant(),
-            //dMeshAutoPtr_(),
-            *dMeshPtr_,
-            IOobject::MUST_READ
-        )
-    )
+    dict
+    //IOdictionary
+    //(
+    //    IOobject
+    //    (
+    //        word("ALEDict"),
+    //        runTime.constant(),
+    //        //dMeshAutoPtr_(),
+    //        *dMeshPtr_,
+    //        IOobject::MUST_READ
+    //    )
+    //)
 ),
 
 remapDict_(ALEDict_.subDict("remapDict")),
 rezoneDict_(ALEDict_.subDict("rezoneDict")),
 
 /// Dimensions
-wedge_(ALEDict_.lookup("wedge")),
+wedge_(ALEDict_.lookupOrDefault<bool>("wedge", false)),
 planar2D_(),
 
 /// Remap params
@@ -160,7 +172,12 @@ aspectThreshold_(),
 /// Good mesh quality parameters
 goodSkewThreshold_(),
 goodNonOrthThreshold_(),
-goodAspectThreshold_()
+goodAspectThreshold_(),
+incrementPhysicalTimeInRemap_(),
+resetFieldTimeIndex_(),
+
+pseudoTimeDict_(),
+pseudoTimePtr_()
 {
     /// this->read<T> reads dictionary, not IOdict
     const dictionary& aleDict = ALEDict_;
@@ -287,8 +304,8 @@ goodAspectThreshold_()
 
         ifRead<label> (wedge_, smootherDict, word("wedgeDir"), wedgeDir_);
         ifRead<label> (wedge_, smootherDict, word("radialDir"), radialDir_);
-        ifRead<scalar>(wedge_, smootherDict, word("wedgeAperture"), wedgeAperture_);
-        ifRead<label> (!wedge_, smootherDict, word("emptyDir"), emptyDir_);
+        //ifRead<scalar>(wedge_, smootherDict, word("wedgeAperture"), wedgeAperture_);
+        ifRead<label> (planar2D_, smootherDict, word("emptyDir"), emptyDir_);
         read<List<string> >(smootherDict, word("freePatches"), patchesWithFreePoints_);
 
         read<scalar>(smootherDict, word("skewThreshold"), skewThreshold_);
@@ -298,6 +315,22 @@ goodAspectThreshold_()
         read<scalar>(smootherDict, word("goodSkewThreshold"), goodSkewThreshold_);
         read<scalar>(smootherDict, word("goodNonOrthoThreshold"), goodNonOrthThreshold_);
         read<scalar>(smootherDict, word("goodAspectThreshold"), goodAspectThreshold_);
+
+        read<bool>
+        (
+            remapDict_,
+            word("incrementPhysicalTimeInRemap"),
+            incrementPhysicalTimeInRemap_
+        );
+
+        ifRead<bool>
+        (
+            incrementPhysicalTimeInRemap_,
+            remapDict_,
+            word("resetFieldTimeIndex"),
+            resetFieldTimeIndex_
+        );
+
     //}
     //else if (cfMeshSmoother_)
     //{
@@ -322,7 +355,13 @@ goodAspectThreshold_()
     /// If case/system/fvSchemes/ddtScheme.default == steadyState,
     /// advection equation gives SIGFPE, so we define it as an error.
 
-    if (mesh_.schemesDict().ddtSchemes().lookup("default")=="steadyState")
+    
+    if
+    (
+        mesh_.schemesDict()
+        .ddtSchemes().lookupOrDefault<word>("default", "steadyState")
+     == word("steadyState")
+    )
     {
         FatalErrorIn("system/fvSchemes.ddtScheme.default")
             << "ddtScheme cannot be steadyState"
@@ -342,12 +381,40 @@ goodAspectThreshold_()
         registerFields<symmTensor>();
         registerFields<sphericalTensor>();
     }
+
+    if (wedge_)
+    {
+        /// Calculations
+        const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
+        const pointField& pf = mesh_.points();
+        const vector& n1 = pbm[pbm.findPatchID(wedgePatchNames_[0])][0].normal(pf);
+        const vector& n2 = pbm[pbm.findPatchID(wedgePatchNames_[1])][0].normal(pf);
+
+        wedgeAperture_ = radToDeg
+            (
+                Foam::acos
+                (
+                    n1 & n2 / (mag(n1) * mag(n2))
+                )
+            );
+
+        if (wedgeAperture_ > 90)
+        {
+            wedgeAperture_ = 180 - wedgeAperture_;
+        }
+
+        Info<< "    Wedge aperture is "
+            << wedgeAperture_
+            << " degrees."
+            << endl;
+    }
 }
 
 /// Destructor
 Foam::meshDance::~meshDance()
 {
     delete dMeshPtr_;
+    delete meshFluxPtr_;
 }
 
 ///
@@ -376,9 +443,17 @@ void Foam::meshDance::setOverallPointMotion
 }
 
 /// Time-step adaptive point increment
-/// Returns true if points moved
+/// Returns true if the final mesh is hit
 bool Foam::meshDance::stepTowards()
 {
+    /// Update volumes
+    //mesh_.V();
+
+    /// Delets old volumes and mesh fluxes
+    //mesh_.setV0();
+
+    //mesh_.V00();
+
     /// Incremental motion, dx = (dt / Time) * totalMove
     /// This formula is correct when Time/dt = N, number of iterations,
     /// in which case 
@@ -410,8 +485,7 @@ bool Foam::meshDance::stepTowards()
             << "Mesh moves to the final points, ignoring the overshoot.\n"
             << /*abort(FatalError)*/endl;
 
-        hitFinalMesh();
-        return true;
+        return hitFinalMesh();
     }
     else
     {
@@ -427,8 +501,7 @@ bool Foam::meshDance::stepTowards()
                 << "Mesh moves to the final points, ignoring the overshoot.\n"
                 << endl;
 
-            hitFinalMesh();
-            return true;
+            return hitFinalMesh();
         }
         else
         {
@@ -462,24 +535,38 @@ bool Foam::meshDance::stepTowards()
                 oldPoints + motionFraction_ * overallPointMotion_
             );
 
+            //meshFlux_ = mesh_.phi();
+            //meshFluxPtr_.reset(new surfaceScalarField(mesh_.phi()));
+
+            delete meshFluxPtr_;
+            meshFluxPtr_ = (new surfaceScalarField(mesh_.phi()));
+
             /// Points moved.
-            return true;
+            //return false;
         }
     }
+
+    return false;
 }
 
 bool Foam::meshDance::hitFinalMesh()
 {
-    if (!finalMeshIsHit_)
-    {
+    //if (!finalMeshIsHit_)
+    //{
         /// Move the mesh, so that the overall motion
         /// hits
         mesh_.movePoints(overallPointMotion_ + updatedStartingPoints_);
 
-        finalMeshIsHit_ = true;
-    }
+        //meshFlux_ = mesh_.phi();
+        //meshFluxPtr_.reset(new surfaceScalarField(mesh_.phi()));
 
-    return finalMeshIsHit_;
+        delete meshFluxPtr_;
+        meshFluxPtr_ = (new surfaceScalarField(mesh_.phi()));
+
+    //    finalMeshIsHit_ = true;
+    //}
+
+    return /*finalMeshIsHit_*/true;
 }
 
 /// Update motion fraction
@@ -497,12 +584,14 @@ void Foam::meshDance::updateMotionFraction()
               - startTime_.value()
             );
 
-        sumMotionFraction_ += motionFraction_; 
+        //sumMotionFraction_ += motionFraction_; 
     }
     else
     {
         motionFraction_ = 1 / ( SMALL + rMotionFraction_);
     }
+
+    sumMotionFraction_ += motionFraction_; 
 }
 
 /// Access motion fraction
@@ -623,6 +712,8 @@ void Foam::meshDance::resetStartingPoints(const pointField& pf)
 /// - sumMotionFraction
 /// \note: It is the driver's responsibility to use it when needed.
 /// This class is not aware of when the cycle finishes as of now.
+
+/// Update: It is now aware!
 void Foam::meshDance::resetMotion()
 {
     const Time& runTime = mesh_.time();
@@ -1112,7 +1203,21 @@ Foam::pointField Foam::meshDance::smooth/*cfMeshSmooth*/
 )
 {
     //- A local mesh
-    polyMesh& mesh = mesh_;
+    //autoPtr<mergePolyMesh> wireMeshPtr_;
+    autoPtr<polyMesh> meshPtr(&mesh_);
+
+    if (multiZone_)
+    {
+        this->subMesh();
+        meshPtr.reset(wireMeshPtr_);
+    }
+
+    polyMesh& mesh = meshPtr();
+
+    //if (laplacianMeshSmoother_)
+    //{
+    //    return LaplaceSmooth(iterPerQualityCheck_);
+    //}
 
     /// Freeze points for recovery
     const pointField& freezedPoints = mesh.points();
@@ -1155,21 +1260,31 @@ Foam::pointField Foam::meshDance::smooth/*cfMeshSmooth*/
         //- Parse locked patch names
         List<string>& lockedPatchNames = fixedPatches_;
 
+        //- Count locked patches
+        label lpc = 0;
+
         //- Find locked patch IDs
-        labelList lockedPatches(lockedPatchNames.size());
+        labelList lockedPatches(lpc)/*(lockedPatchNames.size())*/;
 
         forAll(lockedPatchNames, patchI)
         {
-            lockedPatches[patchI] = bm.findPatchID(lockedPatchNames[patchI]);
-
-            if (lockedPatches[patchI] == -1)
+            if (bm.findPatchID(lockedPatchNames[patchI]) != -1)
             {
-                FatalErrorIn("smooth()")
-                    << "It seems like the patch names specified in\n"
-                    << "ALEDict.fixedPatches do not match the actual patch\n"
-                    << "names."
-                    << abort(FatalError);
+                lockedPatches.setSize(++lpc);
+
+                /// Note: Subscript falls behind patchI in general
+                lockedPatches[/*patchI*/lpc - 1] = bm.findPatchID(lockedPatchNames[patchI]);
             }
+        }
+
+        if (!lockedPatches.size())
+        {
+            WarningIn("smooth()")
+                << "It seems like the patch names specified in\n"
+                << "ALEDict.fixedPatches do not match the actual patch\n"
+                << "names, or that ALEDict.fixedPatches is empty.\n"
+                << "The latter is often wrong, unless you do it on purpose."
+                << endl;
         }
 
         //- Find locked point labels
@@ -1283,19 +1398,19 @@ Foam::pointField Foam::meshDance::smooth/*cfMeshSmooth*/
             /// Stop when maximum mesh motion is below a threshold
                 max(mag(mesh.points() - oldPoints)) / characteristicLength;
 
-            Info<< "    Relative mesh motion: "
-                << changeMeasure
-                << endl;
+            //Info<< "    Relative mesh motion: "
+            //    << changeMeasure
+            //    << endl;
 
-            if (changeMeasure < qualityThreshold_)
-            {
-                Info<< "\n    Mesh did not change within the threshold of "
-                    << qualityThreshold_
-                    << ";\n    Stop smoothing."
-                    << endl;
+            //if (changeMeasure < qualityThreshold_)
+            //{
+            //    Info<< "\n    Mesh did not change within the threshold of "
+            //        << qualityThreshold_
+            //        << ";\n    Stop smoothing."
+            //        << endl;
 
-                break;
-            }
+            //    break;
+            //}
 
             oldOldPoints = oldPoints;
         }
@@ -1332,6 +1447,26 @@ Foam::pointField Foam::meshDance::smooth/*cfMeshSmooth*/
 
     return pf();
 }
+
+    if (multiZone_)
+    {
+        /// Points of the smoothed zone
+        mesh.points() = pf();
+
+        this->mergeZones();
+
+        /// Final points after merge
+        pointField pf = mesh.points();
+        mesh.movePoints(freezedPoints);
+
+        return pf;
+    }
+    else
+    {
+        return pf();
+    }
+}
+
 
 void Foam::meshDance::defineBadMesh()
 {
@@ -1702,287 +1837,267 @@ void Foam::meshDance::correctAxisPoints
     }
 }
 
-//Foam::pointField Foam::meshDance::smooth()
-//{
-//    autoPtr<pointField> pf
-//    (
-//        new Field<point>(mesh_.points().size(),vector::zero)
-//    );
-//
-//    if (laplacianMeshSmoother_)
-//    {
-//        /// Plain Laplace smooth, with point slide functionality
-//        pf.reset(new pointField(LaplaceSmooth()));
-//    //}
-//    //else if (cfMeshSmoother_)
-//    //{
-//        /// Improve quality (untangle)
-//        if (cfMeshSmoother_)
-//        {
-//            pf.reset(new pointField(cfMeshSmooth(pf)));
-//        }
-//    }
-//    else
-//    {
-//        FatalErrorIn("smooth()")
-//            << "No smoother selected."
-//            << abort(FatalError);
-//    }
-//
-//    return pf();
-//}
 
-/// Obtains the rezoned state; mesh motion actually happens in
-/// remap()
+/// Only obtains the rezoned state
+/// Not supposed to move the mesh
+/// Mesh motion actually happens in remap()
 void Foam::meshDance::rezone(const pointField& targetPoints)
 {
+    /// Remove prev mesh fluxes and old volumes
+    //mesh_.setV0();
+
     //Info<< "targetPoints.size() = "
     //    << targetPoints.size()
     //    << endl;
+
+    /// Important for correct hitFinalMesh() behaviour.
+    this->resetStartingPoints(this->points());
 
     //this -> setOverallPointMotion(dMeshAutoPtr_().points(), targetPoints);
     this -> setOverallPointMotion((*dMeshPtr_).points(), targetPoints);
 }
 
 
-//template<class Type>
-//void Foam::meshDance::storeFieldCopies()
+//void Foam::meshDance::remap(const bool write)
 //{
-//    HashTable
-//    <
-//        const GeometricField<Type, fvPatchField, volMesh>*
-//    > fields = mesh_.thisDb().lookupClass
-//    <
-//        GeometricField<Type, fvPatchField, volMesh>
-//    >();
+//    const scalar now = runTime_.value();
+//    const label nowIndex = runTime_.timeIndex();
+//    const scalar deltaT = runTime_.deltaTValue();
+//    //const scalar endTime = runTime_.endTime().value();
 //
-//    typename
-//    HashTable
-//    <
-//        const GeometricField<Type, fvPatchField, volMesh>*
-//    >::iterator fieldIter;
+//    /// To be accessed inside advect()
+//    nowName_ = runTime_.timeName();
 //
-//    for
-//    (
-//        fieldIter = fields.begin();
-//        fieldIter !=fields.end();
-//        ++fieldIter
-//    )
+//    /// If pseudo time is not real time
+//    if (nRemapSteps_)
 //    {
-//        GeometricField
-//	    <
-//	        Type, fvPatchField, volMesh
-//	    >& field = const_cast
-//	    <
-//            GeometricField
-//	    <
-//	        Type, fvPatchField, volMesh
-//	    >&
-//	    >(*fieldIter());
-//
-//        //{
-//        tof_<Type>.set[field.name()] = new GeometricField<Type, fvPatchFields, volMesh>
-//            (
-//                IOobject
-//                (
-//                    field.name(),
-//                    nowName_,
-//                    mesh_,
-//                    IOobject::NO_READ,
-//                    IOobject::NO_WRITE,
-//                    /// Do not register
-//                    false
-//                ),
-//                field,
-//                "zeroGradient"
-//            );
-//        //}
+//        const_cast<Time&>(runTime_).setDeltaT(1);
 //    }
-//}
-
-
-//template<class Type>
-//void Foam::meshDance::saveOldOldTimes()
-//{
-//    HashTable
-//    <
-//        const GeometricField<Type, fvPatchField, volMesh>*
-//    > fields = mesh_.thisDb().lookupClass
-//    <
-//        GeometricField<Type, fvPatchField, volMesh>
-//    >();
 //
-//    typename
-//    HashTable
-//    <
-//        const GeometricField<Type, fvPatchField, volMesh>*
-//    >::iterator fieldIter;
+//    /// Let the remap loop disregard controlDict.endTime
+//    //if (incrementPhysicalTimeInRemap_)
+//    //{
+//    //    const_cast<Time&>(runTime_)
+//    //    .setEndTime(1e300);
+//    //}
 //
-//    for
-//    (
-//        fieldIter = fields.begin();
-//        fieldIter !=fields.end();
-//        ++fieldIter
-//    )
+//    /// Change database from physical time to pseudo time
+//    //this->changeDb<scalar>(pseudoTime_);
+//    //this->changeDb<vector>(pseudoTime_);
+//    //this->changeDb<tensor>(pseudoTime_);
+//    //this->changeDb<symmTensor>(pseudoTime_);
+//
+//    this->changeDb(*pseudoTimePtr_);
+//
+//    label iter = 0;
+//
+//    while (pseudoTimePtr_->run())
 //    {
-//        GeometricField
-//	    <
-//	        Type, fvPatchField, volMesh
-//	    >& field = const_cast
-//	    <
-//            GeometricField
-//	    <
-//	        Type, fvPatchField, volMesh
-//	    >&
-//	    >(*fieldIter());
+//        Info<< "Remap step = "
+//            << iter++
+//            <<"\n";
 //
-//        if (isOldOld(field.name()))
+//        /// Rezone overshoot-proof
+//        /// Read fields from the database and advect
+//        bool finalMeshIsHit = stepTowards();
+//
+//        /// VolFields
+//        this -> advect<scalar>    (writeRemappedSteps_);
+//        this -> advect<vector>    (writeRemappedSteps_);
+//        this -> advect<tensor>    (writeRemappedSteps_);
+//        this -> advect<symmTensor>(writeRemappedSteps_);
+//        //this -> advect<sphericalTensor>(write);
+//
+//        if (finalMeshIsHit)
 //        {
-//            oldOldFHT_<Type>.set[field.name()] =
-//                new GeometricField<Type, fvPatchFields, volMesh>
-//                (
-//                    IOobject
-//                    (
-//                        field.name(),
-//                        nowName_,
-//                        mesh_,
-//                        IOobject::NO_READ,
-//                        IOobject::NO_WRITE,
-//                        /// Do not register
-//                        false
-//                    ),
-//                    field,
-//                    "zeroGradient"
-//                );
+//            Info<< "\n    Final mesh in this time step is hit; ignore next"
+//                << "\n    remap steps, advect fields and move on to the" 
+//                << "\n    next time step."
+//                << endl;
+//
+//            break;
+//        }
+//
+//        if (incrementPhysicalTimeInRemap_)
+//        {
+//            const_cast<Time&>(runTime_)++;
 //        }
 //    }
+//
+//    /// Re-assign physical time as the database
+//    this->changeDb(runTime_);
+//
+//    /// Correct physical time, and prevent fields from re-creating old
+//    /// fields
+//    this->resetTime(now, nowIndex, deltaT/*, endTime*/);
+//
+//    /// Re-set step-wise mesh motion data
+//    this->resetSumMotionFraction();
+//
+//    /// write parameter is responsible for forcing mesh and fields being
+//    /// written, ignoring the controlDict write controls
+//    //if (write)
+//    if (ifForceWriteAtRemapTime_)
+//    {
+//        this->write();
+//
+//        Info<< "    Mesh and fields written to "
+//            << runTime_.timeName()
+//            << "\n";
+//    }
+//
+//    Info<<"    Remap done\n    Time reset to "
+//        << runTime_.timeName()
+//        <<"\n";
+//}
+
+//void Foam::meshDance::remap2(const bool write
+//{
+//    const scalar now = runTime_.value();
+//    const label nowIndex = runTime_.timeIndex();
+//    const scalar deltaT = runTime_.deltaTValue();
+//    //const scalar endTime = runTime_.endTime().value();
+//
+//    /// To be accessed inside advect()
+//    nowName_ = runTime_.timeName();
+//
+//    /// If pseudo time is not real time
+//    if (nRemapSteps_)
+//    {
+//        const_cast<Time&>(runTime_).setDeltaT(1);
+//    }
+//
+//    /// Let the remap loop disregard controlDict.endTime
+//    //if (incrementPhysicalTimeInRemap_)
+//    //{
+//    //    const_cast<Time&>(runTime_)
+//    //    .setEndTime(1e300);
+//    //}
+//
+//    for (label iter = 0; iter < nRemapSteps_; ++iter)
+//    {
+//        Info<< "Remap step = "
+//            << iter + 1
+//            <<"\n";
+//
+//        /// Rezone overshoot-proof
+//        /// Read fields from the database and advect
+//        bool finalMeshIsHit = stepTowards();
+//
+//        /// VolFields
+//        this -> advect2<scalar>    (writeRemappedSteps_);
+//        this -> advect2<vector>    (writeRemappedSteps_);
+//        this -> advect2<tensor>    (writeRemappedSteps_);
+//        this -> advect2<symmTensor>(writeRemappedSteps_);
+//        //this -> advect<sphericalTensor>(write);
+//
+//        if (finalMeshIsHit)
+//        {
+//            Info<< "\n    Final mesh in this time step is hit; ignore next"
+//                << "\n    remap steps, advect fields and move on to the" 
+//                << "\n    next time step."
+//                << endl;
+//
+//            break;
+//        }
+//
+//        if (incrementPhysicalTimeInRemap_)
+//        {
+//            const_cast<Time&>(runTime_)++;
+//        }
+//    }
+//
+//    this->deregisterTmpFields();
+//
+//    /// Correct physical time, and prevent fields from re-creating old
+//    /// fields
+//    this->resetTime(now, nowIndex, deltaT/*, endTime*/);
+//
+//    /// Re-set step-wise mesh motion data
+//    this->resetSumMotionFraction();
+//
+//    /// write parameter is responsible for forcing mesh and fields being
+//    /// written, ignoring the controlDict write controls
+//    //if (write)
+//    if (ifForceWriteAtRemapTime_)
+//    {
+//        this->write();
+//
+//        Info<< "    Mesh and fields written to "
+//            << runTime_.timeName()
+//            << "\n";
+//    }
+//
+//    Info<<"    Remap done\n    Time reset to "
+//        << runTime_.timeName()
+//        <<"\n";
 //}
 
 
 void Foam::meshDance::remap(const bool write)
 {
-    const scalar now = runTime_.value();
-    const label nowIndex = runTime_.timeIndex();
     const scalar deltaT = runTime_.deltaTValue();
 
-    /// To be accessed inside advect()
-    nowName_ = runTime_.timeName();
     const_cast<Time&>(runTime_).setDeltaT(1);
 
-    /// Save old- and oldOld-physical-time fields
-    //saveOldTimes<scalar>();
-    //saveOldTimes<vector>();
-    //saveOldTimes<tensor>();
-    //saveOldTimes<symmTensor>();
+    /// Rename fields if needed
+    if
+    (
+        mesh_.thisDb()
+        .foundObject<GeometricField<scalar, fvPatchField, volMesh> >
+        ("(1|impK)")
+    )
+    {
+        const GeometricField<scalar, fvPatchField, volMesh>& field = mesh_.thisDb()
+        .lookupObject<GeometricField<scalar, fvPatchField, volMesh> >
+        ("(1|impK)");
 
-    //this->storeFieldCopies<scalar>();
-    //this->storeFieldCopies<vector>();
-    //this->storeFieldCopies<tensor>();
-    //this->storeFieldCopies<symmTensor>();
+        const_cast
+        <
+            GeometricField<scalar, fvPatchField, volMesh>&
+        >(field).rename("I_am_renamed_impK");
+    }
 
-    /// Advect nowTime fields
-    //if (meshFluxMeetsThreshold())
-    //{
+    /// VolFields
+    this -> advect3<scalar>    (writeRemappedSteps_);
+    this -> advect3<vector>    (writeRemappedSteps_);
+    this -> advect3<tensor>    (writeRemappedSteps_);
+    this -> advect3<symmTensor>(writeRemappedSteps_);
+    //this -> advect<sphericalTensor>(write);
 
-    //isSameAsOld<vector>(word("DU"), "Before remap loop:\n", word("Before_remap_loop"));
 
-        for (label iter = 0; iter < nRemapSteps_; ++iter)
-        {
-            Info<< "Remap step = "
-                <<iter<<"\n";
+    if (ifForceWriteAtRemapTime_)
+    {
+        Info<< "Force writing mesh and fields after remap"
+            //<< tfield.name()
+            //<< "\n"
+            << endl;
 
-            /// Rezone overshoot-proof
-            /// Read fields from the database and advect
-            if (this -> stepTowards())
-            {
-                Info<< "\n    Final mesh in this cycle is hit; ignore next"
-                    << "\n    time steps, advect fields and move to the" 
-                    << "\n    next cycle."
-                    << endl;
+        mesh_.write();
+    }
 
-                /// VolFields
-                this -> advect<scalar>    (writeRemappedSteps_);
-                this -> advect<vector>    (writeRemappedSteps_);
-                this -> advect<tensor>    (writeRemappedSteps_);
-                this -> advect<symmTensor>(writeRemappedSteps_);
-                //this -> advect<sphericalTensor>(write);
 
-                if (finalMeshIsHit_)
-                {
-                    finalMeshIsHit_ = false;
-                    break;
-                }
-            }
+    /// Restore original field names when needed
+    if
+    (
+        mesh_.thisDb()
+        .foundObject<GeometricField<scalar, fvPatchField, volMesh> >
+        ("I_am_renamed_impK")
+    )
+    {
+        const GeometricField<scalar, fvPatchField, volMesh>& field = mesh_.thisDb()
+        .lookupObject<GeometricField<scalar, fvPatchField, volMesh> >
+        ("I_am_renamed_impK");
 
-            /// Volume fields
-            //this -> advect<scalar>    (writeRemappedSteps_);
-            //this -> advect<vector>    (writeRemappedSteps_);
-            //this -> advect<tensor>    (writeRemappedSteps_);
-            //this -> advect<symmTensor>(writeRemappedSteps_);
-            //this -> advect<sphericalTensor>(write);
+        const_cast
+        <
+            GeometricField<scalar, fvPatchField, volMesh>&
+        >(field).rename("(1|impK)");
+    }
 
-            //isSameAsOld<vector>(word("DU"), "In advect loop, before time++\n",
-            //word("In_advect_loop_before_timePP"));
+    const_cast<Time&>(runTime_).setDeltaT(deltaT);
 
-            /// Move ahead; needs to be after advect()
-            //const_cast<Time&>(/*pseudo*/runTime_)++;
-
-            /// Does it prevent the re-creation of old fields?
-            //resetFieldTimeIndex<scalar>    (runTime_.timeIndex());
-            //resetFieldTimeIndex<vector>    (runTime_.timeIndex());
-            //resetFieldTimeIndex<tensor>    (runTime_.timeIndex());
-            //resetFieldTimeIndex<symmTensor>(runTime_.timeIndex());
-
-            /// Store old fields
-            //storeOldFields();
-             
-            /// Previous design: Write remap steps in physical time dirs.
-            /// New design: Write remap steps "inside" the remap physical time
-
-            //isSameAsOld<vector>(word("DU"), "In advect loop, after time++\n",
-            //word("In_advect_loop_after_timePP"));
-        }
-
-        //isSameAsOld<vector>(word("DU"), "After advect loop",
-        //word("After_advect_loop"));
-
-        /// Correct physical time, and prevent fields from re-creating old
-        /// fields
-        this->resetTime(now, nowIndex, deltaT);
-
-        //isSameAsOld<vector>(word("DU"), "After reset time",
-        //word("After_reset_time"));
-
-        /// write parameter is responsible for forcing mesh and fields being
-        /// written, ignoring the controlDict write controls
-        //if (write)
-        if (ifForceWriteAtRemapTime_)
-        {
-            this->write();
-
-            Info<< "    Mesh and fields written to "
-                << runTime_.timeName()
-                << "\n";
-        }
-
-        //isSameAsOld<vector>(word("DU"), "In advect loop, after force write\n",
-        //word("DU_0"));
-
-        Info<<"    Remap done\n    Time reset to "
-            << runTime_.timeName()
-            <<"\n";
-    //}
-    //else
-    //{
-    //    Info<<"    Rezone and Remap is skipped."
-    //        << endl;
-    //}
-
-    /// Advect oldTime fields
-    //AdvectOldFields();
-
-    /// Update field.oldTime() and field.oldTime().oldTime()
-    //UpdateOldFields();
+    Info<<"    Remap done\n";
 }
 
 
@@ -1990,58 +2105,49 @@ void Foam::meshDance::resetTime
 (
     const scalar now,
     const label nowIndex,
-    const scalar deltaT
+    const scalar deltaT//,
+    //const scalar endTime
 )
 {
     /// Reset deltaT
     const_cast<Time&>(runTime_).setDeltaT(deltaT);
 
     /// Reset time
-    //const_cast<Time&>(runTime_).setTime
-    //(
-    //    now,
-    //    nowIndex
-    //);
+    if (incrementPhysicalTimeInRemap_)
+    {
+        const_cast<Time&>(runTime_).setTime
+        (
+            now,
+            nowIndex
+        );
 
-    /// Reset field time indices
-    //resetFieldTimeIndex<scalar>    (nowIndex);
-    //resetFieldTimeIndex<vector>    (nowIndex);
-    //resetFieldTimeIndex<tensor>    (nowIndex);
-    //resetFieldTimeIndex<symmTensor>(nowIndex);
+        if (resetFieldTimeIndex_)
+        {
+            /// Reset field time indices
+            resetFieldTimeIndex<scalar>    (nowIndex);
+            resetFieldTimeIndex<vector>    (nowIndex);
+            resetFieldTimeIndex<tensor>    (nowIndex);
+            resetFieldTimeIndex<symmTensor>(nowIndex);
+        }
+    }
+
+    /// Reset endTime
+    //const_cast<Time&>(runTime_).setEndTime(endTime);
 }
-
-
-//void Foam::meshDance::AdvectOldFields()
-//{
-//    advectOldFields<scalar>(oldFHT_);
-//    advectOldFields<vector>(oldFHT_);
-//    advectOldFields<tensor>(oldFHT_);
-//    advectOldFields<symmTensor>(oldFHT_);
-//
-//    advectOldFields<scalar>(oldOldFHT_);
-//    advectOldFields<vector>(oldOldFHT_);
-//    advectOldFields<tensor>(oldOldFHT_);
-//    advectOldFields<symmTensor>(oldOldFHT_);
-//}
-
-
-//void Foam::meshDance::UpdateOldFields()
-//{
-//    updateOldFields<scalar>();
-//    updateOldFields<vector>();
-//    updateOldFields<tensor>();
-//    updateOldFields<symmTensor>();
-//}
 
 
 bool Foam::meshDance::permissibleToAdvect(const word& fieldName)
 {
     std::smatch matches;
-    std::regex illegal{R"(ddt0+)"};
+    std::regex illegal_1{R"(ddt0+)"};
+    std::regex illegal_2{R"(_tmp$)"};
+    std::regex illegal_3{R"(PrevIter)"};
 
     if
     (
-        std::regex_search(fieldName, matches, illegal)
+        std::regex_search(fieldName, matches, illegal_1)
+     || std::regex_search(fieldName, matches, illegal_2)
+     || std::regex_search(fieldName, matches, illegal_3)
     )
     {
         Info<< nl
@@ -2071,6 +2177,32 @@ bool Foam::meshDance::permissibleToAdvect(const word& fieldName)
     return true;
 }
 
+/// Return true if the fieldName ends with "_tmp"
+bool Foam::meshDance::isTmp(const word& fieldName)
+{
+    std::smatch matches;
+
+    /// String ending with _0
+    std::regex illegal{R"(_tmp$)"};
+
+    if
+    (
+        std::regex_search(fieldName, matches, illegal)
+    )
+    {
+        Info<< nl
+            << "    "
+            << fieldName
+            << " is a temporary field."
+            << '\n';
+
+        return true;
+    }
+
+    return false;
+}
+
+
 /// Return true if the fieldName ends with "_0"
 bool Foam::meshDance::isOld(const word& fieldName)
 {
@@ -2094,4 +2226,273 @@ bool Foam::meshDance::isOld(const word& fieldName)
     }
 
     return false;
+}
+
+//void Foam::meshDance::changeDb(const Time& pseudoTime)
+//{
+//    const_cast<Time&>(mesh_.time()) = pseudoTime_;
+//
+//    const label& nowIndex = pseudoTime.timeIndex();
+//
+//    /// Reset field time indices
+//    resetFieldTimeIndex<scalar>    (nowIndex);
+//    resetFieldTimeIndex<vector>    (nowIndex);
+//    resetFieldTimeIndex<tensor>    (nowIndex);
+//    resetFieldTimeIndex<symmTensor>(nowIndex);
+//}
+
+void Foam::meshDance::deregisterTmpFields()
+{
+    this->DeregisterTmpFields<scalar>();
+    this->DeregisterTmpFields<vector>();
+    this->DeregisterTmpFields<tensor>();
+    this->DeregisterTmpFields<symmTensor>();
+}
+
+
+void Foam::meshDance::calcGrad
+(
+    autoPtr<GeometricField<tensor, fvPatchField, volMesh> >&
+    gradDUPtr,
+    autoPtr<GeometricField<tensor, fvPatchField, volMesh> >&
+    gradDU0Ptr,
+    const word& fieldName
+)
+{
+    /// Run-time request of some BC's
+    std::smatch matches;
+    /// bekaert
+    std::regex DUtmpName{R"(^DU_tmp$)"};
+    std::regex UtmpName{R"(^U_tmp$)"};
+    std::regex DU_0Name{R"(^DU_0)"};
+    std::regex U_0Name{R"(^U_0)"};
+    std::regex UName{R"(^U$)"};
+    std::regex DUName{R"(^DU$)"};
+    /// solids4foam
+    std::regex DDtmpName{R"(^DD_tmp$)"};
+    std::regex DtmpName{R"(^D_tmp$)"};
+    std::regex DD_0Name{R"(^DD_0)"};
+    std::regex D_0Name{R"(^D_0)"};
+    std::regex DName{R"(^D$)"};
+    std::regex DDName{R"(^DD$)"};
+
+    if
+    (
+        std::regex_search(fieldName, matches, DName)
+     || std::regex_search(fieldName, matches, UName)
+     || std::regex_search(fieldName, matches, D_0Name)
+     || std::regex_search(fieldName, matches, U_0Name)
+     || std::regex_search(fieldName, matches, DUName)
+     || std::regex_search(fieldName, matches, DDName)
+     || std::regex_search(fieldName, matches, DUtmpName)
+     || std::regex_search(fieldName, matches, DDtmpName)
+     || std::regex_search(fieldName, matches, UtmpName)
+     || std::regex_search(fieldName, matches, DtmpName)
+     || std::regex_search(fieldName, matches, DU_0Name)
+     || std::regex_search(fieldName, matches, DD_0Name)
+    )
+    {
+        /// If grad field does not exist, calculate it
+        if
+        (
+            !mesh_.thisDb()
+                .foundObject<GeometricField<tensor, fvPatchField, volMesh> >
+                 (word("grad(") + fieldName + word(")"))
+        )
+        {
+            gradDUPtr.clear();
+            gradDUPtr.reset
+            (
+                new GeometricField<tensor, fvPatchField, volMesh> 
+                (
+                    fvc::grad
+                    (
+                        mesh_.thisDb()
+                            .lookupObject
+                                <
+                                    GeometricField<vector, fvPatchField, volMesh>
+                                >(fieldName),
+                        word("grad(") + fieldName + word(")")
+                    )
+                )
+            );
+    
+            Info<< "    "
+                << (word("grad(") + fieldName + word(")"))
+                << " calculated.\n";
+        }
+
+        /// Also evaluate the old-time grad field, if old-time field
+        /// presents, but the grad field does not
+        if
+        (
+            mesh_.thisDb()
+                .foundObject<GeometricField<vector, fvPatchField, volMesh> >
+                (fieldName + word("_0"))
+        && !mesh_.thisDb()
+                .foundObject<GeometricField<tensor, fvPatchField, volMesh> >
+                (word("grad(") + fieldName + word("_0)"))
+        )
+        {
+            gradDU0Ptr.clear();
+            gradDU0Ptr.reset
+            (
+                new GeometricField<tensor, fvPatchField, volMesh> 
+                (
+                    fvc::grad
+                    (
+                        mesh_.thisDb()
+                            .lookupObject
+                                <
+                                    GeometricField<vector, fvPatchField, volMesh>
+                                >(fieldName + word("_0")),
+                        word("grad(") + fieldName + word("_0)")
+                    )
+                )
+            );
+        }
+    }
+}
+
+/// Calculate a subMesh
+void Foam::meshDance::subMesh(const word zoneToBeSmoothed)
+{
+    /// Zone names
+    List<word> zones(mesh_.cellZones().size());
+
+    /// Zone fv meshes --- To be a member data
+    List<autoPtr<fvMesh> > zoneMeshesPtrList(zones.size());
+
+    /// Zone subMeshing engines
+    List<autoPtr<fvMeshSubset> > fvMeshSubsetPtrList(zones.size());
+
+    forAll(zones, zoneI)
+    {
+        zones[zoneI] = mesh_.cellZones()[zoneI].name();
+
+        Info<< "Create subMesh for zone "
+            << zones[zoneI]
+            << endl;
+
+        /// Find zone
+        label zoneID = mesh.cellZones().findZoneID(zones[zoneI]);
+        label sz = mesh.cellZones()[zoneID].size();
+
+        /// Init set
+        cellSet subSet(mesh, zones[zoneI], sz);
+
+        /// Fill set 
+        forAll(mesh.cellZones()[zoneID], cellI)
+        {
+            subSet.set(mesh.cellZones()[zoneID][cellI]/*, 0*/);
+        }
+
+        /// In case you want to write it, to avoid writing in constant/polyMesh
+        subSet.instance() = runTime_.timeName();
+        subSet.write();
+
+        /// Create subMesh engine
+        fvMeshSubsetPtrList[zoneI].set
+        (
+            new fvMeshSubset
+            (
+                IOobject
+                (
+                    "set" + zones[zoneI],
+                    runTime.timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh
+            )
+        );
+
+        fvMeshSubset& sMesh = fvMeshSubsetPtrList[zoneI]();
+
+        sMesh.setLargeCellSubset(subSet);
+        zoneMeshesPtrList[zoneI].set(&sMesh.subMesh());
+    }
+
+    Info<< "    Zone meshes are set.\n";
+
+    /// Keep the scope happy
+
+        /// The subMesh to be smoothed
+        //autoPtr<mergePolyMesh> wireMeshPtr;
+
+        /// The fixed subMesh
+        autoPtr<fvMesh> rollsFvMeshPtr;
+
+
+    forAll(zoneMeshesPtrList, zoneI)
+    {
+        if (zones[zoneI] == zoneToBeSmoothed)
+        {
+            polyMesh& mesh = zoneMeshesPtrList[zoneI]();
+            mesh.rename(zoneToBeSmoothed);
+
+            /// Calls polyMesh(IOobject&) constructor, which must read from the
+            /// disk, so write it first
+            mesh.write();
+
+            Info<< "    Zonal mesh is written to "
+                << runTime.timeName()
+                << endl;
+
+            wireMeshPtr_
+            .set(new mergePolyMesh(mesh));
+            //.set
+            //(
+            //    new mergeMesh
+            //    (
+            //        mesh,
+            //        xferCopy(mesh.points()),
+            //        xferCopy(mesh.faces()),
+            //        xferCopy(mesh.faceOwner()),
+            //        xferCopy(mesh.faceNeighbour())
+            //    )
+            //);
+
+            break;
+        }
+    }
+}
+
+
+/// Merge smoothed subMesh with fixed mesh zones
+void Foam::meshDance::mergeZones()
+{
+    forAll(zoneMeshesPtrList, zoneI)
+    {
+        if (zones[zoneI] != zoneToBeSmoothed_)
+        {
+            Info<< "    Mesh separation for "
+                << zones[zoneI]
+                << endl;
+
+            if (zoneMeshesPtrList[zoneI].empty())
+            { 
+                FatalErrorIn("meshDance::subMesh()")
+                    << "Ptr not set!\n"
+                    << abort(FatalError);
+            }
+            
+            fvMesh* meshPtr = zoneMeshesPtrList[zoneI].ptr();
+            rollsFvMeshPtr.reset(meshPtr);
+            rollsFvMeshPtr().rename(zones[zoneI]);
+
+            if (wireMeshPtr_.valid())
+            {
+                wireMeshPtr_().addMesh(rollsFvMeshPtr());
+
+                Info<< zones[zoneI]
+                    << " mesh is added to "
+                    << zoneToBeSmoothed
+                    << endl;
+            }
+        }
+    }
+
+    wireMeshPtr_().merge();
 }

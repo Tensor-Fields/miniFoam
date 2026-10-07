@@ -38,11 +38,15 @@ class meshDance//: public fvMesh
     //fvMesh& mesh_;
 
     dynamicFvMesh& mesh_;
+    surfaceScalarField& meshFlux_;
+    //autoPtr<surfaceScalarField> meshFluxPtr_;
+    surfaceScalarField* meshFluxPtr_;
 
     const IOobjectList fields_;
 
     /// ALE dictionary
-    const IOdictionary ALEDict_;
+    //const IOdictionary ALEDict_;
+    const dictionary ALEDict_;
     const dictionary remapDict_;
     const dictionary rezoneDict_;
 
@@ -192,6 +196,12 @@ class meshDance//: public fvMesh
 
     scalar fluxSign();
 
+    bool incrementPhysicalTimeInRemap_;
+    bool resetFieldTimeIndex_;
+
+    dictionary pseudoTimeDict_;
+    Time* pseudoTimePtr_;
+
     /// Public
     public:
 
@@ -199,6 +209,7 @@ class meshDance//: public fvMesh
         meshDance
         (
             const Time&,
+            const dictionary& ALEDict,
             const bool registerFields = false
             /// const label,
             /// const List<string>&,
@@ -270,6 +281,13 @@ class meshDance//: public fvMesh
         template<class Type>
         void advect(bool writeAdvectedFields = false);
 
+        template<class Type>
+        void advect2(bool writeAdvectedFields = false);
+
+        /// Psudo-time loop inside field-search loop
+        template<class Type>
+        void advect3(bool writeAdvectedFields = false);
+
         /// Advect surfaceFields
         template<class Type>
         void advects(bool writeAdvectedFields);
@@ -298,7 +316,12 @@ class meshDance//: public fvMesh
 
         /// Check if this field is allowed to be advected
         bool permissibleToAdvect(const word& fieldName);
+
+        /// True if fieldName ends with "_0"
         bool isOld(const word& fieldName);
+
+        /// True if fieldName ends with "_tmp"
+        bool isTmp(const word& fieldName);
 
         /// Rezone or not
         bool ifRezone(const label);
@@ -370,8 +393,20 @@ class meshDance//: public fvMesh
         (
             const scalar now,
             const label nowIndex,
-            const scalar deltaT
+            const scalar deltaT//,
+            //const scalar endTime
         );
+
+
+        void calcGrad
+        (
+            autoPtr<GeometricField<tensor, fvPatchField, volMesh> >&,
+            autoPtr<GeometricField<tensor, fvPatchField, volMesh> >&,
+            const word& fieldName
+        );
+
+
+        void deregisterTmpFields();
 
 
         template<class T>
@@ -386,6 +421,9 @@ class meshDance//: public fvMesh
             const word oldFieldName,
             const bool writeOldField = true
         );
+
+        template<class T>
+        void DeregisterTmpFields();
 
         //template<class Type>
         //void saveOldTimes();
@@ -405,8 +443,7 @@ class meshDance//: public fvMesh
         //void updateOldFields();
 
         //void UpdateOldFields();
-
-    };
+};
 }
 
 #include "meshDanceTemplates.C"
