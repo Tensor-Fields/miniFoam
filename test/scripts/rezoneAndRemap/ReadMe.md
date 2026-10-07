@@ -34,3 +34,45 @@ Study alpha in fixed everything
 
 Description:
 Study alpha in fixed everything
+
+Description:
+For two N_iters, do rezone+remap at four mesh levels, for 18 div(meshPhi,p) schemes
+
+Description:
+For two N_iters, do rezone+remap at four mesh levels, for 18 div(meshPhi,p) schemes
+
+Description:
+For two N_iters, do rezone+remap at four mesh levels, for 18 div(meshPhi,p) schemes
+
+Description:
+For two N_iters, do rezone+remap at four mesh levels, for 18 div(meshPhi,p) schemes
+
+Description:
+For two N_iters, do rezone+remap at four mesh levels, for 18 div(meshPhi,p) schemes
+
+Description:
+For two N_iters, do rezone+remap at four mesh levels, for 18 div(meshPhi,p) schemes
+
+Description:
+For two N_iters, do rezone+remap at four mesh levels, for 18 div(meshPhi,p) schemes
+
+Description:
+For two N_iters, do rezone+remap at four mesh levels, for 18 div(meshPhi,p) schemes
+
+Description:
+For two N_iters, do rezone+remap at four mesh levels, for 18 div(meshPhi,p) schemes
+
+Description:
+For two N_iters, do rezone+remap at four mesh levels, for 18 div(meshPhi,p) schemes
+
+Description:
+For two N_iters, do rezone+remap at four mesh levels, for 18 div(meshPhi,p) schemes
+
+Description:
+For two N_iters, do rezone+remap at four mesh levels, for 18 div(meshPhi,p) schemes
+
+Description:
+For two N_iters, do rezone+remap at four mesh levels, for 18 div(meshPhi,p) schemes
+
+Description:
+For two N_iters, do rezone+remap at four mesh levels, for 18 div(meshPhi,p) schemes

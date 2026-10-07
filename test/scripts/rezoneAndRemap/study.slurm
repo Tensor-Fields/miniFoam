@@ -19,12 +19,9 @@ fe40
 
 # Execute the run script
 #./Allrun &> log.Allrun
-<<<<<<< Updated upstream
 
 # Random is not cyclic, see Test.sh
 # random, once, or cyclic
-./study.sh "study_template" "random"
+#./study.sh "study_template" "random"
 #./study.gplt.sh
-=======
-./study.sh "study_template" "cyclic"
->>>>>>> Stashed changes
+./study.sh "study_template" "once"

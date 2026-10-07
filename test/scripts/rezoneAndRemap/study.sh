@@ -39,10 +39,10 @@ do
 
     if [ -d $study ]; then
 	echo Remove $study
-        rm -r $study
+        rm -rf $study
     fi
 
-    tmp=$(readlink -f study_template)
+    tmp=$(readlink -f $study_tmp)
     cp -r $tmp $study
     echo $study created
 
