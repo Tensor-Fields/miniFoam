@@ -1,0 +1,151 @@
+FoamFile
+{
+    version 2.0;
+    format ascii;
+    object ALEDict;
+    class dictionary;
+}
+
+planar2D true;
+wedge false;
+/// When the two are false, it is 3-D.
+ 
+rezoneDict
+{
+    /// 0: Deactivate ALE
+    /// Large, to only rezone when quality criterion is met
+    rezoneFrequency 300000; /// Every N timestep / rezone
+    
+    //lockedPatchNames
+    fixedPatches
+    (
+        "billetTop"
+        //"left"
+        "dieContact"
+        "billetContact"
+        "billetSide"
+        "dieBottom"
+        //"loading"
+        //"back"
+        //"front"
+        //"axis"
+    );
+    
+    LaplaceSmoother true;
+    cfMeshSmoother false;
+    
+    meshSmootherDict
+    {
+        untangle false;
+    
+        nSurfaceIterations 5;
+        nLoops 10;
+        patchWithSlidingPoints "This_Does_Nothing";
+        //freePatches ("billetFront" "billetBack");
+        freePatches ("front" "back");
+        //crossingPatches ("billetFront" "billetBack");
+        crossingPatches ("front" "back");
+        wedgePatchNames ( "front" "back" );
+        slideCrossingPoints true;
+        fixCrossingPoints false;
+        maxRezoneIter 100;
+        maxRezoneRes 1e-5;
+        wedgeDir 2; // z
+        radialDir 1;// y
+    
+        /// Important
+        //solidWedgeAperture 0.2; // degrees
+    
+        //emptyDir 2; // When empty instead of solidWedge
+        fixPointsInBoundBoxAnyway false;
+    	// Box bounds: 
+        // Non-axial points of the die
+        bbMin (-1e6 17.98e-3 -1e6);
+        bbMax ( 1e6 1e6       1e6);
+        constrainedCellsSet xxxxx;
+    //}
+//meshQualityDict
+/// Turn off a quality measure by '-1'
+//{
+    /// > 1 to less frequently check quality
+    iterPerQualityCheck 2;
+
+    /// Bad mesh
+        /// Low, to make sure smoothing loop does not break because point motion is
+        /// small
+        qualityThreshold 0;
+
+        /// Actual quality criterion
+        nonOrthoThreshold 70;
+
+        /// High, to make it ineffective
+        skewThreshold -1;
+
+        /// Edge length in solidWedge direction is considered in the calculations, so,
+        /// low aspectThreshold might never be met.
+        /// Set it to very high to deactivate it, that is, mesh ckeck alwasy returns
+        /// "good" in terms of aspect ratio.
+        aspectThreshold -1;
+
+    /// Good mesh
+        /// Low, to make sure smoothing loop does not break because point motion is
+        /// small
+        qualityThreshold 0;
+
+        /// Actual quality criterion
+        goodNonOrthoThreshold 65;
+
+        /// High, to make it ineffective; -1 to skip
+        goodSkewThreshold -1;
+
+        /// Edge length in solidWedge direction is considered in the calculations, so,
+        /// low aspectThreshold might never be met.
+        /// Set it to very high to deactivate it, that is, mesh ckeck alwasy returns
+        /// "good" in terms of aspect ratio.
+        goodAspectThreshold -1;
+    }
+}
+
+remapDict
+{
+    flipFluxSign true;
+    
+    remapLoopPerStep 1;
+    
+    nRemapSteps 10;
+    
+    remapWrite false;
+    
+    remapWriteFrequency 1;
+    
+    illegalToAdvect
+    (
+        "materials"
+        //"(1|impK)"
+        //"mu"
+        //"lambda"
+        //"twoMuLambda"
+        //"sigmaY"
+    );
+    
+    forceWriteAtRemapTime true;
+ 
+    /// Larger number -> less possibility
+    /// 0-1 range
+    /// 0:   Swept volume does not need to exceed a threshold
+    /// 1:   Swept volume needs to exceed the volume of the old cell 
+    /// 0.1: Swept volume needs to exceed 10% of the volume of the old cell 
+    sweptVolumeThreshold 0;
+    
+    /// Larger number -> less possibility
+    /// 0-1 range
+    /// 0:   No cell needs to meet the threshold
+    /// 1:   All cells need to meet the threshold
+    /// 0.1: 10% of cells need to meet the threshold
+    cellCountFraction 1e-20;
+    
+    minCellCount 1;
+
+    incrementPhysicalTimeInRemap false;
+    resetFieldTimeIndex false;
+}
