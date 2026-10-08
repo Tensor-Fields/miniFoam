@@ -1,7 +1,7 @@
     this->calcGrad
     ( 
         gradDUPtr,
-        gradDU0Ptr,
+        //gradDU0Ptr,
         field.name()
     );
 

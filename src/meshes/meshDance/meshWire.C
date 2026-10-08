@@ -55,12 +55,6 @@ void Foam::meshWire::wire(const label& pointI)
     /// For all edges connected to pointI
     forAll(meshPointEdges_[pointI], edgeI)
     {
-        //Info<<"a="<< meshEdges_[meshPointEdges_[pointI][edgeI]]
-        //             .vec(newPoints_)
-        //    <<"\n"<<"b="
-        //    << fixedDir_
-        //    << endl;
-
         /// If edge is parallel to fixedDir_, this edge is the wire
         if 
         (
@@ -196,45 +190,12 @@ Foam::pointField Foam::meshWire::sinCycle
             ///
             wire(pointI);
 
-        //    //Info<< "\nwire created\n"
-        //    //    << endl;
-
             forAll(isMoving, dirI)
             {
                 /// If a point is allowed to move in the direction dirI
                 if (isMoving[dirI])
                 {
                     scalar d = 0;
-
-                    /// Else, d = 0, because sin(SMALL) = 0
-                    //if (mag(newPoints_[pointI][dirI]) > SMALL)
-                    //{
-                    //    if (dirI == 0)
-                    //    {
-                    //        const label dirII = 1;
-                    //        
-                    //        d =
-                    //            newPoints_[pointI][dirI] / mag(newPoints_[pointI][dirI])
-                    //            // runTime is dynamic, mesh_.time().value() is static,
-                    //            // because mesh_ is const&
-                    //         *  (mesh_.time().endTime().value() - runTime.value())
-                    //         *  sin(2 * mathematicalConstant::pi
-                    //         *  (newPoints_[pointI][dirII] - phi));
-                    //    }
-                    //    else if (dirI == 1)
-                    //    {
-                    //        const label dirII = 0;
-
-                    //        d =
-                    //            newPoints_[pointI][dirI] / mag(newPoints_[pointI][dirI])
-                    //          * mesh_.time().value()
-                    //            // runTime is dynamic, mesh_.time().value() is static,
-                    //            // because mesh_ is const&
-                    //          * (mesh_.time().endTime().value() - runTime.value())
-                    //          * sin(2 * mathematicalConstant::pi
-                    //          * (newPoints_[pointI][dirII] - phi));
-                    //    }
-                    //}
 
                     d =
                         tau
@@ -253,17 +214,6 @@ Foam::pointField Foam::meshWire::sinCycle
                                 newPoints_[pointI][1] - phi
                             )
                         );
-
-                    //Info<< "d = "
-                    //    << d  << endl;
-
-                    //Info<< nl << "(mesh_.time().endTime().value() = "
-                    //    << mesh_.time().endTime().value()
-                    //    << nl << "runTime.value() = "
-                    //    << runTime.value()
-                    //    << nl << "sin(2 * mathematicalConstant::pi * newPoints_[pointI][dirI]) = "
-                    //    << sin(2 * mathematicalConstant::pi * newPoints_[pointI][dirI])
-                    //    << endl;
 
                     /// \note: To avoid duplicate search, the front and back
                     /// patches on which wire end points reside should have

@@ -1,1 +1,0 @@
-rezoneAndRemap/plot.sh

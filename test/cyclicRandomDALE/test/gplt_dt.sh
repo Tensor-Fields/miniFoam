@@ -1,1 +1,0 @@
-rezoneAndRemap/gplt_dt.sh

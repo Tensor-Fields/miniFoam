@@ -1,1 +1,0 @@
-../rezoneAndRemapScripts/study.gplt.sh

@@ -45,8 +45,7 @@ class meshDance//: public fvMesh
     const IOobjectList fields_;
 
     /// ALE dictionary
-    //const IOdictionary ALEDict_;
-    const dictionary ALEDict_;
+    const IOdictionary ALEDict_;
     const dictionary remapDict_;
     const dictionary rezoneDict_;
 
@@ -90,13 +89,14 @@ class meshDance//: public fvMesh
     label rMotionFraction_;
 
     List<string> fixedPatches_;
+    HashTable<label, word, Hash<word> > fixedPatchesHashTable_;
 
     /// Rezone frequency
     /// Set it to a large number by default, meaning that never rezone!
     label rezoneFreq_;
 
     /// Must be initialized as used by advect()
-    bool writeRemappedSteps_ = false;
+    bool writeRemappedSteps_;
     label remapWriteFreq_;
 
     /// Rezone only if the swept volume of at least one cell meets this fraction
@@ -209,7 +209,6 @@ class meshDance//: public fvMesh
         meshDance
         (
             const Time&,
-            const dictionary& ALEDict,
             const bool registerFields = false
             /// const label,
             /// const List<string>&,
@@ -400,7 +399,6 @@ class meshDance//: public fvMesh
 
         void calcGrad
         (
-            autoPtr<GeometricField<tensor, fvPatchField, volMesh> >&,
             autoPtr<GeometricField<tensor, fvPatchField, volMesh> >&,
             const word& fieldName
         );
