@@ -1,0 +1,4 @@
+10  linear    '$N_\\text{remap}=10$, linear '
+10  Linear    '$N_\\text{remap}=10$, limitedLinear'
+100  linear   '$N_\\text{remap}=100$, linear'
+100  Linear   '$N_\\text{remap}=100$, limitedLinear'
