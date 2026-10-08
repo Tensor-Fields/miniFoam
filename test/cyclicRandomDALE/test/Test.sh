@@ -1,1 +1,0 @@
-rezoneAndRemap/Test.sh

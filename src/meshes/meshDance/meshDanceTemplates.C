@@ -8,45 +8,51 @@
 #include "foamTime.H"
 #include "fixedValueFvPatchField.H"
 
+/// Advection control
+#include "pimpleControl.H"
+
+/// Advection loop
+#include "subCycle.H"
+
 /// To match field names for being/not being advected
 //#include <regex>
 
-bool Foam::meshDance::permissibleToAdvect(const word& fieldName)
-{
-    std::smatch matches;
-    std::regex illegal{R"(ddt0+)"};
-
-    if
-    (
-        std::regex_search(fieldName, matches, illegal)
-    )
-    {
-        Info<< nl
-            << "    "
-            << fieldName
-            << " is hard-coded to not be advected"
-            << '\n';
-
-        return false;
-    }
-
-    /// Run-time selected names
-    forAll(illegalToAdvect_, fieldI)
-    {
-        if (fieldName == illegalToAdvect_[fieldI])
-        {
-            Info<< nl
-                << "    "
-                << fieldName
-                << " was selected to not be advected"
-                << '\n';
-
-            return false;
-        }
-    }
-
-    return true;
-}
+//bool Foam::meshDance::permissibleToAdvect(const word& fieldName)
+//{
+//    std::smatch matches;
+//    std::regex illegal{R"(ddt0+)"};
+//
+//    if
+//    (
+//        std::regex_search(fieldName, matches, illegal)
+//    )
+//    {
+//        Info<< nl
+//            << "    "
+//            << fieldName
+//            << " is hard-coded to not be advected"
+//            << '\n';
+//
+//        return false;
+//    }
+//
+//    /// Run-time selected names
+//    forAll(illegalToAdvect_, fieldI)
+//    {
+//        if (fieldName == illegalToAdvect_[fieldI])
+//        {
+//            Info<< nl
+//                << "    "
+//                << fieldName
+//                << " was selected to not be advected"
+//                << '\n';
+//
+//            return false;
+//        }
+//    }
+//
+//    return true;
+//}
 
 template<class Type>
 void Foam::meshDance::registerFields()
@@ -299,7 +305,7 @@ void Foam::meshDance::registerFields()
 
             //    // Method 1:
             //    /*GeometricField<Type, fvPatchField, volMesh>**/ fieldPtr = new 
-	    //        GeometricField<Type, fvPatchField, volMesh>
+        //        GeometricField<Type, fvPatchField, volMesh>
             //        (
             //            IOobject
             //            (
@@ -406,6 +412,7 @@ void Foam::meshDance::registerFields()
     }
 }
 
+
 template<class Type>
 void Foam::meshDance::advect(bool writeAdvectedFields)
 {
@@ -433,36 +440,51 @@ void Foam::meshDance::advect(bool writeAdvectedFields)
     )
     {
         GeometricField
-	<
-	    Type, fvPatchField, volMesh
-	>& field = const_cast
-	<
-        GeometricField
-	<
-	    Type, fvPatchField, volMesh
-	>&
-	>(*fieldIter());
+        <
+            Type, fvPatchField, volMesh
+        >& field =
+            const_cast
+            <
+                GeometricField
+                <
+                    Type, fvPatchField, volMesh
+                >&
+            >(*fieldIter());
+
+        //if (field.name() == word("DU") || field.name() == word("DU_0"))
+        //{
+        //    Info<< "fieldName: "
+        //        << field.name()
+        //        << endl;
+
+        //    //isSameAsOld<vector>(word("DU"), "advect(), after read from db\n"
+        //    //, word("advect_after_read_from_db"));
+        //}
 
         if 
         (
             permissibleToAdvect(field.name())
+         //&& (!isOld(field.name()))
         )
         {
             /// Create the copy of the field to be convected
 
-	    GeometricField<Type, fvPatchField, volMesh> tfield
+            GeometricField<Type, fvPatchField, volMesh> tfield
             (
                 IOobject
                 (
                     field.name()+"_tmp",
                     //mesh_.time().timeName(),
-					nowName_,
-					//"remapSteps/"+mesh_.time().timeName(),
-					fileName("remapSteps/"+runTime_.timeName()),
+                    //nowName_,
+                    //"remapSteps/"+mesh_.time().timeName(),
+                    //fileName(nowName_ + "remapSteps/" + runTime_.timeName()),
+                    word(nowName_ + "remapSteps/"),
+                    runTime_.timeName(),
                     //pseudoTime_.timeName(),
                     mesh_,
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    false
                 ),
                 field,
                 "zeroGradient"
@@ -473,19 +495,56 @@ void Foam::meshDance::advect(bool writeAdvectedFields)
                 << " created"
                 << endl;
 
-	    for (label iter=0; iter < maxIter_; iter++)
-	    {
+
+            for (label iter=0; iter < maxIter_; iter++)
+            {
+                //if (field.name() == word("DU") || field.name() == word("DU_0"))
+                //{
+                //    Info<< "fieldName: "
+                //        << field.name()
+                //        << endl;
+
+                //    //isSameAsOld<vector>(word("DU"), "advect(), before fieldEq\n",
+                //    //word("advect_before_fieldEq"));
+                //}
+
                 fvMatrix<Type> fieldEq
                 (
-                    fluxSign() * fvm::div(fluxSign() * mesh_.phi(), tfield)
+                    fluxSign()
+                  * fvm::div
+                    (
+                        fluxSign() * /*mesh_.phi()*/(*meshFluxPtr_)/*()*/,
+                        tfield
+                    )
                  == fvm::ddt(tfield)
                 );
+
+                //if (field.name() == word("DU") || field.name() == word("DU_0"))
+                //{
+                //    Info<< "fieldName: "
+                //        << field.name()
+                //        << endl;
+
+                //    //isSameAsOld<vector>(word("DU"), "advect(), after fieldEq\n",
+                //    //word("advect_after_fieldEq"));
+                //}
 
                 //TEq.solve();
                 Info<<"    "
                     << fieldEq.solve()
                     << endl;
-	    }
+
+                //if (field.name() == word("DU") || field.name() == word("DU_0"))
+                //{
+                //    Info<< "fieldName: "
+                //        << field.name()
+                //        << endl;
+
+                //    //isSameAsOld<vector>(word("DU"), "advect(), after fieldEq.solve()\n",
+                //    //word("advect_after_fieldEq_solve"));
+                //}
+            }
+
 
             Info<< "    " 
                 << "Field " 
@@ -499,39 +558,39 @@ void Foam::meshDance::advect(bool writeAdvectedFields)
             //tfield.correctBoundaryConditions();
 
             /// Edit field
-            if (field.name() == "D")
-            {
-                // Answer the run-time request
+            //if (field.name() == "D")
+            //{
+            //    // Answer the run-time request
 
-                // Pointer to live outside this scope
-                //GeometricField<tensor, fvPatchField, volMesh>* gradDPtr
-                /*= */new GeometricField<tensor, fvPatchField, volMesh> 
-                (
-                    fvc::grad
-                    (
-                        mesh_.thisDb()
-                        .lookupObject
-                        <GeometricField<vector, fvPatchField, volMesh> >("D"),
-                        "grad(D)"
-                    )
-                );
-            }
-            else if (field.name() == "DD")
-            {
-                // Answer the run-time request
+            //    // Pointer to live outside this scope
+            //    //GeometricField<tensor, fvPatchField, volMesh>* gradDPtr
+            //    /*= */new GeometricField<tensor, fvPatchField, volMesh> 
+            //    (
+            //        fvc::grad
+            //        (
+            //            mesh_.thisDb()
+            //            .lookupObject
+            //            <GeometricField<vector, fvPatchField, volMesh> >("D"),
+            //            "grad(D)"
+            //        )
+            //    );
+            //}
+            //else if (field.name() == "DD")
+            //{
+            //    // Answer the run-time request
 
-                // Pointer to live outside this scope
-                new GeometricField<tensor, fvPatchField, volMesh> 
-                (
-                    fvc::grad
-                    (
-                        mesh_.thisDb()
-                        .lookupObject
-                        <GeometricField<vector, fvPatchField, volMesh> >("DD"),
-                        "grad(DD)"
-                    )
-                );
-            }
+            //    // Pointer to live outside this scope
+            //    new GeometricField<tensor, fvPatchField, volMesh> 
+            //    (
+            //        fvc::grad
+            //        (
+            //            mesh_.thisDb()
+            //            .lookupObject
+            //            <GeometricField<vector, fvPatchField, volMesh> >("DD"),
+            //            "grad(DD)"
+            //        )
+            //    );
+            //}
 
             field.internalField() = tfield.internalField();
 
@@ -540,6 +599,16 @@ void Foam::meshDance::advect(bool writeAdvectedFields)
                 << " internal values updated from "
                 << tfield.name()
                 << endl;
+
+                //if (field.name() == word("DU") || field.name() == word("DU_0"))
+                //{
+                //    Info<< "fieldName: "
+                //        << field.name()
+                //        << endl;
+
+                //    //isSameAsOld<vector>(word("DU"), "advect(), after internalField eval\n",
+                //    //word("advect_after_internalField_eval"));
+                //}
 
             // Extrapolate the boundary field from the internal field
             boolList isFixed(field.boundaryField().size(), false);
@@ -602,6 +671,725 @@ void Foam::meshDance::advect(bool writeAdvectedFields)
                 << " will not be advected."
                 << nl << endl;
         }
+
+        //if (field.name() == word("DU") || field.name() == word("DU_0"))
+        //{
+        //    Info<< "fieldName: "
+        //        << field.name()
+        //        << endl;
+
+        //    //isSameAsOld<vector>(word("DU"), "advect(), end of func\n",
+        //    //word("advect_end_of_func"));
+        //}
+    }
+
+    //for
+    //(
+    //    fieldIter = fields.begin();
+    //    fieldIter !=fields.end();
+    //    ++fieldIter
+    //)
+    //{
+    //    GeometricField
+    //<
+    //    Type, fvPatchField, volMesh
+    //>& field = const_cast
+    //<
+    //    GeometricField
+    //<
+    //    Type, fvPatchField, volMesh
+    //>&
+    //>(*fieldIter());
+
+    //    if 
+    //    (
+    //        permissibleToAdvect(field.name())
+    //     //&& isOld(field.name())
+    //    )
+    //    {
+    //        /// Create the copy of the field to be convected
+
+    //    GeometricField<Type, fvPatchField, volMesh> tfield
+    //        (
+    //            IOobject
+    //            (
+    //                field.name()+"_tmp",
+    //                //mesh_.time().timeName(),
+    //                nowName_,
+    //                //"remapSteps/"+mesh_.time().timeName(),
+    //                fileName("remapSteps/"+runTime_.timeName()),
+    //                //pseudoTime_.timeName(),
+    //                mesh_,
+    //                IOobject::NO_READ,
+    //                IOobject::NO_WRITE
+    //            ),
+    //            field,
+    //            "zeroGradient"
+    //        );
+
+    //        Info<< "    Temporary copy of "
+    //            << field.name()
+    //            << " created"
+    //            << endl;
+
+    //    /// Save old times
+    //    const GeometricField<Type, fvPatchField, volMesh> fieldOld
+    //        (
+    //            IOobject
+    //            (
+    //                field.name()+"_0",
+    //                //mesh_.time().timeName(),
+    //                nowName_,
+    //                //"remapSteps/"+mesh_.time().timeName(),
+    //                fileName("remapSteps/"+runTime_.timeName()),
+    //                //pseudoTime_.timeName(),
+    //                mesh_,
+    //                IOobject::NO_READ,
+    //                IOobject::NO_WRITE
+    //            ),
+    //            field,
+    //            "zeroGradient"
+    //        );
+
+    //    const GeometricField<Type, fvPatchField, volMesh> fieldOldOld
+    //        (
+    //            IOobject
+    //            (
+    //                field.name()+"_0_0",
+    //                //mesh_.time().timeName(),
+    //                nowName_,
+    //                //"remapSteps/"+mesh_.time().timeName(),
+    //                fileName("remapSteps/"+runTime_.timeName()),
+    //                //pseudoTime_.timeName(),
+    //                mesh_,
+    //                IOobject::NO_READ,
+    //                IOobject::NO_WRITE
+    //            ),
+    //            field,
+    //            "zeroGradient"
+    //        );
+
+    //    for (label iter=0; iter < maxIter_; iter++)
+    //    {
+    //            fvMatrix<Type> fieldEq
+    //            (
+    //                fluxSign() * fvm::div(fluxSign() * mesh_.phi(), tfield)
+    //             == fvm::ddt(tfield)
+    //            );
+
+    //            //TEq.solve();
+    //            Info<<"    "
+    //                << fieldEq.solve()
+    //                << endl;
+    //    }
+
+    //        Info<< "    " 
+    //            << "Field " 
+    //            << tfield.name()
+    //            //<< fieldPtr->name()
+    //            << " advected."
+    //            << endl;
+
+    //    /// Recover old times
+    //    field.oldTime() = fieldOld;
+    //    field.oldTime().oldTime() = fieldOldOld;
+
+    //        /// Do not correct BC's for the temporary copy; it has
+    //        /// not-necessarily-correct zeroGradient on all boundaries
+    //        //tfield.correctBoundaryConditions();
+
+    //        /// Edit field
+    //        //if (field.name() == "D")
+    //        //{
+    //        //    // Answer the run-time request
+
+    //        //    // Pointer to live outside this scope
+    //        //    //GeometricField<tensor, fvPatchField, volMesh>* gradDPtr
+    //        //    /*= */new GeometricField<tensor, fvPatchField, volMesh> 
+    //        //    (
+    //        //        fvc::grad
+    //        //        (
+    //        //            mesh_.thisDb()
+    //        //            .lookupObject
+    //        //            <GeometricField<vector, fvPatchField, volMesh> >("D"),
+    //        //            "grad(D)"
+    //        //        )
+    //        //    );
+    //        //}
+    //        //else if (field.name() == "DD")
+    //        //{
+    //        //    // Answer the run-time request
+
+    //        //    // Pointer to live outside this scope
+    //        //    new GeometricField<tensor, fvPatchField, volMesh> 
+    //        //    (
+    //        //        fvc::grad
+    //        //        (
+    //        //            mesh_.thisDb()
+    //        //            .lookupObject
+    //        //            <GeometricField<vector, fvPatchField, volMesh> >("DD"),
+    //        //            "grad(DD)"
+    //        //        )
+    //        //    );
+    //        //}
+
+    //        field.internalField() = tfield.internalField();
+
+    //        Info<< "    "
+    //            << field.name()
+    //            << " internal values updated from "
+    //            << tfield.name()
+    //            << endl;
+
+    //        // Extrapolate the boundary field from the internal field
+    //        boolList isFixed(field.boundaryField().size(), false);
+
+    //        forAll(field.boundaryField(), patchI)
+    //        {
+    //            forAll(fixedPatches_, fixedPatchI)
+    //            {
+    //                if 
+    //                (
+    //                    mesh_.boundaryMesh()[patchI].name()
+    //                 == fixedPatches_[fixedPatchI]
+    //                )
+    //                {
+    //                    isFixed[patchI] = true;
+
+    //                    break;
+    //                }
+
+    //            }
+    //        }
+
+    //        forAll(field.boundaryField(), patchI)
+    //        {
+    //            if (isFixed[patchI])
+    //            {
+    //                // Do nothing, i.e., keep the existing boundary values. 
+    //            }
+    //            else
+    //            {
+    //                field.boundaryField()[patchI] 
+    //              = field.boundaryField()[patchI].patchInternalField()();
+    //            }
+    //        }
+
+    //        Info<< "    "
+    //            << field.name()
+    //            << " non-fixed boundary values updated from "
+    //            << "internal values" 
+    //            << "\n"
+    //            << endl;
+    //        
+    //        if (writeAdvectedFields)
+    //        {
+    //            Info<< "    Write "
+    //                << tfield.name()
+    //                //<< field.name()
+    //                << "\n"
+    //                << endl;
+
+    //            tfield.write();
+    //            //field.write();
+    //        }
+    //    }
+    //    else
+    //    {
+    //        Info<< "    "
+    //            << "Field "
+    //            << field.name()
+    //            << " will not be advected."
+    //            << nl << endl;
+    //    }
+    //}
+}
+
+template<class Type>
+void Foam::meshDance::advect2(bool writeAdvectedFields)
+{
+    HashTable
+    <
+        const GeometricField<Type, fvPatchField, volMesh>*
+    > fields = mesh_.thisDb().lookupClass
+    <
+        GeometricField<Type, fvPatchField, volMesh>
+    >();
+
+    typename
+    HashTable
+    <
+        const GeometricField<Type, fvPatchField, volMesh>*
+    >::iterator fieldIter;
+
+    for
+    (
+        fieldIter = fields.begin();
+        fieldIter !=fields.end();
+        ++fieldIter
+    )
+    {
+        GeometricField
+        <
+            Type, fvPatchField, volMesh
+        >& field =
+            const_cast
+            <
+                GeometricField
+                <
+                    Type, fvPatchField, volMesh
+                >&
+            >(*fieldIter());
+
+        if 
+        (
+            permissibleToAdvect(field.name())
+        )
+        {
+            GeometricField<Type, fvPatchField, volMesh>* tfieldPtr = NULL;
+
+            /// > 1 remap steps
+            if
+            (
+                mesh_.thisDb().foundObject
+                <
+                    GeometricField
+                    <
+                        Type, fvPatchField, volMesh
+                    >
+                >
+                (field.name()+"_tmp")
+            )
+            {
+                tfieldPtr = 
+                    const_cast
+                    <
+                        GeometricField<Type, fvPatchField, volMesh>*
+                    >
+                    (
+                        &mesh_.thisDb().lookupObject
+                        <
+                            GeometricField<Type, fvPatchField, volMesh>
+                        >(field.name() + word("_tmp"))
+                    );
+            }
+            /// First remap step
+            else
+            {
+                /// calculated -> zeroGradient
+                PtrList<fvPatchField<Type> >
+                patchesPtr (field.boundaryField().size());
+
+                forAll(field.boundaryField(), patchI)
+                {
+                    if (field.boundaryField()[patchI].type() == word("calculated"))
+                    {
+                        patchesPtr.set
+                        (
+                            patchI,
+                            zeroGradientFvPatchField<Type>
+                            (
+                                mesh_.boundary()[patchI],
+                                field.boundaryField()[patchI]
+                                    .dimensionedInternalField()
+                            ).clone().ptr()
+                        );
+                    }
+                    else
+                    {
+                        patchesPtr
+                            .set(patchI, field.boundaryField()[patchI].clone().ptr());
+                    }
+                }
+
+                /// Create the copy of the field to be advected
+                tfieldPtr = new
+                    GeometricField<Type, fvPatchField, volMesh>
+                    (
+                        IOobject
+                        (
+                            field.name()+"_tmp",
+                            runTime_.timeName(),
+                            mesh_
+                        ),
+                        mesh_,
+                        field.dimensions(),
+                        field,
+                        patchesPtr
+                    );
+            }
+
+            /// Reference to the temporary field
+            GeometricField<Type, fvPatchField, volMesh>& tfield = *tfieldPtr;
+
+
+            /// Run-time request of some BC's
+            std::smatch matches;
+            /// bekaert
+            std::regex DUName{R"(^DU_tmp$)"};
+            std::regex UName{R"(^U_tmp$)"};
+            std::regex DU_0Name{R"(^DU_0)"};
+            std::regex U_0Name{R"(^U_0)"};
+            /// solids4foam
+            std::regex DDName{R"(^DD_tmp$)"};
+            std::regex DName{R"(^D_tmp$)"};
+            std::regex DD_0Name{R"(^DD_0)"};
+            std::regex D_0Name{R"(^D_0)"};
+
+            autoPtr<GeometricField<tensor, fvPatchField, volMesh> >
+                gradDUPtr(NULL);
+
+            if
+            (
+                std::regex_search(tfield.name(), matches, DName)
+             || std::regex_search(tfield.name(), matches, UName)
+             || std::regex_search(tfield.name(), matches, D_0Name)
+             || std::regex_search(tfield.name(), matches, U_0Name)
+             || std::regex_search(tfield.name(), matches, DUName)
+             || std::regex_search(tfield.name(), matches, DDName)
+             || std::regex_search(tfield.name(), matches, DU_0Name)
+             || std::regex_search(tfield.name(), matches, DD_0Name)
+            )
+            {
+                gradDUPtr.reset
+                (
+                    //new 
+                    //GeometricField<tensor, fvPatchField, volMesh>
+                    //(
+                    //    fvc::grad
+                    //    (field, word("grad(") + field.name() + word(")"))
+                    //)
+                    new GeometricField<tensor, fvPatchField, volMesh> 
+                    (
+                        fvc::grad
+                        (
+                            mesh_.thisDb()
+                                .lookupObject
+                                    <
+                                        GeometricField<vector, fvPatchField, volMesh>
+                                    >(tfield.name()),
+                            word("grad(") + tfield.name() + word(")")
+                        )
+                    )
+                );
+            }
+
+            pimpleControl pimple(mesh_);
+
+            //for (label iter=0; iter < maxIter_; iter++)
+            while(pimple.loop())
+            {
+                fvMatrix<Type> fieldEq
+                (
+                    fluxSign()
+                  * fvm::div
+                    (
+                        fluxSign() * /*mesh_.phi()*/(*meshFluxPtr_)/*()*/,
+                        tfield
+                    )
+                 == fvm::ddt(tfield)
+                );
+
+                //TEq.solve();
+                Info<<"    "
+                    << fieldEq.solve()
+                    << endl;
+
+                Info<< "    " 
+                    << "Field " 
+                    << tfield.name()
+                    //<< fieldPtr->name()
+                    << " advected."
+                    << endl;
+
+                tfield.correctBoundaryConditions();
+            }
+
+            /// Update field
+            field.internalField() = tfield.internalField();
+
+            Info<< "    "
+                << field.name()
+                << " internal values updated from "
+                << tfield.name()
+                << endl;
+
+            /// Flag fixed patches
+            boolList isFixed(field.boundaryField().size(), false);
+
+            forAll(field.boundaryField(), patchI)
+            {
+                forAll(fixedPatches_, fixedPatchI)
+                {
+                    if 
+                    (
+                        mesh_.boundaryMesh()[patchI].name()
+                     == fixedPatches_[fixedPatchI]
+                    )
+                    {
+                        isFixed[patchI] = true;
+
+                        break;
+                    }
+                }
+            }
+
+            /// Force non-fixed patch values to change
+            forAll(field.boundaryField(), patchI)
+            {
+                if (!isFixed[patchI])
+                {
+                    field.boundaryField()[patchI] 
+                  = tfield.boundaryField()[patchI];
+                }
+            }
+
+            Info<< "    "
+                << field.name()
+                << " non-fixed boundary values updated from "
+                << "internal values" 
+                << "\n"
+                << endl;
+            
+            if (writeAdvectedFields)
+            {
+                Info<< "    Write "
+                    << tfield.name()
+                    //<< field.name()
+                    << "\n"
+                    << endl;
+
+                tfield.write();
+                //field.write();
+            }
+
+            /// Free the heap
+            delete tfieldPtr;
+        }
+        //else
+        //{
+        //    Info<< "    "
+        //        << "Field "
+        //        << field.name()
+        //        << " will not be advected."
+        //        << nl << endl;
+        //}
+    }
+}
+
+template<class Type>
+void Foam::meshDance::advect3(bool writeAdvectedFields)
+{
+    HashTable
+    <
+        const GeometricField<Type, fvPatchField, volMesh>*
+    > fields = mesh_.thisDb().lookupClass
+    <
+        GeometricField<Type, fvPatchField, volMesh>
+    >();
+
+    typename
+    HashTable
+    <
+        const GeometricField<Type, fvPatchField, volMesh>*
+    >::iterator fieldIter;
+
+    for
+    (
+        fieldIter = fields.begin();
+        fieldIter !=fields.end();
+        ++fieldIter
+    )
+    {
+        GeometricField
+        <
+            Type, fvPatchField, volMesh
+        >& tfield =
+            const_cast
+            <
+                GeometricField
+                <
+                    Type, fvPatchField, volMesh
+                >&
+            >(*fieldIter());
+
+        if 
+        (
+            permissibleToAdvect(tfield.name())
+        )
+        {
+            GeometricField<Type, fvPatchField, volMesh>* tfieldPtr = NULL;
+
+            /// calculated -> zeroGradient
+            PtrList<fvPatchField<Type> >
+            patchesPtr (tfield.boundaryField().size());
+
+            const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
+ 
+            forAll(tfield.boundaryField(), patchI)
+            {
+                if (fixedPatchesHashTable_.found(pbm[patchI].name()))
+                {
+                    patchesPtr.set
+                    (
+                        patchI,
+                        fixedValueFvPatchField<Type>
+                        (
+                            mesh_.boundary()[patchI],
+                            tfield.boundaryField()[patchI]
+                                .dimensionedInternalField()
+                        ).clone().ptr()
+                    );
+                }
+                else //(tfield.boundaryField()[patchI].type() == word("calculated"))
+                {
+                    patchesPtr.set
+                    (
+                        patchI,
+                        zeroGradientFvPatchField<Type>
+                        (
+                            mesh_.boundary()[patchI],
+                            tfield.boundaryField()[patchI]
+                                .dimensionedInternalField()
+                        ).clone().ptr()
+                    );
+                }
+                /// Keep original BC
+                //else
+                //{
+                //    patchesPtr
+                //        .set(patchI, tfield.boundaryField()[patchI].clone().ptr());
+                //}
+            }
+
+            /// Create the copy of the field to be advected
+            tfieldPtr = new
+                GeometricField<Type, fvPatchField, volMesh>
+                (
+                    IOobject
+                    (
+                        tfield.name() /*+ "_tmp"*/,
+                        runTime_.timeName(),
+                        mesh_,
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE,
+                        false // Do not register
+                        //true // Some objects needed to be looked up by
+                             // calcGrad()
+                    ),
+                    mesh_,
+                    tfield.dimensions(),
+                    tfield,
+                    patchesPtr
+                );
+
+            /// Get an alias for the temporary field
+            GeometricField<Type, fvPatchField, volMesh>& field = *tfieldPtr;
+
+            /// Run-time request for grad field from some BC's
+            autoPtr<GeometricField<tensor, fvPatchField, volMesh> >
+            gradDUPtr(NULL);
+
+            this->calcGrad(gradDUPtr, field.name());
+
+            pimpleControl pimple(mesh_);
+
+            label remapStepCounter = 0;
+
+            if (nRemapSteps_ > 1)
+            {
+                for
+                (
+                    subCycle
+                    <
+                        GeometricField
+                        <
+                            Type, fvPatchField, volMesh
+                        >
+                    > fieldSubCycle
+                    (
+                        field,
+                        nRemapSteps_
+                    );
+                    !(++fieldSubCycle).end();
+                )
+                {
+                    /// Rezone overshoot-proof
+                    /// Read fields from the database and advect
+                    bool finalMeshIsHit = this->stepTowards();
+
+                    while(pimple.loop())
+                    {
+                        #include "fieldEqn.H"
+                    }
+
+                    //if
+                    //( 
+                    //    remapStepCounter % remapWriteFreq_ < SMALL
+                    //    && writeRemappedSteps_
+                    //)
+                    //{
+                    //}
+
+                    if (finalMeshIsHit)
+                    {
+                        Info<< "\n    Final mesh in this time step is hit; ignore next"
+                            << "\n    remap steps, advect fields and move on to the" 
+                            << "\n    next time step."
+                            << endl;
+
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                /// Rezone overshoot-proof
+                /// Read fields from the database and advect
+                //bool finalMeshIsHit = this->stepTowards();
+                this->hitFinalMesh();
+
+                while(pimple.loop())
+                {
+                    #include "fieldEqn.H"
+                }
+            }
+
+            /// Update original field
+            tfield = field;
+
+            //if (writeAdvectedFields)
+            if (ifForceWriteAtRemapTime_)
+            {
+                Info<< "    Write "
+                    << field.name()
+                    //<< field.name()
+                    << "\n"
+                    << endl;
+
+                field.write();
+                //field.write();
+            }
+
+            /// write parameter is responsible for forcing mesh and fields being
+            /// written, ignoring the controlDict write controls
+            //if (write)
+            //if (ifForceWriteAtRemapTime_)
+            //{
+            //    this->write();
+
+            //    Info<< "    Mesh and fields written to "
+            //        << runTime_.timeName()
+            //        << "\n";
+            //}
+
+            /// Re-set step-wise mesh motion data
+            this->resetSumMotionFraction();
+
+            /// Avoid deregister(); causes segfault
+            //tfieldPtr->deregister();
+            delete tfieldPtr;
+        }
     }
 }
 
@@ -632,15 +1420,15 @@ void Foam::meshDance::advects(bool writeAdvectedFields)
     )
     {
         GeometricField
-	<
-	    Type, fvsPatchField, surfaceMesh
-	>& field = const_cast
-	<
+    <
+        Type, fvsPatchField, surfaceMesh
+    >& field = const_cast
+    <
         GeometricField
-	<
-	    Type, fvsPatchField, surfaceMesh
-	>&
-	>(*fieldIter());
+    <
+        Type, fvsPatchField, surfaceMesh
+    >&
+    >(*fieldIter());
 
         /// Filter out field's name to not be advected
         /// Note: you can use Foam::reg(something) class as well
@@ -673,7 +1461,7 @@ void Foam::meshDance::advects(bool writeAdvectedFields)
         {
             /// Create the copy of the field to be convected
 
-	    GeometricField<Type, fvsPatchField, surfaceMesh> tfield
+        GeometricField<Type, fvsPatchField, surfaceMesh> tfield
             (
                 IOobject
                 (
@@ -702,8 +1490,8 @@ void Foam::meshDance::advects(bool writeAdvectedFields)
             GeometricField<Type, fvPatchField, volMesh> tvfield =
                 fvc::reconstruct(tfield);
 
-	    for (label iter=0; iter < maxIter_; iter++)
-	    {
+        for (label iter=0; iter < maxIter_; iter++)
+        {
                 fvMatrix<Type> fieldEq
                 (
                     fluxSign() * fvm::div(fluxSign() * mesh_.phi(), tvfield)
@@ -714,7 +1502,7 @@ void Foam::meshDance::advects(bool writeAdvectedFields)
                 Info<<"    "
                     << fieldEq.solve()
                     << endl;
-	    }
+        }
 
             Info<< "    " 
                 << "Field " 
@@ -844,20 +1632,17 @@ void Foam::meshDance::read
     T& value
 )
 {
-    if (dict.found(key))
+    if(!dict.readIfPresent<T>(key, value))
     {
-        dict.readIfPresent<T>(key, value);
-    }
-    else
-    {
-        FatalErrorIn("")
+        FatalErrorIn("read()")
             << "Keyword "
             << key
             << " was not found in "
             << dict.name()
-            << '\n';
+            << abort(FatalError);
     }
 }
+
 
 /// Conitional key-reading
 template<class T>
@@ -875,237 +1660,408 @@ void Foam::meshDance::ifRead
     }
 }
 
-        //--------------------------------------------------------------
-        // Error documentation: registerFields<T>
-        //--------------------------------------------------------------
-        // Start test block
-        //--------------------------------------------------------------
-        /// See if the field being read consists of the BC's on the disk
-        /// Copy fieldPtr(), resetting IO
-        //word dummyFileName = "1000";
-        //word dummyFileName = mesh_.time().timeName();
-        //
-        ////mkDir(dummyFileName);
 
-        //GeometricField<Type, fvPatchField, volMesh> fieldToWrite
-        //(
-        //    IOobject
-        //    (
-        //        (fieldPtr -> name() + "_copy"),
-        //        dummyFileName,
-        //        mesh_,
-        //        IOobject::NO_READ,
-        //        IOobject::AUTO_WRITE
-        //    ),
-        //    *fieldPtr
-        //);
+template<class Type>
+void Foam::meshDance::resetFieldTimeIndex(const label timeIndex)
+{
+    HashTable
+    <
+        const GeometricField<Type, fvPatchField, volMesh>*
+    > fields = mesh_.thisDb().lookupClass
+    <
+        GeometricField<Type, fvPatchField, volMesh>
+    >();
 
-        //if (fieldToWritePtr -> write())
-        //{
-        //    Info<< "    The read "
-        //        << fieldPtr -> name()
-        //        << " written to "
-        //        << dummyFileName
-        //        << endl;
-        //}
-        //else
-        //{
-        //    FatalErrorIn("")
-        //        << fieldToWritePtr->name()
-        //        << " is not written to "
-        //        << dummyFileName
-        //        << endl;
-        //}
-        //--------------------------------------------------------------
-        // End test block
-        //--------------------------------------------------------------
+    typename
+    HashTable
+    <
+        const GeometricField<Type, fvPatchField, volMesh>*
+    >::iterator fieldIter;
 
-        //--------------------------------------------------------------
-        // Start edit_patches
-        //--------------------------------------------------------------
+    for
+    (
+        fieldIter = fields.begin();
+        fieldIter !=fields.end();
+        ++fieldIter
+    )
+    {
+        GeometricField
+        <
+            Type, fvPatchField, volMesh
+        >& field =
+            const_cast
+            <
+                GeometricField
+                <
+                    Type, fvPatchField, volMesh
+                >&
+            >(*fieldIter());
 
-        //Info<< "    Temporary "
-        //    << fieldIter() -> name()
-        //    << " created."
-        //    << endl;
-
-        ////
-        //// Create patches
-        ////
-
-        //// Method 1:
-
-        //// Errors:
-        //    //- For a field like DD, error below is due to the construction of
-        //        // some BC's being failed:
-
-        //        // --> FOAM FATAL ERROR: 
-        //        // Could not find solidModel_region0
-        //        // 
-        //        // solidModels in the objectRegistry: 
-        //        // 0
-        //        // (
-        //        // )
-        //        // 
-        //        // 
-        //        // solidModels in the parent objectRegistry:
-        //        // 0
-        //        // (
-        //        // )
-        //        // 
-        //        // 
-        //        //     From function const solidModel& lookupSolidModel(const objectRegistry& obReg)
-        //        //     in file solidModels/solidModel/lookupSolidModel.C at line 66.
-
-        ///// Create a list of patch types
-        //wordList patchTypes(fieldPtr->boundaryField().size());
-        //
-        //bool patchTypeChanged = false;
-
-        //forAll(patchTypes, patchI)
-        //{
-        //    Info<< "        patch "
-        //        << patchI 
-        //        << " is "
-        //        << fieldPtr->boundaryField()[patchI].type()
-        //        << endl;
-
-        //    // To work around the error above, force all patch types to be
-        //    // fixedVaule
-        //    if 
-        //    (
-        //        fieldPtr->boundaryField()[patchI].type() != word("calculated")
-        //     && fieldPtr->boundaryField()[patchI].type() != word("solidContact")
-        //     && fieldPtr->boundaryField()[patchI].type() != word("solidTraction")
-        //     //&& field.boundaryField()[patchI].type() != word("solidWedge")
-        //     //&& field.boundaryField()[patchI].type() 
-        //     //!= word("fixedDisplacement")
-        //    )
-        //    {
-        //        patchTypes[patchI] = fieldPtr->boundaryField()[patchI].type(); 
-        //    }
-        //    else
-        //    {
-        //        patchTypes[patchI] = word("fixedValue");
-        //        patchTypeChanged = true;
-
-        //        Info<< "        "
-        //            << fieldPtr->boundaryField()[patchI].type()
-        //            << " changed to fixedValue"
-        //            << endl;
-        //    }
-        //}
+        field.timeIndex() = timeIndex;
+    }
+}
 
 
-        ///// Create/Edit field
-        //if (patchTypeChanged)
-        //{
-        //    // Check-out the field with calculated patches, check-in the
-        //    // editted field
-        //    const_cast<fvMesh&>(mesh_).thisDb().checkOut(*fieldPtr);
+template<class T>
+bool Foam::meshDance::isSameAsOld
+(
+    const word fieldName,
+    const string text,
+    const word oldFieldName,
+    const bool writeOldField
+)
+{
+    const GeometricField<T, fvPatchField, volMesh>& field = mesh_.thisDb()
+        .lookupObject<GeometricField<T, fvPatchField, volMesh> >(fieldName);
 
-        //    // Method 1:
-        //    /*GeometricField<Type, fvPatchField, volMesh>**/ fieldPtr = new 
-        //        GeometricField<Type, fvPatchField, volMesh>
-        //        (
-        //            IOobject
-        //            (
-        //                fieldIter()->name(),
-        //                mesh_.time().timeName(),
-        //                mesh_,
-        //                IOobject::NO_READ,
-        //                IOobject::AUTO_WRITE
-        //            ),
-        //            *fieldPtr,
-        //            patchTypes
+    const GeometricField<T, fvPatchField, volMesh>& oldField =
+        field.oldTime();
 
-        //            // Force fixedValue
-        //            //"fixedValue"
-        //        );
+    bool isSameAsOld = true;
 
-        //    Info<< "        Check out "
-        //        << fieldIter()->name()
-        //        << " with with old patch types, check in the editted"
-        //        << " version"
-        //        << endl;
-        //}
-        ////else
-        ////{
-        ////    // Method 2:
-        ////    
-        ////    ///
-        ////    /// Map boundary conditions from `field`
-        ////    /// 
+    forAll(field, cellI)
+    {
+        if (field[cellI] != oldField[cellI])
+        {
+            isSameAsOld = false;
+            break;
+        }
+    }
 
-        ////    PtrList<fvPatchField<Type> >
-        ////        patches(field.boundaryField().size());
+    Info<<text<< isSameAsOld
+        << endl;
 
-        ////    forAll(patches, patchI)
-        ////    {
-        ////        patches.set
-        ////        (
-        ////            patchI,
-        ////            field.boundaryField()[patchI].clone().ptr()
-        ////        );
-        ////    }
+    if (writeOldField)
+    {
+        const_cast<GeometricField<T, fvPatchField, volMesh>& >(oldField)
+            .rename(word(oldFieldName));
 
-        ////    // Errors:
-        ////        //- For a field like DD, error below is due to the construction of
-        ////            // some BC's being failed:
+        oldField.write();
+    }
+    
+    return isSameAsOld;
+}
 
-        ////            // --> FOAM FATAL ERROR: 
-        ////            // Could not find solidModel_region0
-        ////            // 
-        ////            // solidModels in the objectRegistry: 
-        ////            // 0
-        ////            // (
-        ////            // )
-        ////            // 
-        ////            // 
-        ////            // solidModels in the parent objectRegistry:
-        ////            // 0
-        ////            // (
-        ////            // )
-        ////            // 
-        ////            // 
-        ////            //     From function const solidModel& lookupSolidModel(const objectRegistry& obReg)
-        ////            //     in file solidModels/solidModel/lookupSolidModel.C at line 66.
 
-        ////        //- For fields with calculated patches, e.g., U, 
+//--------------------------------------------------------------
+// Error documentation: registerFields<T>
+//--------------------------------------------------------------
+// Start test block
+//--------------------------------------------------------------
+/// See if the field being read consists of the BC's on the disk
+/// Copy fieldPtr(), resetting IO
+//word dummyFileName = "1000";
+//word dummyFileName = mesh_.time().timeName();
+//
+////mkDir(dummyFileName);
 
-        ////            // --> FOAM FATAL ERROR: 
+//GeometricField<Type, fvPatchField, volMesh> fieldToWrite
+//(
+//    IOobject
+//    (
+//        (fieldPtr -> name() + "_copy"),
+//        dummyFileName,
+//        mesh_,
+//        IOobject::NO_READ,
+//        IOobject::AUTO_WRITE
+//    ),
+//    *fieldPtr
+//);
 
-        ////            // valueInternalCoeffs cannot be called for a calculatedFvPatchField
-        ////            // on patch billetTop of field U in file "/root/foam/root-4.0/run_host/miniFoam/test/meshDanceImp/Test-meshDanceImp/impactBar/impactBar_DALE/4e-05/U"
-        ////            // You are probably trying to solve for a field with a default boundary condition.
+//if (fieldToWritePtr -> write())
+//{
+//    Info<< "    The read "
+//        << fieldPtr -> name()
+//        << " written to "
+//        << dummyFileName
+//        << endl;
+//}
+//else
+//{
+//    FatalErrorIn("")
+//        << fieldToWritePtr->name()
+//        << " is not written to "
+//        << dummyFileName
+//        << endl;
+//}
+//--------------------------------------------------------------
+// End test block
+//--------------------------------------------------------------
 
-        ////            // From function calculatedFvPatchField<Type>::valueInternalCoeffs(const tmp<scalarField>&) const
-        ////            // in file fields/fvPatchFields/basic/calculated/calculatedFvPatchField.C at line 144.
+//--------------------------------------------------------------
+// Start edit_patches
+//--------------------------------------------------------------
 
-        ////    // Method 2:
-        ////    GeometricField
-        ////    <
-        ////        Type, fvPatchField, volMesh
-        ////    >*
-        ////    fieldPtr = new GeometricField
-        ////    <
-        ////        Type, fvPatchField, volMesh
-        ////    >
-        ////    (
-        ////        IOobject
-        ////        (
-        ////            fieldIter()->name(),
-        ////            mesh_.time().timeName(),
-        ////            mesh_,
-        ////            IOobject::NO_READ,
-        ////            IOobject::AUTO_WRITE
-        ////        ),
-        ////        mesh_,
-        ////        field.dimensions(),
-        ////        Field<Type>(mesh_.nCells()),
-        ////        patches
-        ////    );
-        ////}
-        //--------------------------------------------------------------
-        // End edit_patches
-        //--------------------------------------------------------------
+//Info<< "    Temporary "
+//    << fieldIter() -> name()
+//    << " created."
+//    << endl;
+
+////
+//// Create patches
+////
+
+//// Method 1:
+
+//// Errors:
+//    //- For a field like DD, error below is due to the construction of
+//        // some BC's being failed:
+
+//        // --> FOAM FATAL ERROR: 
+//        // Could not find solidModel_region0
+//        // 
+//        // solidModels in the objectRegistry: 
+//        // 0
+//        // (
+//        // )
+//        // 
+//        // 
+//        // solidModels in the parent objectRegistry:
+//        // 0
+//        // (
+//        // )
+//        // 
+//        // 
+//        //     From function const solidModel& lookupSolidModel(const objectRegistry& obReg)
+//        //     in file solidModels/solidModel/lookupSolidModel.C at line 66.
+
+///// Create a list of patch types
+//wordList patchTypes(fieldPtr->boundaryField().size());
+//
+//bool patchTypeChanged = false;
+
+//forAll(patchTypes, patchI)
+//{
+//    Info<< "        patch "
+//        << patchI 
+//        << " is "
+//        << fieldPtr->boundaryField()[patchI].type()
+//        << endl;
+
+//    // To work around the error above, force all patch types to be
+//    // fixedVaule
+//    if 
+//    (
+//        fieldPtr->boundaryField()[patchI].type() != word("calculated")
+//     && fieldPtr->boundaryField()[patchI].type() != word("solidContact")
+//     && fieldPtr->boundaryField()[patchI].type() != word("solidTraction")
+//     //&& field.boundaryField()[patchI].type() != word("solidWedge")
+//     //&& field.boundaryField()[patchI].type() 
+//     //!= word("fixedDisplacement")
+//    )
+//    {
+//        patchTypes[patchI] = fieldPtr->boundaryField()[patchI].type(); 
+//    }
+//    else
+//    {
+//        patchTypes[patchI] = word("fixedValue");
+//        patchTypeChanged = true;
+
+//        Info<< "        "
+//            << fieldPtr->boundaryField()[patchI].type()
+//            << " changed to fixedValue"
+//            << endl;
+//    }
+//}
+
+
+///// Create/Edit field
+//if (patchTypeChanged)
+//{
+//    // Check-out the field with calculated patches, check-in the
+//    // editted field
+//    const_cast<fvMesh&>(mesh_).thisDb().checkOut(*fieldPtr);
+
+//    // Method 1:
+//    /*GeometricField<Type, fvPatchField, volMesh>**/ fieldPtr = new 
+//        GeometricField<Type, fvPatchField, volMesh>
+//        (
+//            IOobject
+//            (
+//                fieldIter()->name(),
+//                mesh_.time().timeName(),
+//                mesh_,
+//                IOobject::NO_READ,
+//                IOobject::AUTO_WRITE
+//            ),
+//            *fieldPtr,
+//            patchTypes
+
+//            // Force fixedValue
+//            //"fixedValue"
+//        );
+
+//    Info<< "        Check out "
+//        << fieldIter()->name()
+//        << " with with old patch types, check in the editted"
+//        << " version"
+//        << endl;
+//}
+////else
+////{
+////    // Method 2:
+////    
+////    ///
+////    /// Map boundary conditions from `field`
+////    /// 
+
+////    PtrList<fvPatchField<Type> >
+////        patches(field.boundaryField().size());
+
+////    forAll(patches, patchI)
+////    {
+////        patches.set
+////        (
+////            patchI,
+////            field.boundaryField()[patchI].clone().ptr()
+////        );
+////    }
+
+////    // Errors:
+////        //- For a field like DD, error below is due to the construction of
+////            // some BC's being failed:
+
+////            // --> FOAM FATAL ERROR: 
+////            // Could not find solidModel_region0
+////            // 
+////            // solidModels in the objectRegistry: 
+////            // 0
+////            // (
+////            // )
+////            // 
+////            // 
+////            // solidModels in the parent objectRegistry:
+////            // 0
+////            // (
+////            // )
+////            // 
+////            // 
+////            //     From function const solidModel& lookupSolidModel(const objectRegistry& obReg)
+////            //     in file solidModels/solidModel/lookupSolidModel.C at line 66.
+
+////        //- For fields with calculated patches, e.g., U, 
+
+////            // --> FOAM FATAL ERROR: 
+
+////            // valueInternalCoeffs cannot be called for a calculatedFvPatchField
+////            // on patch billetTop of field U in file "/root/foam/root-4.0/run_host/miniFoam/test/meshDanceImp/Test-meshDanceImp/impactBar/impactBar_DALE/4e-05/U"
+////            // You are probably trying to solve for a field with a default boundary condition.
+
+////            // From function calculatedFvPatchField<Type>::valueInternalCoeffs(const tmp<scalarField>&) const
+////            // in file fields/fvPatchFields/basic/calculated/calculatedFvPatchField.C at line 144.
+
+////    // Method 2:
+////    GeometricField
+////    <
+////        Type, fvPatchField, volMesh
+////    >*
+////    fieldPtr = new GeometricField
+////    <
+////        Type, fvPatchField, volMesh
+////    >
+////    (
+////        IOobject
+////        (
+////            fieldIter()->name(),
+////            mesh_.time().timeName(),
+////            mesh_,
+////            IOobject::NO_READ,
+////            IOobject::AUTO_WRITE
+////        ),
+////        mesh_,
+////        field.dimensions(),
+////        Field<Type>(mesh_.nCells()),
+////        patches
+////    );
+////}
+//--------------------------------------------------------------
+// End edit_patches
+//--------------------------------------------------------------
+
+//template<class Type>
+//void Foam::meshDance::changeDb(const Time&)
+//{
+//    HashTable
+//    <
+//        const GeometricField<Type, fvPatchField, volMesh>*
+//    > fields = mesh_.thisDb().lookupClass
+//    <
+//        GeometricField<Type, fvPatchField, volMesh>
+//    >();
+//
+//    typename
+//    HashTable
+//    <
+//        const GeometricField<Type, fvPatchField, volMesh>*
+//    >::iterator fieldIter;
+//
+//    for
+//    (
+//        fieldIter = fields.begin();
+//        fieldIter !=fields.end();
+//        ++fieldIter
+//    )
+//    {
+//        GeometricField
+//        <
+//            Type, fvPatchField, volMesh
+//        >& field =
+//            const_cast
+//            <
+//                GeometricField
+//                <
+//                    Type, fvPatchField, volMesh
+//                >&
+//            >(*fieldIter());
+//    }
+//}
+
+template<class Type>
+void Foam::meshDance::DeregisterTmpFields()
+{
+    HashTable
+    <
+        const GeometricField<Type, fvPatchField, volMesh>*
+    > fields = mesh_.thisDb().lookupClass
+    <
+        GeometricField<Type, fvPatchField, volMesh>
+    >();
+
+    typename
+    HashTable
+    <
+        const GeometricField<Type, fvPatchField, volMesh>*
+    >::iterator fieldIter;
+
+    for
+    (
+        fieldIter = fields.begin();
+        fieldIter !=fields.end();
+        ++fieldIter
+    )
+    {
+        GeometricField
+        <
+            Type, fvPatchField, volMesh
+        >& field =
+            const_cast
+            <
+                GeometricField
+                <
+                    Type, fvPatchField, volMesh
+                >&
+            >(*fieldIter());
+
+        if 
+        (
+            isTmp(field.name())
+        )
+        {
+            field.deregister();
+
+            Info<< "    "
+                << field.name()
+                << " deregistered.\n";
+        }
+    }
+}
