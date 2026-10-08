@@ -114,7 +114,7 @@ remapDict_(ALEDict_.subDict("remapDict")),
 rezoneDict_(ALEDict_.subDict("rezoneDict")),
 
 /// Dimensions
-wedge_(ALEDict_.lookup("wedge")),
+wedge_(readBool(ALEDict_.lookup("wedge"))),
 planar2D_(),
 
 /// Remap params
@@ -394,6 +394,8 @@ pseudoTimePtr_()
     }
 
     /// Calculations
+    if (wedge_)
+    {
     const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
     const pointField& pf = mesh_.points();
     const vector& n1 = pbm[pbm.findPatchID(wedgePatchNames_[0])][0].normal(pf);
@@ -416,6 +418,7 @@ pseudoTimePtr_()
         << wedgeAperture_
         << " degrees."
         << endl;
+    }
 
     //pseudoTimeDict_.add(word("deltaT"), 1.0);
     //pseudoTimeDict_.add(word("startFrom"), word("startTime"));
