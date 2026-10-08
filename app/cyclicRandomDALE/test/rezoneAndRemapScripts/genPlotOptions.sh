@@ -25,8 +25,13 @@ set xlabel \"\$\\\\sqrt{N_\\\\mathrm{cells}}\$\"
 set datafile commentschar '#'
 
 # Key
+<<<<<<< HEAD
 #set key left box opaque outside width -25
 set key left box opaque outside
+=======
+set key left box opaque outside width -5
+#set key left box opaque outside
+>>>>>>> 8fcf7739a206e0ffcc8928a3489d888584816a84
 " >> plot_src/plot.options
 
 #
@@ -50,6 +55,7 @@ while read -r dir key col3; do \
     #else
 
     # Plot column x=4 vs y=2 of L1_err, where its column 3 is the screening keyword
+<<<<<<< HEAD
         echo \
         \"$dir/plot_src/L1_err.dat\" \
 	u \(\$1\):\(\$2\) \
@@ -57,6 +63,16 @@ while read -r dir key col3; do \
 	t \"\", \\\
         >> plot_src/plot.options;
 
+=======
+    echo \
+    \"$dir/plot_src/L1_err.dat\" \
+	u \(\$1\):\(strstrt\(stringcolumn\(3\), \"$key\"\) \> 0 ?\$2:1/0\) \
+	w p dt $(echo $RANDOM) pt $(echo $RANDOM) ps 1.5 \
+	t \"\\\\tiny{$col3}\", \\\
+    >> plot_src/plot.options;
+
+	#u \(\$1\):\(\$2\) \
+>>>>>>> 8fcf7739a206e0ffcc8928a3489d888584816a84
 	#u \(\$4\):\(\$2\) \
 	#u \(\$1\):\(strstrt\(stringcolumn\(3\), \"$key\"\) \> 0 ?\$2:1/0\) \
 	#Error: u \(\$4\):\(stringcolumn\(3\) =~ \/$key\/ ?\$2:1/0\) \
@@ -124,12 +140,17 @@ echo \
 #61.9677    8.555e-6
 #123.935    1.073e-6
 #     e
+<<<<<<< HEAD
      # 3rd order
+=======
+# 3rd order
+>>>>>>> 8fcf7739a206e0ffcc8928a3489d888584816a84
 #32	1.00E-04	1.00E-04	1.00E-05
 #64	0.00005	0.000025	0.00000125
 #128	0.000025	0.00000625	0.00000015625
 #256	0.0000125	0.0000015625	0.00000001953125
 #512	0.00000625	0.000000390625	2.44140625E-09
+<<<<<<< HEAD
 #	1st	2nd	3rd
 16	1.00E-05	1.00E-05	1.00E-06
 32	0.000005	0.0000025	0.000000125
@@ -160,6 +181,27 @@ echo \
 64	0.0000025	0.000000625	0.000000015625
 128	0.00000125	0.00000015625	0.000000001953125
 e' \
+=======
+	# 1	2	3
+15	4.00E-04	4.00E-04	4.00E-04
+30	0.0002	0.0001	0.00005
+60	0.0001	0.000025	0.00000625
+120	0.00005	0.00000625	0.00000078125
+e			
+	# 1	2	3
+15	4.00E-04	4.00E-04	4.00E-04
+30	0.0002	0.0001	0.00005
+60	0.0001	0.000025	0.00000625
+120	0.00005	0.00000625	0.00000078125
+e			
+	# 1	2	3
+15	4.00E-04	4.00E-04	4.00E-04
+30	0.0002	0.0001	0.00005
+60	0.0001	0.000025	0.00000625
+120	0.00005	0.00000625	0.00000078125
+e			
+' \
+>>>>>>> 8fcf7739a206e0ffcc8928a3489d888584816a84
      >> plot_src/plot.options
 
 #echo \
