@@ -1,5 +1,5 @@
-100  linear   '$N_\\text{remap}=100$, linear'
-100  Linear   '$N_\\text{remap}=100$, limitedLinear'
-100  QUICK    '$N_\\text{remap}=10$, QUICK'
-100  Upwind    '$N_\\text{remap}=10$, linearUpwind'
-100  vanLeer    '$N_\\text{remap}=10$, vanLeer'
+100  linear   \"{linear}\"
+100  Linear   \"{limitedLinear}\"
+100  QUICK    \"{QUICK}\"
+100  Upwind   \"{linearUpwind}\"
+100  vanLeer  \"{vanLeer}\"
