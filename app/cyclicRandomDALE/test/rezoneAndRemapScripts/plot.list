@@ -7,4 +7,7 @@
 #sinCyclic_accumulate_roundOff/ 30 {30 cycles}
 #sinCyclic_timeSteps_hires   _1  \$\\Delta\\tau_{end}\$ = 0.01 
 #sinCyclic_timeSteps_hires   _1   \\tiny{Convective remap}
-cyclicCyclicRandom "" ""
+#cyclicCyclicRandom "" ""
+meshLevels_nRemaps_cyclic _1 \$N_\\text{remap}=1\$
+meshLevels_nRemaps_cyclic _10 \$N_\\text{remap}=10\$
+meshLevels_nRemaps_cyclic _100 \$N_\\text{remap}=100\$
