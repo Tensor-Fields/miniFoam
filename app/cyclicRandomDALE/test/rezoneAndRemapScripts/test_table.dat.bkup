@@ -1,0 +1,305 @@
+description="7 time levels, 3 mesh levels, two schemes, to study time discretisation error, and how it relates to other errors."
+
+#
+# Study
+#
+#declare -a studyTimeSteps=(1) 
+#declare -a studyEndTimes=(10000)
+#declare -a studyWriteIntervals=(1000) 
+#declare -a studyNames=("${studyEndTimes[@]}")
+declare -a studyNames=("study_N_iter_2")
+
+#declare -a studyTimeSteps=(1  1   1    1   )
+#declare -a studyEndTimes=(1  11  97   199  )
+#declare -a studyWriteIntervals=(1  11  97   199) 
+#declare -a studyNames=("${studyEndTimes[@]}")
+
+
+# 
+# Cases
+#
+
+# Keep M for consistency between Test.sh and plot.sh
+# Case name generator should be ideally a separate script
+
+# Now, name generator script is separate. Keep M for generality
+# Also keep it as a bare case counter.
+
+#declare -a M=(25 50 100 200)
+#declare -a M=(1  1  1  1 1 1 1 1)
+#declare -a M=(8 16 32 64)
+declare -a M=(1 1 1 1 1 1 1 \
+              1 1 1 1 1 1 1 \
+              1 1 1 1 1 1 1 \
+              1 1 1 1 1 1 1 \
+              1 1 1 1 1 1 1 \
+              1 1 1 1 1 1 1 \
+#              2 2 2 2 \
+#              2 2 2 2 \
+#              2 2 2 2 \
+#              2 2 2 2 \
+#              2 2 2 2 \
+#              2 2 2 2 \
+#              2 2 2 2 \
+#              2 2 2 2 \
+#              2 2 2 2 \
+#              2 2 2 2 \
+#              2 2 2 2 \
+#              2 2 2 2 \
+)
+
+#
+# Time
+# 
+
+declare -a studyTimeSteps=( \
+1 1 1 1 1 1 1 \
+1 1 1 1 1 1 1 \
+1 1 1 1 1 1 1 \
+1 1 1 1 1 1 1 \
+1 1 1 1 1 1 1 \
+1 1 1 1 1 1 1 \
+)
+declare -a studyEndTimes=( \
+64 128 256 512 1024 2048 4096  \
+64 128 256 512 1024 2048 4096  \
+64 128 256 512 1024 2048 4096  \
+64 128 256 512 1024 2048 4096  \
+64 128 256 512 1024 2048 4096  \
+64 128 256 512 1024 2048 4096  \
+)
+declare -a studyWriteIntervals=( \
+8 16 32 64 128 256 512 \
+8 16 32 64 128 256 512 \
+8 16 32 64 128 256 512 \
+8 16 32 64 128 256 512 \
+8 16 32 64 128 256 512 \
+8 16 32 64 128 256 512 \
+) # Write 8 steps 
+
+
+declare -a ddtScheme=( \
+"backward" "backward" "backward" "backward" "backward"  "backward" "backward" \
+"backward" "backward" "backward" "backward" "backward"  "backward" "backward" \
+"backward" "backward" "backward" "backward" "backward"  "backward" "backward" \
+"backward" "backward" "backward" "backward" "backward"  "backward" "backward" \
+"backward" "backward" "backward" "backward" "backward"  "backward" "backward" \
+"backward" "backward" "backward" "backward" "backward"  "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+#"backward" "backward" "backward" "backward" \
+)
+
+declare -a grad1Scheme=( \
+"leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" \
+"leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" \
+"leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" \
+"leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" \
+"leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" \
+"leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" "leastSquares" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+#"Gauss" "Gauss" "Gauss" "Gauss" \
+)
+
+declare -a grad2Scheme=( \
+"" "" "" "" ""  "" "" \
+"" "" "" "" ""  "" "" \
+"" "" "" "" ""  "" "" \
+"" "" "" "" ""  "" "" \
+"" "" "" "" ""  "" "" \
+"" "" "" "" ""  "" "" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+#"linear" "linear" "linear" "linear" \
+)
+
+declare -a meshPhiScheme=( \
+'Gauss linear' 'Gauss linear' 'Gauss linear' 'Gauss linear' 'Gauss linear'  'Gauss linear' 'Gauss linear' \
+'Gauss linear' 'Gauss linear' 'Gauss linear' 'Gauss linear' 'Gauss linear'  'Gauss linear' 'Gauss linear' \
+'Gauss linear' 'Gauss linear' 'Gauss linear' 'Gauss linear' 'Gauss linear'  'Gauss linear' 'Gauss linear' \
+#'limitedLinear 1' 'limitedLinear 1' 'limitedLinear 1' 'limitedLinear 1' \
+#'limitedLinear01 1' 'limitedLinear01 1' 'limitedLinear01 1' 'limitedLinear01 1' \
+#'limitedLinearV 1' 'limitedLinearV 1' 'limitedLinearV 1' 'limitedLinearV 1' \
+#'Minmod' 'Minmod' 'Minmod' 'Minmod' \
+#'upwind' 'upwind' 'upwind' 'upwind' \
+#'limitedLimitedLinear' 'limitedLimitedLinear' 'limitedLimitedLinear' 'limitedLimitedLinear' \
+#'interfaceCompression' 'interfaceCompression' 'interfaceCompression' 'interfaceCompression' \
+#'vanLeer' 'vanLeer' 'vanLeer' 'vanLeer' \
+#'vanLeerV' 'vanLeerV' 'vanLeerV' 'vanLeerV' \
+#'vanLeer01' 'vanLeer01' 'vanLeer01' 'vanLeer01' \
+#'vanLeerDC' 'vanLeerDC' 'vanLeerDC' 'vanLeerDC' \
+'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' \
+'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' \
+'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' 'Gauss linearUpwind grad(p)' \
+#'linearUpwind leastSquares' 'linearUpwind leastSquares' 'linearUpwind leastSquares' 'linearUpwind leastSquares' \
+#'linearUpwindV' 'linearUpwindV' 'linearUpwindV' 'linearUpwindV' \
+#'linear grad(p)' 'linear grad(p)' 'linear grad(p)' 'linear grad(p)' \
+#'linearUpwind grad(p)' 'linearUpwind grad(p)' 'linearUpwind grad(p)' 'linearUpwind grad(p)' \
+#'quadraticLinearUpwindFit grad(p)' 'quadraticLinearUpwindFit grad(p)' 'quadraticLinearUpwindFit grad(p)' 'quadraticLinearUpwindFit grad(p)' \
+)
+
+declare -a caseNameSuffix=( \
+'linear' 'linear' 'linear' 'linear' 'linear' 'linear' 'linear' \
+'linear' 'linear' 'linear' 'linear' 'linear' 'linear' 'linear' \
+'linear' 'linear' 'linear' 'linear' 'linear' 'linear' 'linear' \
+#'limitedLinear_1' 'limitedLinear_1' 'limitedLinear_1' 'limitedLinear_1' \
+#'limitedLinear01_1' 'limitedLinear01_1' 'limitedLinear01_1' 'limitedLinear01_1' \
+#'limitedLinearV_1' 'limitedLinearV_1' 'limitedLinearV_1' 'limitedLinearV_1' \
+#'Minmod' 'Minmod' 'Minmod' 'Minmod' \
+#'upwind' 'upwind' 'upwind' 'upwind' \
+#'limitedLimitedLinear' 'limitedLimitedLinear' 'limitedLimitedLinear' 'limitedLimitedLinear' \
+#'interfaceCompression' 'interfaceCompression' 'interfaceCompression' 'interfaceCompression' \
+#'vanLeer' 'vanLeer' 'vanLeer' 'vanLeer' \
+#'vanLeerV' 'vanLeerV' 'vanLeerV' 'vanLeerV' \
+#'vanLeer01' 'vanLeer01' 'vanLeer01' 'vanLeer01' \
+#'vanLeerDC' 'vanLeerDC' 'vanLeerDC' 'vanLeerDC' \
+#'linearUpwind' 'linearUpwind' 'linearUpwind' 'linearUpwind' \
+'linearUpwind' 'linearUpwind' 'linearUpwind' 'linearUpwind' 'linearUpwind' 'linearUpwind' 'linearUpwind' \
+'linearUpwind' 'linearUpwind' 'linearUpwind' 'linearUpwind' 'linearUpwind' 'linearUpwind' 'linearUpwind' \
+'linearUpwind' 'linearUpwind' 'linearUpwind' 'linearUpwind' 'linearUpwind' 'linearUpwind' 'linearUpwind' \
+#'linearUpwindV' 'linearUpwindV' 'linearUpwindV' 'linearUpwindV' \
+#'linear_grad(p)' 'linear_grad(p)' 'linear_grad(p)' 'linear_grad(p)' \
+#'linearUpwind_grad(p)' 'linearUpwind_grad(p)' 'linearUpwind_grad(p)' 'linearUpwind_grad(p)' \
+#'quadraticLinearUpwindFit_grad(p)' 'quadraticLinearUpwindFit_grad(p)' 'quadraticLinearUpwindFit_grad(p)' 'quadraticLinearUpwindFit_grad(p)' \
+)
+
+# 
+# Mesh
+#
+
+#declare -a nX=(25 50 100 200)
+#declare -a nY=(25 50 100 200)
+
+# Lipnikov and Shashkov
+declare -a nX=( \
+60 60 60 60 60 60 60 \
+120 120 120 120 120 120 120 \
+240 240 240 240 240 240 240 \
+60 60 60 60 60 60 60 \
+120 120 120 120 120 120 120 \
+240 240 240 240 240 240 240 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+)
+
+declare -a nY=( \
+64 64 64 64 64 64 64 \
+128 128 128 128 128 128 128 \
+256 256 256 256 256 256 256 \
+64 64 64 64 64 64 64 \
+128 128 128 128 128 128 128 \
+256 256 256 256 256 256 256 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+#               15 30 60 120 \
+)
+
+#declare -a nX=(15 15 30 30 60 60 120 120)
+#declare -a nY=(15 16 30 32 60 64 120 128)
+
+declare -a nGradX=(1  1  1  1 1 1 1 \
+                   1  1  1  1 1 1 1 \
+                   1  1  1  1 1 1 1 \
+                   1  1  1  1 1 1 1 \
+                   1  1  1  1 1 1 1 \
+                   1  1  1  1 1 1 1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+)
+
+declare -a nGradY=(1  1  1  1 1 1 1 \
+                   1  1  1  1 1 1 1 \
+                   1  1  1  1 1 1 1 \
+                   1  1  1  1 1 1 1 \
+                   1  1  1  1 1 1 1 \
+                   1  1  1  1 1 1 1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+#                   1  1  1  1 \
+)
+
+declare -a N_iter=(0  0  0  0 0 0 0 \
+                   0  0  0  0 0 0 0 \
+                   0  0  0  0 0 0 0 \
+                   0  0  0  0 0 0 0 \
+                   0  0  0  0 0 0 0 \
+                   0  0  0  0 0 0 0 \
+)
