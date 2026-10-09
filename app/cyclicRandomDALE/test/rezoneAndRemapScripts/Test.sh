@@ -13,7 +13,20 @@
 # Test data
 source test_table.dat
 
+# Rezone mode: the argument, else 'mode' from test_table.dat
+if [ -n "$1" ] && [ -n "$mode" ] && [ "$1" != "$mode" ]; then
+    echo "Warning: argument mode '$1' overrides test_table.dat mode '$mode'"
+fi
+mode=${1:-$mode}
+
+# Cyclic mode adds -cyclic to cyclicRandomDALE
+cyclicFlag=""
+if [ "$cyclic" = on ]; then
+    cyclicFlag="-cyclic"
+fi
+
 # Get the number of tests
+# (can be counted from nX, since M is optional)
 s=${#M[@]}
 
 # Traverse all tests
@@ -32,10 +45,18 @@ do
     echo $Case created.
 
     # Set up time controls
-    #sed -i "s/END_TIME/${studyEndTimes[i]}/" "$Case/system/controlDict"
-    #sed -i "s/DELTA_T/${studyTimeSteps[i]}/" "$Case/system/controlDict"
-    #sed -i "s/WRITE_INTERVAL/${studyWriteIntervals[i]}/" "$Case/system/controlDict"
-    #sed -i "s/NREMAP/${nRemap[i]}/g" $Case/constant/ALEDict
+    # Cyclic: only M and nRemap take effect; deltaT = 1/nRemap, endTime = M,
+    # a write every nRemap steps. Otherwise study.sh sets them per study.
+    if [ "$cyclic" = on ]; then
+    #    deltaT=$(awk -v n="${nRemap[i]}" 'BEGIN { printf "%.15g", 1/n }')
+         sed -i "s/^\(\s*startFrom\s\+\)\S\+;/\1latestTime;/" "$Case/system/controlDict"
+    fi
+         # Per-case values (test_table.dat case* arrays and nRemap)
+         sed -i "s/END_TIME/${caseEndTimes[i]}/" "$Case/system/controlDict"
+         sed -i "s/DELTA_T/${caseTimeSteps[i]}/" "$Case/system/controlDict"
+         sed -i "s/WRITE_INTERVAL/${caseWriteIntervals[i]}/" "$Case/system/controlDict"
+         sed -i "s/NREMAP/${nRemap[i]}/g" $Case/constant/ALEDict
+    #fi
 
     # Copy source mesh and field to a new case
     echo Copy source mesh and field to source/
@@ -84,7 +105,7 @@ do
         > $Case/log.setAlgebraicFields
 
     # Rezone + Remap
-    if [[ $1 = "sinOnce" ]]; then
+    if [[ $mode = "sinOnce" ]]; then
 
 	# Required by meshDancImp implementation
         #ln -rs $Case/source/constant $Case/constant/sourceMesh
@@ -115,7 +136,7 @@ do
             > $Case/"source"/log.setAlgebraicFields
 
     # Rezone + Remap
-    elif [[ $1 = "once" ]]; then
+    elif [[ $mode = "once" ]]; then
 
 	# Required by meshDancImp implementation
         #ln -rs $Case/source/constant $Case/constant/sourceMesh
@@ -128,11 +149,12 @@ do
 	#			  > $Case/log.meshDanceImp
 	
         cyclicRandomDALE -nY ${nY[i]} \
-                         -M ${M[i]} \
+                         ${M[i]:+-M ${M[i]}} \
                          ${alpha[i]:+-alpha ${alpha[i]}} \
                          -randomDirs \( "1" "1" "0" \)  \
                          -notFixedPatchNames \( "front" \)  \
                          -writeIntermediateMeshes \
+                         ${cyclicFlag} \
                          -case $Case \
 	  	         -seed $((RANDOM)) \
 			 -targetMesh "source" \
@@ -158,12 +180,12 @@ do
         setAlgebraicFields -case $Case/"source" -a 0 -b 1 -c 1 -d 1 -sinsin \
             > $Case/"source"/log.setAlgebraicFields
 
-    elif [[ $1 = "cyclic" ]]; then
+    elif [[ $mode = "cyclic" ]]; then
 
         # Cyclic rezone + remap
         echo Cyclic rezone + remap ...
         cyclicRandomDALE -nY ${nY[i]} \
-                         -M ${M[i]} \
+                         ${M[i]:+-M ${M[i]}} \
                          -alpha .125 \
                          -randomDirs \( "1" "1" "0" \)  \
                          -notFixedPatchNames \( "front" \)  \
@@ -175,16 +197,17 @@ do
                          > $Case/log.cyclicRandomDALE #\
 	  	         #-fixedTimeStep # Unnecessary, time will not be adjusted
 	  	         # when controlDict.adjustTimestep is commented.
-    elif [[ $1 = "random" ]]; then
+    elif [[ $mode = "random" ]]; then
 
         # Random rezone + remap
         echo Random rezone + remap ...
         cyclicRandomDALE -nY ${nY[i]} \
-                         -M ${M[i]} \
+                         ${M[i]:+-M ${M[i]}} \
                          ${alpha[i]:+-alpha ${alpha[i]}} \
                          -randomDirs \( "1" "1" "0" \)  \
                          -notFixedPatchNames \( "front" \)  \
                          -writeIntermediateMeshes \
+                         ${cyclicFlag} \
                          -case $Case \
 	  	         -seed $((RANDOM)) \
 			 -maxIter 10 \
@@ -210,13 +233,13 @@ do
         setAlgebraicFields -case $Case/"source" -a 0 -b 1 -c 1 -d 1 -sinsin \
             > $Case/"source"/log.setAlgebraicFields
 
-    elif [[ $1 = "interpolate" ]]; then
+    elif [[ $mode = "interpolate" ]]; then
         miniMapAllFields > $Case/log.miniMapAllFields
 
 
     else
-	 echo; echo Error: Test.sh needs an argument:
-	 echo cyclic or once
+	 echo; echo "Error: unknown mode '$mode'; pass it as the argument or set"
+	 echo "mode in test_table.dat: sinOnce once cyclic random interpolate"
 	 echo
 	 exit 1
     fi

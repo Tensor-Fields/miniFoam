@@ -1,4 +1,5 @@
 cyclicRandomDALE            \
+                 ${M[i]:+-M ${M[i]}} \
                  ${alpha[i]:+-alpha ${alpha[i]}} \
                  -beta  0.5 \
                  -notFixedPatchNames \( "front" \)  \
@@ -6,7 +7,7 @@ cyclicRandomDALE            \
                  -maxIter 1    \
                  -flipFluxSign \
                  -sinCycle     \
-		 -cyclic \
+                 ${cyclicFlag} \
                  -fixedPatchNames \( "movingWall" "fixedWalls" \) \
                  -motionDirs '("1" "1" "0")' \
 		 -case $Case \

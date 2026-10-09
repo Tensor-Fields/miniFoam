@@ -20,12 +20,31 @@ declare -A legacyName=(
     [grad2]=grad2Scheme
     [meshPhi]=meshPhiScheme
     [alpha]=alpha
+    [nRemap]=nRemap
+    [endTime]=caseEndTimes
+    [deltaT]=caseTimeSteps
+    [writeInterval]=caseWriteIntervals
 )
+
+# Per-case keys that may be left unset
+declare -A optionalKey=([alpha]=1 [nRemap]=1 [endTime]=1 [deltaT]=1 [writeInterval]=1)
 
 declare -a studyNames=() studyEndTimes=() studyTimeSteps=() studyWriteIntervals=()
 declare -a studyNRemaps=()
 declare -A defaultVal=()
-declare -a axisKeys=()
+
+# Expansion units: a single axis, or a bundle of axes that advance together
+# (entry j of every member forms one combination). Units are permuted with
+# each other, the first unit varying slowest.
+declare -a units=()       # unit ids; members in unit_<id> arrays
+declare -A unitOfKey=()   # key -> unit id
+inBundle=""               # id of the open bundle, if any
+
+# Cyclic mode: on/off
+cyclic=off
+
+# Rezone mode, i.e. the Test.sh argument
+mode=""
 
 # Keyword helpers used by the conf file
 
@@ -44,11 +63,8 @@ study()
         esac
     done
 
-    if [ -z "$endTime" ] || [ -z "$deltaT" ] || [ -z "$writeInterval" ]; then
-        echo "Error: study $name needs endTime, deltaT and writeInterval" >&2
-        exit 1
-    fi
-
+    # endTime, deltaT, writeInterval may instead be given per case (fixed
+    # axis or defaults); completeness is checked after reading the conf
     studyNames+=("$name")
     studyEndTimes+=("$endTime")
     studyTimeSteps+=("$deltaT")
@@ -61,6 +77,49 @@ study()
         exit 1
     fi
     [ -n "$nRemap" ] && studyNRemaps+=("$nRemap")
+}
+
+cyclic()
+{
+    case $1 in
+        on|off) cyclic=$1 ;;
+        *) echo "Error: cyclic must be 'on' or 'off', not '$1'" >&2; exit 1 ;;
+    esac
+}
+
+mode()
+{
+    case $1 in
+        sinOnce|once|cyclic|random|interpolate) mode=$1 ;;
+        *) echo "Error: unknown mode '$1';" \
+                "valid: sinOnce once cyclic random interpolate" >&2
+           exit 1 ;;
+    esac
+}
+
+bundleBegin()
+{
+    if [ -n "$inBundle" ]; then
+        echo "Error: nested bundle{" >&2
+        exit 1
+    fi
+    inBundle=${#units[@]}
+    units+=("$inBundle")
+    declare -g -a "unit_$inBundle=()"
+}
+
+bundleEnd()
+{
+    if [ -z "$inBundle" ]; then
+        echo "Error: '}' without bundle{" >&2
+        exit 1
+    fi
+    local -n members="unit_$inBundle"
+    if [ ${#members[@]} -eq 0 ]; then
+        echo "Error: empty bundle" >&2
+        exit 1
+    fi
+    inBundle=""
 }
 
 checkKey()
@@ -90,20 +149,60 @@ axis()
         exit 1
     fi
 
-    axisKeys+=("$key")
+    if [ -n "${unitOfKey[$key]}" ]; then
+        echo "Error: axis $key is given more than once" >&2
+        exit 1
+    fi
+
     declare -g -a "axis_$key"
     local -n vals="axis_$key"
     vals=("$@")
+
+    local id=$inBundle
+    if [ -z "$id" ]; then
+        id=${#units[@]}
+        units+=("$id")
+        declare -g -a "unit_$id=()"
+    fi
+
+    local -n members="unit_$id"
+    if [ ${#members[@]} -gt 0 ]; then
+        local -n first="axis_${members[0]}"
+        if [ ${#first[@]} -ne $# ]; then
+            echo "Error: bundle axes ${members[0]} and $key differ in" \
+                 "length (${#first[@]} vs $#)" >&2
+            exit 1
+        fi
+    fi
+    members+=("$key")
+    unitOfKey[$key]=$id
 }
 
-source "$1"
+# Unknown keywords in the conf (e.g. a misspelt bundle{) abort the expansion
+command_not_found_handle()
+{
+    echo "Error: unknown keyword '$1' in conf" >&2
+    kill -TERM $$
+}
+trap 'exit 1' TERM
+
+# bundle{ and } lines are not valid bash; turn them into helper calls
+source <(sed -E \
+    -e 's/^([[:space:]]*)bundle[[:space:]]*\{[[:space:]]*(#.*)?$/\1bundleBegin/' \
+    -e 's/^([[:space:]]*)\}[[:space:]]*(#.*)?$/\1bundleEnd/' \
+    "$1")
+
+if [ -n "$inBundle" ]; then
+    echo "Error: bundle{ without closing }" >&2
+    exit 1
+fi
 
 if [ ${#studyNames[@]} -eq 0 ]; then
     echo "Error: no study defined" >&2
     exit 1
 fi
 
-# Build cases as the cartesian product of the axes; the first axis varies
+# Build cases as the cartesian product of the units; the first unit varies
 # slowest
 
 declare -a nX=() nY=() caseNameSuffix=()
@@ -134,42 +233,87 @@ addCase()
 
     for key in "${!legacyName[@]}"; do
         value=${current[$key]-${defaultVal[$key]}}
-        # alpha is optional; every other key must have a value
         if [ -z "$value" ]; then
-            [ "$key" = alpha ] && continue
+            [ -n "${optionalKey[$key]}" ] && continue
             echo "Error: no value for '$key'; set it in defaults or an axis" >&2
             exit 1
         fi
         append "${legacyName[$key]}" "$value"
     done
 
-    # Case name suffix: values of the varied non-mesh axes
-    for key in "${axisKeys[@]}"; do
-        [ "$key" = mesh ] && continue
-        value=${current[$key]}
+    # Case name suffix: per unit not containing the mesh, the value of its
+    # first axis
+    local id
+    for id in "${units[@]}"; do
+        local -n members="unit_$id"
+        [ "${unitOfKey[mesh]}" = "$id" ] && { unset -n members; continue; }
+        value=${current[${members[0]}]}
         suffix+=${suffix:+_}${value// /_}
+        unset -n members
     done
     caseNameSuffix+=("${suffix:-case}")
 }
 
 expand()
 {
-    local level=$1 v
+    local level=$1 j key
 
-    if [ "$level" -eq ${#axisKeys[@]} ]; then
+    if [ "$level" -eq ${#units[@]} ]; then
         addCase
         return
     fi
 
-    local key=${axisKeys[level]}
-    local -n vals="axis_$key"
-    for v in "${vals[@]}"; do
-        current[$key]=$v
+    local -n members="unit_${units[level]}"
+    local -n firstVals="axis_${members[0]}"
+    for j in "${!firstVals[@]}"; do
+        for key in "${members[@]}"; do
+            local -n vals="axis_$key"
+            current[$key]=${vals[j]}
+            unset -n vals
+        done
         expand $((level+1))
     done
 }
 
 expand 0
+
+# Case names must be unique
+declare -A seen=()
+for i in "${!nX[@]}"; do
+    name="${nX[i]}x${nY[i]}_${caseNameSuffix[i]}"
+    if [ -n "${seen[$name]}" ]; then
+        echo "Error: duplicate case name $name; the first axis of each" \
+             "bundle names the cases, so its values must differ" >&2
+        exit 1
+    fi
+    seen[$name]=1
+done
+
+# Time controls: cyclic takes them from M and nRemap; otherwise each must be
+# given per case or on every study line
+if [ "$cyclic" != on ]; then
+    for key in endTime deltaT writeInterval; do
+        declare -n perCase=${legacyName[$key]}
+        declare -n perStudy=study${key^}s
+        [ "$key" = deltaT ] && declare -n perStudy=studyTimeSteps
+        if [ ${#perCase[@]} -eq 0 ]; then
+            for v in "${perStudy[@]}"; do
+                if [ -z "$v" ]; then
+                    echo "Error: $key must be set per case or on every" \
+                         "study line" >&2
+                    exit 1
+                fi
+            done
+        fi
+        unset -n perCase perStudy
+    done
+fi
+
+# Cyclic cases take endTime from M and writeInterval from nRemap
+if [ "$cyclic" = on ] && [ ${#nRemap[@]} -eq 0 ]; then
+    echo "Error: cyclic on needs a per-case nRemap (defaults or axis)" >&2
+    exit 1
+fi
 
 # Write in the legacy format
 
@@ -177,13 +321,17 @@ echo "# Generated by expandTable.sh from $1 -- edit that file instead"
 echo
 printf 'description=%q\n' "$description"
 echo
+echo "cyclic=$cyclic"
+echo "mode=$mode"
+echo
 for arr in studyTimeSteps studyEndTimes studyWriteIntervals studyNRemaps studyNames \
            M nX nY nGradX nGradY \
-           ddtScheme grad1Scheme grad2Scheme meshPhiScheme caseNameSuffix alpha
+           ddtScheme grad1Scheme grad2Scheme meshPhiScheme caseNameSuffix \
+           alpha nRemap caseEndTimes caseTimeSteps caseWriteIntervals
 do
     local_ref="$arr[@]"
     # Optional arrays: skip them when nothing sets them
-    case $arr in alpha|studyNRemaps)
+    case $arr in alpha|nRemap|studyNRemaps|case*)
         declare -n ref=$arr
         [ ${#ref[@]} -eq 0 ] && { unset -n ref; continue; }
         unset -n ref ;;

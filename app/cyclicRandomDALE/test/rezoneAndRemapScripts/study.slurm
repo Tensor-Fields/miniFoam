@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --job-name=myJobName
-#SBATCH --output=log_%x_%j.out
-#SBATCH --error=log_%x_%j.err
+#SBATCH --job-name=elephant
+#SBATCH --output=out
+#SBATCH --error=err
 #SBATCH --partition=main
-#SBATCH --ntasks=6
+#SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --time=03:30:00
 
@@ -24,4 +24,4 @@ fe40
 # random, once, or cyclic
 #./study.sh "study_template" "random"
 #./study.gplt.sh
-./study.sh "study_template" "sinOnce"
+./study.sh "study_template"

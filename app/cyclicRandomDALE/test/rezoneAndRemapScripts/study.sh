@@ -8,7 +8,7 @@
 # standalone if copied or moved, without link breakage. In other words,
 # studies created from study_template are symlink-proof.
 
-# Usage: ./study.sh <study_template_dir>
+# Usage: ./study.sh <study_template_dir> [mode]   (mode defaults to test_table.dat)
 
 if [ -f test_table.dat ]; then
     rm -f test_table.dat
@@ -32,6 +32,9 @@ if ! cp "test.dat" test_table.dat; then
 fi
 
 source test_table.dat
+
+# Rezone mode: the 2nd argument, else 'mode' from test_table.dat
+mode=${2:-$mode}
 
 # Number of studies
 N=${#studyNames[@]}
@@ -155,16 +158,26 @@ do
     #sed -i "s/DELTA_T/${studyTimeSteps[i]}/" "$study/template/system/controlDict"
     #sed -i "s/WRITE_INTERVAL/${studyWriteIntervals[i]}/" "$study/template/system/controlDict"
 
-    sed -i "s/END_TIME/${studyEndTimes[i]}/" "$study/template/system/controlDict"
-    sed -i "s/DELTA_T/${studyTimeSteps[i]}/" "$study/template/system/controlDict"
-    sed -i "s/WRITE_INTERVAL/${studyWriteIntervals[i]}/" "$study/template/system/controlDict"
-    sed -i "s/NREMAP/${studyNRemaps[i]}/g" "$study/template/constant/ALEDict"
+    # Cyclic: time controls are set per case by Test.sh from M and nRemap
+    #if [ "$cyclic" != on ]; then
+    #   # Skipped when given per case; Test.sh sets those
+    #   if [ ${#caseEndTimes[@]} -eq 0 ]; then
+    #       sed -i "s/END_TIME/${studyEndTimes[i]}/" "$study/template/system/controlDict"
+    #   fi
+    #   if [ ${#caseTimeSteps[@]} -eq 0 ]; then
+    #       sed -i "s/DELTA_T/${studyTimeSteps[i]}/" "$study/template/system/controlDict"
+    #   fi
+    #   if [ ${#caseWriteIntervals[@]} -eq 0 ]; then
+    #       sed -i "s/WRITE_INTERVAL/${studyWriteIntervals[i]}/" "$study/template/system/controlDict"
+    #   fi
+    #   sed -i "s/NREMAP/${studyNRemaps[i]}/g" "$study/template/constant/ALEDict"
+    #fi
 
     # Submit the study
-    sed -i "s/MODE/$2/g" $study/run.slurm
+    sed -i "s/MODE/$mode/g" $study/run.slurm
     cd $study;
     #sbatch run.slurm
-    ./Test.sh $2
+    ./Test.sh $mode
     cd ..;
 
     echo

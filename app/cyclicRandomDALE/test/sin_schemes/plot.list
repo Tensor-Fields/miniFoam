@@ -1,4 +1,5 @@
-10  linear    '$N_\\text{remap}=10$, linear '
-10  Linear    '$N_\\text{remap}=10$, limitedLinear'
 100  linear   '$N_\\text{remap}=100$, linear'
 100  Linear   '$N_\\text{remap}=100$, limitedLinear'
+100  QUICK    '$N_\\text{remap}=10$, QUICK'
+100  Upwind    '$N_\\text{remap}=10$, linearUpwind'
+100  vanLeer    '$N_\\text{remap}=10$, vanLeer'

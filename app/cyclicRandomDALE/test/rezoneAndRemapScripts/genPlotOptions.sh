@@ -34,8 +34,26 @@ set key left box opaque outside width -7
 #
 echo 'plot \' >> plot_src/plot.options
 
+# plot.list columns: <dir> <key> <title...>
+# key may be quoted ("limitedLinear 1" or 'limitedLinear 1') to contain spaces
 cat $list | grep -v "^\ *#"| \
-while read -r dir key col3; do \
+while IFS= read -r line; do \
+    if [[ $line =~ ^[[:space:]]*([^[:space:]]+)[[:space:]]+(\"([^\"]*)\"|\'([^\']*)\'|([^[:space:]]+))[[:space:]]*(.*)$ ]]; then
+        dir=${BASH_REMATCH[1]}
+        key=${BASH_REMATCH[3]}${BASH_REMATCH[4]}${BASH_REMATCH[5]}
+        col3=${BASH_REMATCH[6]}
+    else
+        [[ $line =~ ^[[:space:]]*$ ]] || echo "Skipped malformed line: $line"
+        continue
+    fi
+
+    # Case names (column 3 of L1_err.dat) have spaces replaced by '_', and
+    # their parts are '_'-separated: match the key as whole parts, so that
+    # e.g. key 1 matches 15x16_1 but not 15x16_10
+    gkey=${key// /_}
+    gkey=${gkey#_}
+    gkey=${gkey%_}
+
     ((i++))
     ## For the last line, ignore printing ,\
     #if ((i==$total)); then
@@ -50,11 +68,8 @@ while read -r dir key col3; do \
     #else
 
     # Plot column x=4 vs y=2 of L1_err, where its column 3 is the screening keyword
-    echo \
-    \"$dir/plot_src/L1_err.dat\" \
-	u \(\$1\):\(strstrt\(stringcolumn\(3\), \"$key\"\) \> 0 ?\$2:1/0\) \
-	w p dt $(echo $RANDOM) pt $(echo $RANDOM) ps 1.5 \
-	t \"\\\\tiny{$col3}\", \\\
+    printf '"%s/plot_src/L1_err.dat" u ($1):(strstrt("_".stringcolumn(3)."_", "_%s_") > 0 ? $2 : 1/0) w p dt %s pt %s ps 1.5 t "\\\\tiny{%s}", \\\n' \
+        "$dir" "$gkey" $RANDOM $RANDOM "$col3" \
     >> plot_src/plot.options;
 
 	#u \(\$1\):\(\$2\) \
