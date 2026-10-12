@@ -203,12 +203,14 @@ int main(int argc, char* argv[])
 
         if (changeSeed)
         {
+            scalar prevSeed = seed;
             seed = seed0 * rand.scalar01();
 
-	    if (mag(seed - seed0) < SMALL)
-	    {
-	        seed *= 1000;
-	    }
+            /// Freeze breaking
+	        if (mag(prevSeed - seed) < 10)
+	        {
+	            seed *= 1000;
+	        }
 
             Info<< "seed becomes "
                 <<seed<< endl;
