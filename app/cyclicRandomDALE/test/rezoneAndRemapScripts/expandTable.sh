@@ -24,10 +24,12 @@ declare -A legacyName=(
     [endTime]=caseEndTimes
     [deltaT]=caseTimeSteps
     [writeInterval]=caseWriteIntervals
+    [seed]=seed
+    [nY]=daleNY      # cyclicRandomDALE -nY; the mesh nY is from 'mesh'
 )
 
 # Per-case keys that may be left unset
-declare -A optionalKey=([alpha]=1 [nRemap]=1 [endTime]=1 [deltaT]=1 [writeInterval]=1)
+declare -A optionalKey=([alpha]=1 [nRemap]=1 [endTime]=1 [deltaT]=1 [writeInterval]=1 [seed]=1 [nY]=1)
 
 declare -a studyNames=() studyEndTimes=() studyTimeSteps=() studyWriteIntervals=()
 declare -a studyNRemaps=()
@@ -186,11 +188,29 @@ command_not_found_handle()
 }
 trap 'exit 1' TERM
 
-# bundle{ and } lines are not valid bash; turn them into helper calls
-source <(sed -E \
-    -e 's/^([[:space:]]*)bundle[[:space:]]*\{[[:space:]]*(#.*)?$/\1bundleBegin/' \
-    -e 's/^([[:space:]]*)\}[[:space:]]*(#.*)?$/\1bundleEnd/' \
-    "$1")
+bundleNoBrace()
+{
+    echo "Error: 'bundle' must be followed by '{'" >&2
+    exit 1
+}
+
+# bundle{ and } lines are not valid bash; turn them into helper calls.
+# '{' may be on the bundle line or on the next non-blank, non-comment line.
+# Line count is kept, so bash error line numbers still match the conf.
+source <(awk '
+    function blank(l) { return l ~ /^[[:space:]]*(#.*)?$/ }
+    pending {
+        if (blank($0))                          { print; next }
+        pending = 0
+        if ($0 ~ /^[[:space:]]*\{[[:space:]]*(#.*)?$/) { print "bundleBegin"; next }
+        print "bundleNoBrace"
+    }
+    /^[[:space:]]*bundle[[:space:]]*\{[[:space:]]*(#.*)?$/ { print "bundleBegin"; next }
+    /^[[:space:]]*bundle[[:space:]]*(#.*)?$/  { pending = 1; print ""; next }
+    /^[[:space:]]*\}[[:space:]]*(#.*)?$/      { print "bundleEnd"; next }
+    { print }
+    END { if (pending) print "bundleNoBrace" }
+' "$1")
 
 if [ -n "$inBundle" ]; then
     echo "Error: bundle{ without closing }" >&2
@@ -241,14 +261,17 @@ addCase()
         append "${legacyName[$key]}" "$value"
     done
 
-    # Case name suffix: per unit not containing the mesh, the value of its
-    # first axis
+    # Case name suffix: the values of all axes, in conf order, joined by '_';
+    # mesh is already the name prefix (caseName.sh); writeInterval, deltaT and
+    # nY are not part of the name
     local id
     for id in "${units[@]}"; do
         local -n members="unit_$id"
-        [ "${unitOfKey[mesh]}" = "$id" ] && { unset -n members; continue; }
-        value=${current[${members[0]}]}
-        suffix+=${suffix:+_}${value// /_}
+        for key in "${members[@]}"; do
+            case $key in mesh|writeInterval|deltaT|nY) continue ;; esac
+            value=${current[$key]}
+            suffix+=${suffix:+_}${value// /_}
+        done
         unset -n members
     done
     caseNameSuffix+=("${suffix:-case}")
@@ -282,8 +305,8 @@ declare -A seen=()
 for i in "${!nX[@]}"; do
     name="${nX[i]}x${nY[i]}_${caseNameSuffix[i]}"
     if [ -n "${seen[$name]}" ]; then
-        echo "Error: duplicate case name $name; the first axis of each" \
-             "bundle names the cases, so its values must differ" >&2
+        echo "Error: duplicate case name $name; cases must differ in an" \
+             "axis other than writeInterval, deltaT and nY" >&2
         exit 1
     fi
     seen[$name]=1
@@ -327,11 +350,12 @@ echo
 for arr in studyTimeSteps studyEndTimes studyWriteIntervals studyNRemaps studyNames \
            M nX nY nGradX nGradY \
            ddtScheme grad1Scheme grad2Scheme meshPhiScheme caseNameSuffix \
-           alpha nRemap caseEndTimes caseTimeSteps caseWriteIntervals
+           alpha nRemap caseEndTimes caseTimeSteps caseWriteIntervals seed \
+           daleNY
 do
     local_ref="$arr[@]"
     # Optional arrays: skip them when nothing sets them
-    case $arr in alpha|nRemap|studyNRemaps|case*)
+    case $arr in alpha|nRemap|studyNRemaps|case*|seed|daleNY)
         declare -n ref=$arr
         [ ${#ref[@]} -eq 0 ] && { unset -n ref; continue; }
         unset -n ref ;;

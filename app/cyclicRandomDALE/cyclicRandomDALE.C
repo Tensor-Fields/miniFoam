@@ -205,6 +205,11 @@ int main(int argc, char* argv[])
         {
             seed = seed0 * rand.scalar01();
 
+	    if (mag(seed - seed0) < SMALL)
+	    {
+	        seed *= 1000;
+	    }
+
             Info<< "seed becomes "
                 <<seed<< endl;
         }

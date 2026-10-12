@@ -148,7 +148,7 @@ do
 	#	                  -flipFluxSign \
 	#			  > $Case/log.meshDanceImp
 	
-        cyclicRandomDALE -nY ${nY[i]} \
+        cyclicRandomDALE -nY ${daleNY[i]:-${nY[i]}} \
                          ${M[i]:+-M ${M[i]}} \
                          ${alpha[i]:+-alpha ${alpha[i]}} \
                          -randomDirs \( "1" "1" "0" \)  \
@@ -156,7 +156,7 @@ do
                          -writeIntermediateMeshes \
                          ${cyclicFlag} \
                          -case $Case \
-	  	         -seed $((RANDOM)) \
+	  	         -seed ${seed[i]:-1000} \
 			 -targetMesh "source" \
 			 -maxIter 1 \
                          -flipFluxSign \
@@ -184,7 +184,7 @@ do
 
         # Cyclic rezone + remap
         echo Cyclic rezone + remap ...
-        cyclicRandomDALE -nY ${nY[i]} \
+        cyclicRandomDALE -nY ${daleNY[i]:-${nY[i]}} \
                          ${M[i]:+-M ${M[i]}} \
                          -alpha .125 \
                          -randomDirs \( "1" "1" "0" \)  \
@@ -192,7 +192,7 @@ do
                          -writeIntermediateMeshes \
 			 -cyclic \
                          -case $Case \
-	  	         -seed $((RANDOM)) \
+	  	         -seed ${seed[i]:-1000} \
 			 -maxIter 1 \
                          > $Case/log.cyclicRandomDALE #\
 	  	         #-fixedTimeStep # Unnecessary, time will not be adjusted
@@ -201,17 +201,18 @@ do
 
         # Random rezone + remap
         echo Random rezone + remap ...
-        cyclicRandomDALE -nY ${nY[i]} \
+        cyclicRandomDALE -nY ${daleNY[i]:-${nY[i]}} \
                          ${M[i]:+-M ${M[i]}} \
                          ${alpha[i]:+-alpha ${alpha[i]}} \
-                         -randomDirs \( "1" "1" "0" \)  \
+                         -motionDirs \( "1" "1" "0" \)  \
                          -notFixedPatchNames \( "front" \)  \
                          -writeIntermediateMeshes \
                          ${cyclicFlag} \
                          -case $Case \
-	  	         -seed $((RANDOM)) \
-			 -maxIter 10 \
+	  	         -seed ${seed[i]:-1000} \
+			 -maxIter 1 \
 			 -flipFluxSign \
+			 -random \
                          > $Case/log.cyclicRandomDALE #\
 			 #-N_iter ${N_iter[i]} \
 	  	         #-fixedTimeStep # Unnecessary, time will not be adjusted
