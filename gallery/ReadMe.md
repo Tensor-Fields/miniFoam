@@ -4,8 +4,8 @@
 **Right**: Field demonstrated by height and color contours remains intact during mesh motion.
 Particularly, field extremums are preserved.
 <div style="display:flex; gap:10px">
-    <img src="gifs/linear_mesh_loop.gif" style="width:45%">
-    <img src="gifs/linear_field.gif" style="width:45%">
+    <img src="gifs/linear_mesh_loop.gif" style="width:45%"/>
+    <img src="gifs/linear_field.gif" style="width:45%"/>
 </div>
 
 ## Cyclic sinusoidal rezoning and remapping
