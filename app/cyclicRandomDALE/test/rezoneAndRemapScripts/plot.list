@@ -1,4 +1,3 @@
-nRemap_cyclic "N1" {N = 1}
-nRemap_cyclic "NM" {N = M}
-nRemap_cyclic "N4" {N = 4M}
-nRemap8M_cyclic "N8" {N = 8M}
+powM2 Msqr        $N_\\mathrm{remap}=M^2$
+nRemap_cyclic NM  $N_\\mathrm{remap}=M$
+nRemap_cyclic N1  $N_\\mathrm{remap}=1$
