@@ -10,6 +10,12 @@
 
 # Usage: ./study.sh <study_template_dir> [mode]   (mode defaults to test_table.dat)
 
+if [[ -z "$1" ]]; then
+    echo Error
+    echo "Usage: ./study.sh <study_template_dir>"
+    exit 1
+fi
+
 if [ -f test_table.dat ]; then
     rm -f test_table.dat
 fi
