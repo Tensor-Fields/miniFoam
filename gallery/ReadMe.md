@@ -3,9 +3,9 @@
 **Left**: Non-uniform mesh turns uniform;  
 **Right**: Field demonstrated by height and color contours remains intact during mesh motion.
 Particularly, field extremums are preserved.
-<div style="display:flex">
-    <img src="gifs/linear_mesh_loop.gif" style="width:50%">
-    <img src="gifs/linear_field.gif" style="width:50%">
+<div style="display:flex; gap:10px">
+    <img src="gifs/linear_mesh_loop.gif" style="width:45%">
+    <img src="gifs/linear_field.gif" style="width:45%">
 </div>
 
 ## Cyclic sinusoidal rezoning and remapping
@@ -43,6 +43,6 @@ DALE and Lagrangian formulations are compared.
 **Left**: Mesh;  
 **Right**: $\sigma_\mathrm{eq}$.
 <div style="display:flex; gap:10px">
-    <img src="gifs/impact_mesh.gif" style="width:50%">
-    <img src="gifs/impact_sigmaEq.gif" style="width:50%">
+    <img src="gifs/impact_mesh.gif" style="width:45%">
+    <img src="gifs/impact_sigmaEq.gif" style="width:45%">
 </div>
