@@ -42,7 +42,8 @@ DALE and Lagrangian formulations are compared.
 DALE and Lagrangian formulations are compared.  
 **Left**: Mesh;  
 **Right**: $\sigma_\mathrm{eq}$.
-<div style="display:flex; gap:10px">
+<!--div style="display:flex; gap:10px"-->
+<p align="center">
     <img src="gifs/impact_mesh.gif" style="width:45%">
     <img src="gifs/impact_sigmaEq.gif" style="width:45%">
-</div>
+</p>
