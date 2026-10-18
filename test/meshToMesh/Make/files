@@ -1,3 +1,0 @@
-meshToMesh.C
-
-EXE = $(FOAM_USER_APPBIN)/meshToMesh

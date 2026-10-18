@@ -1,6 +1,0 @@
-EXE_INC = \
-    -std=c++17 \
-    -I$(LIB_SRC)/finiteVolume/lnInclude
-
-EXE_LIBS = \
-    -lfiniteVolume

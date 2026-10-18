@@ -1,3 +1,0 @@
-myErrorEstimate.C
-
-EXE = $(FOAM_USER_APPBIN)/myErrorEstimate

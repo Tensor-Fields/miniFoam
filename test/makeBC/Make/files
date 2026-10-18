@@ -1,3 +1,0 @@
-Test-makeB.C
-
-EXE = $(FOAM_USER_APPBIN)/Test-makeB
