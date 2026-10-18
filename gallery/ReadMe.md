@@ -44,6 +44,6 @@ DALE and Lagrangian formulations are compared.
 **Right**: $\sigma_\mathrm{eq}$.
 <!--div style="display:flex; gap:10px"-->
 <p align="center">
-    <img src="gifs/impact_mesh.gif" style="width:45%">
-    <img src="gifs/impact_sigmaEq.gif" style="width:45%">
+    <img src="gifs/impact_mesh.gif" style="width:45%"/>
+    <img src="gifs/impact_sigmaEq.gif" style="width:45%"/>
 </p>
