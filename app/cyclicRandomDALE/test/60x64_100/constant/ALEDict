@@ -1,0 +1,79 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      ALEDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Required by meshDance. Since meshDance reads these settings from here, the
+// cyclicRandomDALE options -flipFluxSign, -maxIter and -fixedPatchNames are
+// no longer passed to meshDance; keep the entries below consistent with them.
+
+planar2D false;
+wedge    false;
+
+rezoneDict
+{
+    rezoneFrequency 1;
+
+    fixedPatches ( "movingWall" "fixedWalls" );
+
+    LaplaceSmoother false;
+    cfMeshSmoother  false;
+
+    // Mandatory entries, unused while both smoothers are off
+    meshSmootherDict
+    {
+        untangle                  true;
+        fixPointsInBoundBoxAnyway false;
+        patchWithSlidingPoints    "This_Does_Nothing";
+        crossingPatches           ( "front" );
+        freePatches               ( "front" );
+        slideCrossingPoints       true;
+        maxRezoneIter             50;
+        maxRezoneRes              1e-5;
+        nLoops                    1;
+        nSurfaceIterations        1;
+        iterPerQualityCheck       5;
+        qualityThreshold          0;
+        constrainedCellsSet       xxxxx;
+        emptyDir                  2; // z
+        wedgePatchNames           ( "front" );
+        wedgeDir                  2;
+        radialDir                 1;
+
+        // -1: quality measure off
+        skewThreshold             -1;
+        nonOrthoThreshold         -1;
+        aspectThreshold           -1;
+        goodSkewThreshold         -1;
+        goodNonOrthoThreshold     -1;
+        goodAspectThreshold       -1;
+    }
+}
+
+remapDict
+{
+    flipFluxSign          true;   // -flipFluxSign
+    remapLoopPerStep      1;      // -maxIter 1
+    nRemapSteps           100;
+    remapWrite            false;
+    forceWriteAtRemapTime true;
+    illegalToAdvect       ( );
+    sweptVolumeThreshold  0;
+    cellCountFraction     1e-20;
+    minCellCount          1;
+    incrementPhysicalTimeInRemap false;
+}
+
+// ************************************************************************* //
